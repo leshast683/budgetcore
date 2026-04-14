@@ -1,35 +1,6 @@
 # Budgetly
 
-Budgetly is a personal finance tracking web app that helps users manage expenses and understand their spending habits.
-
-## Features
-
-- **Add and Save Expenses** — Log transactions with an amount, category, and date
-- **View Transaction History** — Browse a clear, chronological list of all recorded expenses
-- **Budget Summary Dashboard** — Get an overview of total spending and remaining budget
-- **Spending Charts by Category** — Visualise where money goes with category-based charts
-- **Search and Filter Transactions** — Find specific transactions by keyword, category, or date
-
-## Tech Stack
-
-- HTML
-- CSS
-- JavaScript
-
-## Project Structure
-
-```
-budgetly/
-├── index.html    # Main landing page
-├── style.css     # Styles and responsive layout
-├── script.js     # JavaScript interactions
-├── README.md     # Project documentation
-└── .gitignore    # Git ignore rules
-```
-
-## Getting Started
-
-Open `index.html` in any modern browser. No build tools or dependencies required.
+Budgetly is a personal finance tracking web app that helps users manage income and expenses, understand spending habits, and work toward savings goals.
 
 ## Live Demo
 
@@ -37,49 +8,156 @@ Open `index.html` in any modern browser. No build tools or dependencies required
 
 ---
 
-## AI Budget Insights
+## Features
 
-### What it does
+- **Authentication** — Sign up / sign in with Firebase Auth; sessions persist across page reloads
+- **Add Income & Expenses** — Log transactions with description, amount, category, and date
+- **Transaction History** — Browse, search, and filter all recorded transactions
+- **Budget Dashboard** — Overview of total income, expenses, and current balance
+- **Spending Charts** — Category-based pie/bar charts showing where money goes
+- **Goals Tracker** — Create savings goals and track progress toward each one
+- **User Profile** — Update display name and avatar
+- **AI Budget Insights** — One-click analysis of your current month powered by Claude (Haiku)
+- **Guest Mode** — Try the app without creating an account; data is in-memory only
 
-The **Analyze Budget** button on the Finance Hub page sends your current month's income and expense data to an AI and gets back a short, plain-English analysis — 2 to 4 sentences that are specific to your actual numbers. It mentions your biggest spending category, whether your balance looks healthy, and one concrete observation you can act on. It won't give you generic advice like "try to save more." Everything it says is grounded in the data you've entered.
+---
 
-### How it works
+## Tech Stack
 
-1. When you click **Analyze Budget**, the app collects all transactions for the current month and groups them by category.
-2. That data (totals + category breakdown) is sent as a POST request to `/analyze-budget`.
-3. The server builds a prompt with your numbers and sends it to the Claude API (claude-haiku).
-4. The response is displayed in the result box below the button.
+| Layer | Technology |
+|---|---|
+| Frontend | HTML, CSS, Vanilla JS |
+| Build tool | Vite |
+| Auth & Database | Firebase Authentication + Firestore |
+| AI Analysis | Anthropic Claude API (Haiku) |
+| Hosting | Vercel (serverless functions) |
 
-In production (Vercel), the request goes to a serverless function at `api/analyze-budget.js`. Locally, it hits an Express server running on port 3001. Vite automatically proxies `/analyze-budget` to that server during development, so the frontend code is the same in both environments.
+---
 
-### Caching
+## Project Structure
 
-The app remembers the last result in memory. If you click **Analyze Budget** again without adding or changing any transactions, it skips the API call and shows the previous result instantly with a **"Loaded from cache"** label. If your data has changed since the last analysis, it fetches a fresh response and shows **"Fresh analysis"**. The cache resets when you reload the page.
+```
+budgetly/
+├── index.html          # Landing / auth page
+├── index.js            # Auth logic
+├── app.html            # Main dashboard (transactions + chart)
+├── app.js              # Dashboard logic
+├── goals.html          # Savings goals page
+├── goals.js            # Goals logic
+├── profile.html        # User profile page
+├── profile.js          # Profile logic
+├── script.js           # Shared utilities
+├── style.css           # Global styles
+├── transitions.js      # Page transition animations
+├── avatarUtils.js      # Avatar generation helpers
+├── firebase.js         # Firebase initialisation
+├── firestore.rules     # Firestore security rules
+├── server.js           # Local Express server (AI proxy)
+├── vite.config.js      # Vite build config
+├── vercel.json         # Vercel routing config
+├── api/
+│   └── analyze-budget.js   # Vercel serverless function (AI)
+└── .gitignore
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- A Firebase project with Authentication and Firestore enabled
+- An Anthropic API key (for AI insights — optional)
+
+### Install dependencies
+
+```bash
+npm install
+```
 
 ### Environment variables
 
-Create a `.env` file in the project root (it's already gitignored):
+Create a `.env` file in the project root (already gitignored):
 
 ```
 ANTHROPIC_API_KEY=your_api_key_here
 ```
 
-Get a free API key at [console.anthropic.com](https://console.anthropic.com). The key is only used server-side and is never exposed to the browser.
+Get a free key at [console.anthropic.com](https://console.anthropic.com). The key is only used server-side and never exposed to the browser.
 
-For Vercel deployment, add the same variable in your project's **Settings → Environment Variables** panel instead of the `.env` file.
+For Vercel, add it in **Settings → Environment Variables** instead.
+
+### Firebase setup
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com)
+2. Create a project → enable **Authentication** (Email/Password)
+3. Create a **Firestore Database** (Production mode)
+4. Paste the rules from `firestore.rules` into **Firestore → Rules** and publish
 
 ### Running locally
 
-You need two terminals — one for the frontend, one for the AI server:
+Two terminals are required — one for the frontend, one for the AI server:
 
 ```bash
-# Terminal 1 — Express server (handles the /analyze-budget route)
+# Terminal 1 — Express server (handles /analyze-budget)
 node server.js
 
-# Terminal 2 — Vite dev server (frontend)
+# Terminal 2 — Vite dev server
 npm run dev
 ```
 
-Then open `http://localhost:5173`, go to the Finance Hub, add a few transactions, and click **Analyze Budget**.
+Then open `http://localhost:5173`.
 
-> **Note:** If you only run `npm run dev` without `node server.js`, the Analyze Budget button will fail with a connection error. Both servers need to be running at the same time for local development.
+> If you skip `node server.js`, the Analyze Budget button will fail. Both servers must run simultaneously for local development.
+
+### Build for production
+
+```bash
+npm run build
+```
+
+Output goes to `dist/`.
+
+---
+
+## Firestore Security Rules
+
+Each user can only read and write their own data:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
+```
+
+---
+
+## AI Budget Insights
+
+The **Analyze Budget** button on the dashboard sends your current month's totals and category breakdown to Claude (Haiku) and returns a 2–4 sentence plain-English analysis — specific to your actual numbers, not generic advice.
+
+**How it works:**
+
+1. The app collects all transactions for the current month and groups them by category
+2. That data is sent as a POST request to `/analyze-budget`
+3. The server builds a prompt and calls the Claude API
+4. The result is displayed below the button
+
+**Caching:** The last result is cached in memory. If no transactions changed since the last analysis, the cached result is shown instantly with a "Loaded from cache" label.
+
+---
+
+## Deploying to Vercel
+
+```bash
+npm run build
+npx vercel --prod
+```
+
+Vercel automatically routes `/analyze-budget` to `api/analyze-budget.js` as a serverless function.
