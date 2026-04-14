@@ -1,13 +1,11 @@
-// Budgetly — main script
+// Budgetly — landing page script
 
 document.addEventListener('DOMContentLoaded', () => {
-  const heroBtn = document.querySelector('.hero .btn');
-  const featuresSection = document.getElementById('features');
-
-  if (heroBtn && featuresSection) {
-    heroBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      featuresSection.scrollIntoView({ behavior: 'smooth' });
-    });
+  // Sticky nav shadow on scroll
+  const navbar = document.getElementById('navbar');
+  if (navbar) {
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 8);
+    }, { passive: true });
   }
 });

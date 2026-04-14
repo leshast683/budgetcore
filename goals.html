@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budgetly — Goals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="prefetch" href="app.html" />
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+</head>
+<body class="app-page">
+
+  <!-- ===== Navigation ===== -->
+  <header id="navbar">
+    <nav>
+      <a href="index.html?home=1" class="logo"><img src="budgetly.png" alt="Budgetly" class="logo-img" /></a>
+      <ul class="nav-links">
+        <li><a href="index.html?home=1">Home</a></li>
+        <li><a href="app.html">Dashboard</a></li>
+        <li><span class="nav-active">Goals</span></li>
+        <li id="nav-user" class="nav-user" style="display:none">
+          <span id="user-email" class="nav-user-email"></span>
+          <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===== Auth Loading ===== -->
+  <div id="auth-loading" class="auth-loading">
+    <img src="budgetly.png" alt="Budgetly" class="auth-loading-logo" />
+  </div>
+
+  <main class="app-layout" id="app-content" style="display:none">
+
+    <!-- ===== Header ===== -->
+    <div class="welcome-bar" id="welcome-bar">
+      <div class="welcome-left">
+        <span class="welcome-greeting">Savings Goals</span>
+        <span class="welcome-email" id="welcome-email"></span>
+      </div>
+      <span class="welcome-date" id="welcome-date"></span>
+    </div>
+
+    <!-- ===== Investing Insight Card ===== -->
+    <section class="investing-tip-card">
+      <div class="itip-icon">💡</div>
+      <div class="itip-body">
+        <p class="itip-headline">Make your savings work for you</p>
+        <p class="itip-text">Once your emergency fund (3–6 months of expenses) is in place, consider putting extra savings in a high-yield savings account or index fund. Even $100/month at 7% annual return grows to <strong>$120K in 30 years</strong>.</p>
+      </div>
+      <div class="itip-stats">
+        <div class="itip-stat"><span class="itip-stat-n">3–6mo</span><span class="itip-stat-l">Emergency fund</span></div>
+        <div class="itip-stat"><span class="itip-stat-n">7%</span><span class="itip-stat-l">Avg index return</span></div>
+        <div class="itip-stat"><span class="itip-stat-n">Automate</span><span class="itip-stat-l">Pay yourself first</span></div>
+      </div>
+    </section>
+
+    <!-- ===== Add Goal Form ===== -->
+    <section class="app-card">
+      <h2 class="card-title">New Goal</h2>
+      <form id="goal-form" novalidate>
+        <div class="goals-form-grid">
+
+          <div class="goal-field">
+            <label class="goal-label">Goal Name</label>
+            <input type="text" id="goal-name" placeholder="e.g. New car, Emergency fund…" maxlength="60" required />
+          </div>
+
+          <div class="goal-field">
+            <label class="goal-label">Target Amount ($)</label>
+            <div class="goal-input-wrap">
+              <input type="number" id="goal-target" placeholder="e.g. 5000" step="any" min="1" inputmode="decimal" required />
+              <button type="button" class="input-clear-btn" data-target="goal-target" title="Clear">&#x2715;</button>
+            </div>
+          </div>
+
+          <div class="goal-field">
+            <label class="goal-label">Already Saved ($)</label>
+            <div class="goal-input-wrap">
+              <input type="number" id="goal-saved" placeholder="0.00" step="any" min="0" inputmode="decimal" />
+              <button type="button" class="input-clear-btn" data-target="goal-saved" title="Clear">&#x2715;</button>
+            </div>
+          </div>
+
+          <div class="goal-field">
+            <label class="goal-label">Target Date (optional)</label>
+            <input type="date" id="goal-deadline" />
+          </div>
+
+        </div>
+
+        <div class="goal-field" style="margin-top:0.75rem">
+          <label class="goal-label">Note (optional)</label>
+          <input type="text" id="goal-note" placeholder="Why this goal matters…" maxlength="120" />
+        </div>
+
+        <div class="goals-form-actions">
+          <button type="submit" class="btn" id="goal-submit-btn">Add Goal</button>
+          <button type="button" class="btn-ghost btn-sm" id="goal-cancel-btn" style="display:none">Cancel Edit</button>
+        </div>
+        <p class="profile-error" id="goal-error"></p>
+      </form>
+    </section>
+
+    <!-- ===== Goals List ===== -->
+    <section class="app-card" id="goals-list-section">
+      <div class="history-header">
+        <h2 class="card-title">Your Goals</h2>
+        <span class="tx-count" id="goals-count">0 goals</span>
+      </div>
+      <div id="goals-list"></div>
+      <p class="empty-state" id="goals-empty" style="display:none">No goals yet — add one above to start saving!</p>
+    </section>
+
+    <!-- Contribution modal -->
+    <div id="contrib-overlay" class="auth-gate" style="display:none">
+      <div class="auth-card contrib-card">
+        <h3 class="contrib-title" id="contrib-title">Add Contribution</h3>
+        <p class="contrib-sub" id="contrib-sub"></p>
+        <div class="auth-fields">
+          <div class="auth-field">
+            <label class="auth-label">Amount ($)</label>
+            <div class="goal-input-wrap">
+              <input type="number" id="contrib-amount" placeholder="0.00" step="any" min="0.01" inputmode="decimal" />
+              <button type="button" class="input-clear-btn" data-target="contrib-amount" title="Clear">&#x2715;</button>
+            </div>
+          </div>
+        </div>
+        <p class="auth-error" id="contrib-error"></p>
+        <button type="button" class="btn btn-full" id="contrib-save-btn">Save</button>
+        <button type="button" class="btn-skip" id="contrib-cancel-btn">Cancel</button>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module" src="goals.js"></script>
+</body>
+</html>

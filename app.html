@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budgetly — Finance Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="prefetch" href="profile.html" />
+  <link rel="prefetch" href="goals.html" />
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+</head>
+<body class="app-page">
+
+  <!-- ===== Navigation ===== -->
+  <header id="navbar">
+    <nav>
+      <a href="index.html?home=1" class="logo"><img src="budgetly.png" alt="Budgetly" class="logo-img" /></a>
+      <ul class="nav-links">
+        <li><a href="index.html?home=1">Home</a></li>
+        <li><span class="nav-active">Finance Hub</span></li>
+        <li><a href="goals.html">Goals</a></li>
+        <li id="nav-user" class="nav-user" style="display:none">
+          <a href="profile.html" class="account-btn" id="account-btn" aria-label="My Account">
+            <div class="account-avatar-ring" id="account-avatar-ring">
+              <svg class="account-person-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="16" cy="11" r="5"/>
+                <path d="M5 28c0-6.075 4.925-11 11-11s11 4.925 11 11"/>
+              </svg>
+            </div>
+            <span class="account-btn-name" id="account-btn-name"></span>
+          </a>
+          <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>
+        </li>
+        <li id="nav-guest" class="nav-user" style="display:none">
+          <span class="nav-user-email">Guest</span>
+          <button type="button" id="guest-signin-btn" class="btn btn-small">Sign In</button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===== Auth Loading ===== -->
+  <div id="auth-loading" class="auth-loading">
+    <img src="budgetly.png" alt="Budgetly" class="auth-loading-logo" />
+  </div>
+
+  <!-- ===== Auth Gate ===== -->
+  <div id="auth-gate" class="auth-gate" style="display:none">
+    <div class="auth-card">
+
+      <div class="auth-header">
+        <img src="budgetly.png" alt="Budgetly" class="auth-logo" />
+        <p class="auth-tagline">Track your money, simply.</p>
+      </div>
+
+      <div id="auth-tabs" class="auth-tabs">
+        <button class="auth-tab active" data-tab="signin">Sign In</button>
+        <button class="auth-tab" data-tab="signup">Create Account</button>
+      </div>
+
+      <form id="auth-form" novalidate>
+        <div class="auth-fields">
+
+          <div class="auth-field" id="auth-name-group" style="display:none">
+            <label for="auth-name" class="auth-label">Full Name</label>
+            <input type="text" id="auth-name" placeholder="Your name" maxlength="60"
+                   autocomplete="name" />
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-email" class="auth-label">Email</label>
+            <input type="email" id="auth-email" placeholder="you@example.com"
+                   autocomplete="email" required />
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-password" class="auth-label">Password</label>
+            <input type="password" id="auth-password" placeholder="Min. 6 characters"
+                   autocomplete="current-password" required minlength="6" />
+          </div>
+
+          <div class="auth-field" id="auth-confirm-group" style="display:none">
+            <label for="auth-confirm" class="auth-label">Confirm Password</label>
+            <input type="password" id="auth-confirm" placeholder="Repeat your password"
+                   autocomplete="new-password" />
+          </div>
+
+        </div>
+
+        <p class="auth-error" id="auth-error"></p>
+
+        <button type="submit" class="btn btn-full" id="auth-submit-btn">Sign In</button>
+        <button type="button" class="btn-skip" id="skip-btn">Skip for now</button>
+      </form>
+
+      <p class="auth-switch">
+        Don't have an account?
+        <button type="button" class="auth-switch-btn" id="auth-switch-btn">Create one</button>
+      </p>
+
+    </div>
+  </div>
+
+  <!-- Signed-in toast banner -->
+  <div id="signin-toast" class="signin-toast" style="display:none" aria-live="polite">
+    <span class="signin-toast-wave">👋</span>
+    <span id="signin-toast-msg"></span>
+    <button type="button" class="signin-toast-close" id="signin-toast-close" aria-label="Dismiss">×</button>
+  </div>
+
+  <main class="app-layout" id="app-content" style="display:none">
+
+    <!-- Firestore connection error (shown if onSnapshot fails) -->
+    <p id="firestore-error" class="form-error" style="display:none;margin:0.75rem 0 0"></p>
+
+    <!-- ===== 0. Welcome Bar ===== -->
+    <div class="welcome-bar" id="welcome-bar">
+      <div class="welcome-left">
+        <span class="welcome-greeting" id="welcome-greeting">Welcome back</span>
+        <span class="welcome-email" id="welcome-email"></span>
+      </div>
+      <!-- Month picker — only shown if previous month data exists -->
+      <div class="month-picker" id="month-picker" style="display:none">
+        <button type="button" class="month-nav-btn" id="month-prev" aria-label="Previous month">&#8592;</button>
+        <span class="month-label" id="month-label"></span>
+        <button type="button" class="month-nav-btn" id="month-next" aria-label="Next month">&#8594;</button>
+      </div>
+      <span class="welcome-date" id="welcome-date"></span>
+    </div>
+
+    <!-- Budget alert banner -->
+    <div class="budget-alert" id="budget-alert" style="display:none">
+      <span id="budget-alert-msg"></span>
+      <button type="button" class="budget-alert-close" id="budget-alert-close">&#x2715;</button>
+    </div>
+
+    <!-- Month-end goal recap banner -->
+    <div class="month-recap" id="month-recap" style="display:none">
+      <div class="month-recap-icon" id="month-recap-icon"></div>
+      <div class="month-recap-body">
+        <p class="month-recap-title" id="month-recap-title"></p>
+        <p class="month-recap-tip"   id="month-recap-tip"></p>
+      </div>
+      <button type="button" class="budget-alert-close" id="month-recap-close">&#x2715;</button>
+    </div>
+
+    <!-- ===== 1. Dashboard ===== -->
+    <section class="dashboard">
+
+      <div class="stat-card stat-card--income">
+        <div class="stat-card-top">
+          <span class="stat-label">Total Income</span>
+          <span class="stat-icon stat-icon--income">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14V4M6 8l4-4 4 4"/><path d="M3 16h14"/></svg>
+          </span>
+        </div>
+        <span class="stat-value" id="stat-income-val">$0.00</span>
+        <span class="stat-sub" id="stat-income-count">0 transactions</span>
+      </div>
+
+      <div class="stat-card stat-card--expenses">
+        <div class="stat-card-top">
+          <span class="stat-label">Total Expenses</span>
+          <span class="stat-icon stat-icon--expenses">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6v10M6 12l4 4 4-4"/><path d="M3 4h14"/></svg>
+          </span>
+        </div>
+        <span class="stat-value" id="stat-expenses-val">$0.00</span>
+        <span class="stat-sub" id="stat-expenses-count">0 transactions</span>
+      </div>
+
+      <div class="stat-card stat-card--balance">
+        <div class="stat-card-top">
+          <span class="stat-label">Balance</span>
+          <span class="stat-icon stat-icon--balance">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l2.5 2.5"/></svg>
+          </span>
+        </div>
+        <span class="stat-value" id="stat-balance-val">$0.00</span>
+        <span class="stat-sub" id="stat-balance-sub">income − expenses</span>
+      </div>
+
+      <!-- Weekly Digest — appears once there are transactions this week -->
+      <div class="weekly-digest" id="weekly-digest" style="display:none">
+        <div class="digest-header">
+          <span class="digest-title">This Week</span>
+          <span class="digest-range" id="digest-range"></span>
+        </div>
+        <div class="digest-stats">
+          <div class="digest-stat">
+            <span class="digest-stat-label">Income</span>
+            <span class="digest-stat-value digest-income" id="digest-income">$0</span>
+          </div>
+          <div class="digest-stat">
+            <span class="digest-stat-label">Expenses</span>
+            <span class="digest-stat-value digest-expense" id="digest-expenses">$0</span>
+          </div>
+          <div class="digest-stat">
+            <span class="digest-stat-label">Saved</span>
+            <span class="digest-stat-value" id="digest-saved">$0</span>
+          </div>
+        </div>
+        <div class="digest-highlights" id="digest-highlights"></div>
+      </div>
+
+      <!-- Pie chart — appears once expense data exists -->
+      <div class="pie-chart-card" id="pie-chart-card" style="display:none">
+        <p class="pie-chart-title">Spending by Category</p>
+        <div class="pie-chart-inner">
+          <canvas id="pie-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly budget progress — appears when a goal is saved -->
+      <div class="budget-card" id="budget-card" style="display:none">
+        <div class="budget-card-top">
+          <span class="budget-card-label">Monthly Budget</span>
+          <span class="budget-card-values" id="budget-card-values"></span>
+        </div>
+        <div class="budget-track">
+          <div class="budget-fill" id="budget-fill"></div>
+        </div>
+        <div class="budget-card-bottom">
+          <span class="budget-remaining" id="budget-remaining"></span>
+          <a href="#profile-section" class="budget-edit-link">Edit goal</a>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== 1.5 AI Budget Insights ===== -->
+    <section class="app-card ai-insights-section" id="ai-insights-section">
+      <div class="ai-insights-header">
+        <div class="ai-insights-title-wrap">
+          <svg class="ai-insights-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+          </svg>
+          <h2 class="card-title" style="margin:0">AI Budget Insights</h2>
+        </div>
+        <button type="button" class="btn btn-small" id="analyze-btn">Analyze Budget</button>
+      </div>
+      <div id="ai-insights-result" class="ai-insights-result" style="display:none">
+        <p id="ai-insights-text" class="ai-insights-text"></p>
+        <span id="ai-insights-cache-label" class="ai-insights-cache-label"></span>
+      </div>
+      <p id="ai-insights-error" class="form-error" style="display:none"></p>
+    </section>
+
+    <!-- ===== 2. Transaction Form ===== -->
+    <section class="app-card form-section">
+      <h2 class="card-title">Add Transaction</h2>
+
+      <form id="transaction-form" novalidate>
+
+        <div class="form-group">
+          <label>Type</label>
+          <div class="type-toggle" id="type-toggle">
+            <button type="button" class="type-btn type-btn--income active" data-type="income">
+              ↑ Income
+            </button>
+            <button type="button" class="type-btn type-btn--expense" data-type="expense">
+              ↓ Expense
+            </button>
+          </div>
+          <input type="hidden" id="tx-type" value="income" />
+        </div>
+
+        <div class="form-body">
+
+        <div class="form-group">
+          <label for="tx-description">Description</label>
+          <input type="text" id="tx-description" placeholder="e.g. Coffee, Monthly rent, Salary…" maxlength="80" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tx-amount">Amount ($)</label>
+            <input type="number" id="tx-amount" min="0.01" step="any" inputmode="decimal" placeholder="0.00" required />
+          </div>
+          <div class="form-group">
+            <label for="tx-date">Date</label>
+            <input type="date" id="tx-date" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+          <div class="cat-select" id="cat-select">
+            <button type="button" class="cat-trigger" id="cat-trigger" aria-expanded="false" aria-haspopup="listbox">
+              <span class="cat-trigger-label" id="cat-trigger-label">Select…</span>
+              <svg class="cat-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="cat-menu" id="cat-menu" role="listbox"></div>
+            <input type="hidden" id="tx-category" />
+          </div>
+          <!-- Custom category input (shown when "custom" is selected) -->
+          <div id="custom-cat-wrap" style="display:none;margin-top:0.5rem">
+            <input type="text" id="custom-cat-input" placeholder="Type your category name…" maxlength="40"
+                   style="width:100%;padding:0.6rem 0.85rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.93rem;background:var(--surface);color:var(--heading)" />
+          </div>
+        </div>
+
+        <label class="recurring-toggle">
+          <input type="checkbox" id="tx-recurring" />
+          <span class="recurring-toggle-label">Repeat monthly (recurring)</span>
+        </label>
+
+        <button type="submit" class="btn btn-full" id="form-submit-btn">Add Income</button>
+        <button type="button" class="btn-ghost btn-full btn-cancel-edit" id="edit-cancel-btn" style="display:none">Cancel Edit</button>
+        <p class="form-error" id="form-error" style="display:none"></p>
+
+        </div><!-- /.form-body -->
+
+      </form>
+
+      <!-- Paycheck Reminder — income section only -->
+      <div class="paycheck-reminder" id="paycheck-reminder" style="display:none">
+
+        <!-- Saved view -->
+        <div class="reminder-saved" id="reminder-saved" style="display:none">
+          <div class="reminder-saved-text">
+            <span class="reminder-saved-label">Next Paycheck</span>
+            <span class="reminder-saved-detail" id="reminder-detail"></span>
+          </div>
+          <div class="reminder-saved-actions">
+            <button type="button" class="btn-ghost btn-sm" id="reminder-edit-btn">Edit</button>
+            <button type="button" class="btn-ghost btn-sm reminder-remove-btn" id="reminder-remove-btn">Remove</button>
+          </div>
+        </div>
+
+        <!-- Edit / new view -->
+        <div class="reminder-edit" id="reminder-edit">
+          <p class="reminder-heading">Next Paycheck Reminder</p>
+          <div class="reminder-fields">
+            <input type="number" id="reminder-amount" placeholder="Amount ($)" step="any" inputmode="decimal" min="0.01">
+            <input type="date"   id="reminder-date">
+            <button type="button" class="btn reminder-save-btn" id="reminder-save-btn">Save</button>
+            <button type="button" class="btn-ghost btn-sm" id="reminder-cancel-btn" style="display:none">Cancel</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== 2.5 Profile — Budget Goals ===== -->
+    <section class="app-card profile-section" id="profile-section" style="display:none">
+      <h2 class="card-title">Monthly Goals</h2>
+
+      <!-- Saved state -->
+      <div class="profile-saved" id="profile-saved" style="display:none">
+        <div class="profile-saved-row">
+          <div class="profile-saved-info">
+            <span class="profile-saved-label">Budget Goal</span>
+            <span class="profile-saved-value" id="profile-saved-value">—</span>
+          </div>
+          <div class="profile-saved-info">
+            <span class="profile-saved-label">Income Target</span>
+            <span class="profile-saved-value" id="profile-saved-income">—</span>
+          </div>
+          <div class="profile-saved-info">
+            <span class="profile-saved-label">Expense Limit</span>
+            <span class="profile-saved-value" id="profile-saved-expense">—</span>
+          </div>
+        </div>
+        <button type="button" class="btn-ghost btn-sm" id="profile-edit-btn">Edit</button>
+      </div>
+
+      <!-- Edit / set state -->
+      <div class="profile-form" id="profile-form">
+        <p class="profile-desc">Set monthly targets to track your progress on the dashboard.</p>
+
+        <div class="goals-grid">
+
+          <div class="goal-field">
+            <label class="goal-label">Monthly Budget Goal</label>
+            <div class="goal-input-wrap">
+              <input type="number" id="profile-budget-input" placeholder="e.g. 2500.00"
+                     step="any" inputmode="decimal" min="0.01" />
+              <button type="button" class="input-clear-btn" data-target="profile-budget-input" title="Clear">&#x2715;</button>
+            </div>
+          </div>
+
+          <div class="goal-field">
+            <label class="goal-label">Total Income Target</label>
+            <div class="goal-input-wrap">
+              <input type="number" id="profile-income-input" placeholder="e.g. 4000.00"
+                     step="any" inputmode="decimal" min="0.01" />
+              <button type="button" class="input-clear-btn" data-target="profile-income-input" title="Clear">&#x2715;</button>
+            </div>
+          </div>
+
+          <div class="goal-field">
+            <label class="goal-label">Total Expenses Limit</label>
+            <div class="goal-input-wrap">
+              <input type="number" id="profile-expense-input" placeholder="e.g. 1500.00"
+                     step="any" inputmode="decimal" min="0.01" />
+              <button type="button" class="input-clear-btn" data-target="profile-expense-input" title="Clear">&#x2715;</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="profile-actions">
+          <button type="button" class="btn" id="profile-save-btn">Save Goals</button>
+          <button type="button" class="btn-ghost btn-sm" id="profile-cancel-btn" style="display:none">Cancel</button>
+        </div>
+        <p class="profile-error" id="profile-error"></p>
+      </div>
+
+    </section>
+
+    <!-- ===== 3. Transaction History ===== -->
+    <section class="app-card history-section">
+
+      <div class="history-header">
+        <h2 class="card-title">Transaction History</h2>
+        <span class="tx-count" id="tx-count">0 transactions</span>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-row">
+        <input type="text" id="search-input" class="filter-search" placeholder="Search transactions…" />
+        <select id="filter-type" class="filter-select">
+          <option value="all">All types</option>
+          <option value="expense">Expenses</option>
+          <option value="income">Income</option>
+        </select>
+        <select id="filter-category" class="filter-select">
+          <option value="all">All categories</option>
+          <optgroup label="── Income ──">
+            <option value="paycheck"   style="background:#d4eccc;color:#1a5010">Paycheck</option>
+            <option value="salary"     style="background:#d8e8f0;color:#1e4868">Salary</option>
+            <option value="freelance"  style="background:#d8d8f0;color:#30288a">Freelance</option>
+            <option value="bonuses"    style="background:#f0e4c4;color:#6c4810">Bonuses</option>
+            <option value="stocks"     style="background:#c8edd8;color:#1a5034">Stocks</option>
+            <option value="gift"       style="background:#f0d4e8;color:#6c1848">Gift</option>
+            <option value="benefits"   style="background:#e0d4f0;color:#3c2070">Gov. Benefits</option>
+            <option value="retirement" style="background:#f0dcd4;color:#6c2c18">Retirement</option>
+            <option value="other"      style="background:#e4e4e8;color:#404050">Other</option>
+          </optgroup>
+          <optgroup label="── Expense ──">
+            <option value="housing"       style="background:#f0e4cc;color:#7a4820">Housing / Rent</option>
+            <option value="mortgage"      style="background:#eddcc8;color:#6c3c18">Mortgage</option>
+            <option value="utilities"     style="background:#e8e4c8;color:#5c5020">Utilities</option>
+            <option value="groceries"     style="background:#f5e6cf;color:#7c5020">Groceries</option>
+            <option value="dining"        style="background:#f5eac4;color:#7a6010">Dining Out</option>
+            <option value="fooddelivery"  style="background:#fce8d4;color:#8c4810">Food Delivery</option>
+            <option value="transport"     style="background:#e8dece;color:#5c3d18">Transportation</option>
+            <option value="gascharging"   style="background:#f5e0c4;color:#7c4010">Gas / Charging</option>
+            <option value="gas"           style="background:#f5e0c4;color:#7c4010">Gas / Fuel (legacy)</option>
+            <option value="carpayment"    style="background:#d8e4f0;color:#24446c">Car Payment</option>
+            <option value="carinsurance"  style="background:#d4ddf0;color:#1e3c6c">Car Insurance</option>
+            <option value="healthins"     style="background:#c8e8d0;color:#1a5c2a">Health Insurance</option>
+            <option value="medical"       style="background:#deecd8;color:#2e6030">Medical</option>
+            <option value="phone"         style="background:#dcd8f0;color:#342880">Phone Bill</option>
+            <option value="internet"      style="background:#d0e4f8;color:#1a4470">Internet</option>
+            <option value="subscriptions" style="background:#e4d4f0;color:#5c2470">Subscriptions</option>
+            <option value="childcare"     style="background:#f8d8e8;color:#7c2050">Childcare</option>
+            <option value="education"     style="background:#e4e8cc;color:#4c5420">Education</option>
+            <option value="creditcards"   style="background:#f5d8cc;color:#8c2c1c">Credit Cards</option>
+            <option value="personalcare"  style="background:#f0d8e4;color:#782448">Personal Care</option>
+            <option value="clothing"      style="background:#d4e8e4;color:#1c5850">Clothing</option>
+            <option value="shopping"      style="background:#e8d8f0;color:#5c2478">Shopping</option>
+            <option value="onlineshopping" style="background:#dcd4f0;color:#4c2478">Online Shopping</option>
+            <option value="entertainment" style="background:#ead4e8;color:#6a2868">Entertainment</option>
+            <option value="other"         style="background:#e4e4e8;color:#404050">Other</option>
+          </optgroup>
+        </select>
+        <input type="date" id="filter-from" class="filter-date" title="From date" />
+        <input type="date" id="filter-to"   class="filter-date" title="To date" />
+        <button id="clear-filters" class="btn-ghost">Clear</button>
+      </div>
+
+      <!-- Spending chart (shown when expense data exists) -->
+      <div class="chart-wrap" id="chart-wrap" style="display:none">
+        <div class="chart-header">
+          <p class="chart-title">Expenses by Category</p>
+          <span id="chart-total-badge" class="chart-total-badge"></span>
+        </div>
+        <div id="chart-bars" class="chart-bars"></div>
+      </div>
+
+      <!-- Transaction list -->
+      <div id="transaction-list"></div>
+      <p class="empty-state" id="list-empty" style="display:none">No transactions found. Add one above!</p>
+
+    </section>
+
+  </main>
+
+  <!-- Change Password Modal -->
+  <div id="change-password-overlay" class="auth-gate" style="display:none">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo-text">Change Password</div>
+        <p class="auth-tagline">Enter a new password for your account.</p>
+      </div>
+      <form id="change-password-form" novalidate>
+        <div class="auth-fields">
+          <div class="auth-field">
+            <label for="new-password-input" class="auth-label">New Password</label>
+            <div class="password-wrapper">
+              <input type="password" id="new-password-input" placeholder="Min. 6 characters" minlength="6" required />
+              <button type="button" class="password-toggle" data-target="new-password-input" aria-label="Show password">
+                <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="auth-error" id="change-password-error"></p>
+        <button type="submit" class="btn btn-full" id="change-password-save-btn">Update Password</button>
+        <button type="button" class="btn-skip" id="change-password-cancel-btn">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Transaction toast notification -->
+  <div id="tx-toast" class="tx-toast" aria-live="polite"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

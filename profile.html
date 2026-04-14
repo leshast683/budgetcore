@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budgetly — My Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="prefetch" href="app.html" />
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+</head>
+<body class="app-page profile-page">
+
+  <!-- Loading -->
+  <div id="auth-loading" class="auth-loading">
+    <img src="budgetly.png" alt="Budgetly" class="auth-loading-logo" />
+  </div>
+
+  <!-- Header -->
+  <header id="navbar">
+    <nav>
+      <a href="index.html?home=1" class="logo"><img src="budgetly.png" alt="Budgetly" class="logo-img" /></a>
+      <ul class="nav-links">
+        <li><a href="index.html?home=1">Home</a></li>
+        <li><a href="app.html">Dashboard</a></li>
+        <li><a href="goals.html">Goals</a></li>
+        <li><span class="nav-active">Profile</span></li>
+        <li id="nav-signout-li" style="display:none">
+          <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="profile-content" class="profile-main" style="display:none">
+
+    <!-- ── Hero: Avatar + Name ── -->
+    <section class="prof-hero">
+      <div class="prof-hero-inner">
+
+        <!-- Avatar -->
+        <div class="prof-avatar-wrap">
+          <div class="prof-avatar" id="prof-avatar">
+            <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="prof-avatar-default">
+              <circle cx="40" cy="28" r="14"/>
+              <path d="M12 72c0-15.464 12.536-28 28-28s28 12.536 28 28"/>
+            </svg>
+          </div>
+          <label class="prof-avatar-upload" title="Upload photo">
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none" />
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13V4M6 8l4-4 4 4"/><path d="M3 15v1a2 2 0 002 2h10a2 2 0 002-2v-1"/></svg>
+          </label>
+        </div>
+
+        <!-- Name + email -->
+        <div class="prof-hero-text">
+          <h1 class="prof-name" id="prof-name">Loading…</h1>
+          <p class="prof-email" id="prof-email"></p>
+          <div class="prof-type-badge" id="prof-type-badge" style="display:none"></div>
+        </div>
+
+      </div>
+
+      <!-- Default avatar picker -->
+      <div class="prof-avatar-defaults">
+        <p class="prof-avatar-defaults-label">Choose an avatar</p>
+        <div class="prof-avatar-grid">
+          <button class="avatar-opt" data-avatar="1" title="Explorer" style="--av-bg:#fde8cc">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#fde8cc"/><path d="M20 10 L24 18 L32 19 L26 25 L28 33 L20 29 L12 33 L14 25 L8 19 L16 18 Z" fill="#f5a623" stroke="none"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="2" title="Bear" style="--av-bg:#d4ecd4">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#d4ecd4"/><circle cx="14" cy="12" r="5" fill="#5c8a5c"/><circle cx="26" cy="12" r="5" fill="#5c8a5c"/><circle cx="20" cy="22" r="10" fill="#5c8a5c"/><circle cx="20" cy="24" r="4" fill="#8ac48a"/><circle cx="17" cy="19" r="2" fill="white"/><circle cx="23" cy="19" r="2" fill="white"/><circle cx="17" cy="19" r="1" fill="#1a0e06"/><circle cx="23" cy="19" r="1" fill="#1a0e06"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="3" title="Owl" style="--av-bg:#e8d4f0">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#e8d4f0"/><ellipse cx="20" cy="22" rx="11" ry="12" fill="#9060b0"/><circle cx="15" cy="18" r="5" fill="white"/><circle cx="25" cy="18" r="5" fill="white"/><circle cx="15" cy="18" r="3" fill="#1a0e06"/><circle cx="25" cy="18" r="3" fill="#1a0e06"/><path d="M17 26 Q20 29 23 26" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M16 11 L20 15 L24 11" stroke="#9060b0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="4" title="Fox" style="--av-bg:#ffe0cc">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#ffe0cc"/><path d="M8 10 L16 18 L12 10 Z" fill="#e07030"/><path d="M32 10 L24 18 L28 10 Z" fill="#e07030"/><circle cx="20" cy="22" r="10" fill="#e07030"/><circle cx="20" cy="24" r="5" fill="#ffd0b0"/><circle cx="16" cy="19" r="2" fill="white"/><circle cx="24" cy="19" r="2" fill="white"/><circle cx="16" cy="19" r="1" fill="#1a0e06"/><circle cx="24" cy="19" r="1" fill="#1a0e06"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="5" title="Lion" style="--av-bg:#fff0cc">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#fff0cc"/><circle cx="20" cy="20" r="13" fill="#d4a020" opacity="0.4"/><circle cx="20" cy="21" r="9" fill="#e8a030"/><circle cx="16" cy="18" r="2" fill="white"/><circle cx="24" cy="18" r="2" fill="white"/><circle cx="16" cy="18" r="1" fill="#1a0e06"/><circle cx="24" cy="18" r="1" fill="#1a0e06"/><path d="M17 24 Q20 27 23 24" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="6" title="Rabbit" style="--av-bg:#f0e4ff">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#f0e4ff"/><ellipse cx="14" cy="9" rx="3.5" ry="7" fill="#c89ae0"/><ellipse cx="26" cy="9" rx="3.5" ry="7" fill="#c89ae0"/><ellipse cx="14" cy="9" rx="2" ry="5" fill="#f8d0e8"/><ellipse cx="26" cy="9" rx="2" ry="5" fill="#f8d0e8"/><circle cx="20" cy="22" r="10" fill="#e0c8f8"/><circle cx="15.5" cy="19" r="2.5" fill="white"/><circle cx="24.5" cy="19" r="2.5" fill="white"/><circle cx="15.5" cy="19" r="1.2" fill="#1a0e06"/><circle cx="24.5" cy="19" r="1.2" fill="#1a0e06"/><ellipse cx="20" cy="23" rx="2" ry="1.5" fill="#f8a0c0"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="7" title="Dragon" style="--av-bg:#ccf0e8">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#ccf0e8"/><path d="M13 14 L16 7 L18.5 14Z" fill="#20a080"/><path d="M20 12 L22 6 L24 12Z" fill="#20a080"/><path d="M25 14 L27.5 7 L30 14Z" fill="#20a080"/><circle cx="20" cy="23" r="11" fill="#30c090"/><ellipse cx="15" cy="20" rx="3" ry="3.5" fill="white"/><ellipse cx="25" cy="20" rx="3" ry="3.5" fill="white"/><ellipse cx="15" cy="20" rx="1.5" ry="2" fill="#1a0e06"/><ellipse cx="25" cy="20" rx="1.5" ry="2" fill="#1a0e06"/><path d="M15 27 Q20 31 25 27" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="8" title="Panda" style="--av-bg:#f0f0f0">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#f0f0f0"/><circle cx="12" cy="11" r="6" fill="#222"/><circle cx="28" cy="11" r="6" fill="#222"/><circle cx="20" cy="22" r="11" fill="white"/><ellipse cx="15" cy="19" rx="4" ry="4" fill="#222"/><ellipse cx="25" cy="19" rx="4" ry="4" fill="#222"/><circle cx="15" cy="19" r="2" fill="white"/><circle cx="25" cy="19" r="2" fill="white"/><circle cx="15" cy="19" r="1" fill="#1a0e06"/><circle cx="25" cy="19" r="1" fill="#1a0e06"/><ellipse cx="20" cy="24" rx="2.5" ry="1.5" fill="#333"/><path d="M17 26 Q20 29 23 26" stroke="#333" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="9" title="Cat" style="--av-bg:#d4eef8">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#d4eef8"/><path d="M10 14 L14 6 L18 14Z" fill="#5a90b8"/><path d="M22 14 L26 6 L30 14Z" fill="#5a90b8"/><path d="M11.5 14 L14 8 L16.5 14Z" fill="#f0c0d0"/><path d="M23.5 14 L26 8 L28.5 14Z" fill="#f0c0d0"/><circle cx="20" cy="22" r="10" fill="#6aa8c8"/><ellipse cx="15.5" cy="19" rx="2.5" ry="3" fill="white"/><ellipse cx="24.5" cy="19" rx="2.5" ry="3" fill="white"/><ellipse cx="15.5" cy="19" rx="1" ry="2" fill="#1a0e06"/><ellipse cx="24.5" cy="19" rx="1" ry="2" fill="#1a0e06"/><ellipse cx="20" cy="23" rx="1.5" ry="1" fill="#f0a0b0"/><path d="M13 22 L17 23M13 24 L17 24" stroke="white" stroke-width="0.8" stroke-linecap="round"/><path d="M27 22 L23 23M27 24 L23 24" stroke="white" stroke-width="0.8" stroke-linecap="round"/></svg>
+          </button>
+          <button class="avatar-opt" data-avatar="10" title="Penguin" style="--av-bg:#ccd8e8">
+            <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#ccd8e8"/><ellipse cx="20" cy="24" rx="11" ry="12" fill="#1a2840"/><ellipse cx="20" cy="26" rx="6" ry="8" fill="white"/><circle cx="15" cy="17" r="3" fill="white"/><circle cx="25" cy="17" r="3" fill="white"/><circle cx="15" cy="17" r="1.5" fill="#1a0e06"/><circle cx="25" cy="17" r="1.5" fill="#1a0e06"/><path d="M17 22 L20 25 L23 22Z" fill="#f0a020"/></svg>
+          </button>
+        </div>
+        <button id="avatar-save-btn" class="btn btn-small avatar-save-btn" style="display:none">Save Avatar</button>
+      </div>
+    </section>
+
+    <!-- ── Who are you? ── -->
+    <section class="prof-section prof-section--type">
+      <h2 class="prof-section-title">Who are you?</h2>
+      <p class="prof-section-sub">This helps us personalise your experience.</p>
+      <div class="prof-type-grid" id="prof-type-grid">
+        <button class="type-card" data-type="spender">
+          <div class="type-icon" style="background:#fff0e0">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#e07030" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="28" height="18" rx="4"/><path d="M2 13h28"/><circle cx="8" cy="20" r="2" fill="#e07030" stroke="none"/></svg>
+          </div>
+          <span class="type-label">Spender</span>
+          <span class="type-desc">I enjoy treating myself</span>
+        </button>
+        <button class="type-card" data-type="saver">
+          <div class="type-icon" style="background:#e8f5e8">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#3a8a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 14c0-4.418-3.582-8-8-8a8 8 0 00-8 8c0 3 1.6 5.6 4 7.2V24h8v-2.8c2.4-1.6 4-4.2 4-7.2z"/><path d="M12 24h8M14 27h4"/></svg>
+          </div>
+          <span class="type-label">Saver</span>
+          <span class="type-desc">I'm building my future</span>
+        </button>
+        <button class="type-card" data-type="learner">
+          <div class="type-icon" style="background:#e8e0f4">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#7040b0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l12-4 12 4v8c0 6-5.333 10-12 12C9.333 26 4 22 4 16V8z"/><path d="M16 12v8M12 16h8"/></svg>
+          </div>
+          <span class="type-label">Budget Learner</span>
+          <span class="type-desc">I want to learn money skills</span>
+        </button>
+        <button class="type-card" data-type="investor">
+          <div class="type-icon" style="background:#e0eeff">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#2060c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,24 12,16 18,20 28,8"/><polyline points="22,8 28,8 28,14"/></svg>
+          </div>
+          <span class="type-label">Investor</span>
+          <span class="type-desc">I'm growing my wealth</span>
+        </button>
+        <button class="type-card" data-type="fighter">
+          <div class="type-icon" style="background:#ffe0e0">
+            <svg viewBox="0 0 32 32" fill="none" stroke="#c02020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3L4 8v10c0 6.627 5.373 12 12 12s12-5.373 12-12V8L16 3z"/><path d="M16 10v6M13 13h6"/></svg>
+          </div>
+          <span class="type-label">Debt-Fighter</span>
+          <span class="type-desc">I'm crushing my debt</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Personalized Tip ── -->
+    <section class="prof-section" id="tip-section" style="display:none">
+      <h2 class="prof-section-title">Your Money Tip</h2>
+      <div class="prof-tip-card" id="prof-tip-card">
+        <div class="tip-icon" id="tip-icon">💡</div>
+        <div class="tip-body">
+          <p class="tip-text" id="tip-text"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Account Settings ── -->
+    <section class="prof-section prof-section--settings">
+      <h2 class="prof-section-title">Account Settings</h2>
+
+      <div class="settings-list">
+
+        <!-- Change Name -->
+        <div class="settings-row" id="settings-name-row">
+          <div class="settings-row-info">
+            <span class="settings-row-label">Display Name</span>
+            <span class="settings-row-value" id="settings-name-value">—</span>
+          </div>
+          <button type="button" class="settings-edit-btn" id="settings-name-btn">Edit</button>
+        </div>
+        <div class="settings-inline-form" id="settings-name-form" style="display:none">
+          <input type="text" id="new-name-input" class="auth-input" placeholder="New display name" maxlength="60" />
+          <div class="settings-form-btns">
+            <button type="button" class="btn btn-small" id="settings-name-save">Save</button>
+            <button type="button" class="btn-ghost btn-sm" id="settings-name-cancel">Cancel</button>
+          </div>
+          <p class="auth-error" id="settings-name-error"></p>
+        </div>
+
+        <!-- Change Password -->
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <span class="settings-row-label">Password</span>
+            <span class="settings-row-value">••••••••</span>
+          </div>
+          <button type="button" class="settings-edit-btn" id="settings-pw-btn">Change</button>
+        </div>
+        <div class="settings-inline-form" id="settings-pw-form" style="display:none">
+          <div class="password-wrapper">
+            <input type="password" id="new-pw-input" class="auth-input" placeholder="New password (min 6 chars)" />
+            <button type="button" class="password-toggle" data-target="new-pw-input">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <div class="settings-form-btns">
+            <button type="button" class="btn btn-small" id="settings-pw-save">Update</button>
+            <button type="button" class="btn-ghost btn-sm" id="settings-pw-cancel">Cancel</button>
+          </div>
+          <p class="auth-error" id="settings-pw-error"></p>
+        </div>
+
+        <!-- Delete Account -->
+        <div class="settings-row settings-row--danger">
+          <div class="settings-row-info">
+            <span class="settings-row-label">Delete Account</span>
+            <span class="settings-row-value" style="color:#c02020">Permanently remove your account and all data</span>
+          </div>
+          <button type="button" class="settings-danger-btn" id="settings-delete-btn">Delete</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Badges ── -->
+    <section class="prof-section prof-section--badges">
+      <div class="badges-header">
+        <h2 class="prof-section-title">Achievements</h2>
+        <span class="badges-count" id="badges-count">0 / 10</span>
+      </div>
+      <p class="prof-section-sub">Earn badges by hitting milestones in Budgetly.</p>
+      <div class="badges-grid" id="badges-grid">
+        <!-- Populated by profile.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Confirm Delete Modal -->
+  <div id="delete-confirm-overlay" class="modal-overlay" style="display:none">
+    <div class="modal-card">
+      <h3 class="modal-title">Delete Account?</h3>
+      <p class="modal-body">This will permanently delete your account and all your data. This cannot be undone.</p>
+      <p class="auth-error" id="delete-error"></p>
+      <div class="modal-btns">
+        <button type="button" class="settings-danger-btn" id="delete-confirm-btn">Yes, delete everything</button>
+        <button type="button" class="btn-ghost btn-sm" id="delete-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="profile.js"></script>
+</body>
+</html>

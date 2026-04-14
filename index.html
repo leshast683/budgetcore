@@ -4,18 +4,175 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Budgetly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="prefetch" href="app.html" />
+  <link rel="prefetch" href="profile.html" />
+  <link rel="prefetch" href="goals.html" />
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
 </head>
 <body>
+
+  <!-- ===== Auth Loading ===== -->
+  <div id="auth-loading" class="auth-loading">
+    <img src="budgetly.png" alt="Budgetly" class="auth-loading-logo" />
+  </div>
+
+  <!-- ===== Auth Modal Overlay ===== -->
+  <div id="auth-overlay" class="auth-gate" style="display:none">
+
+    <!-- Welcome toast shown after sign-in/up -->
+    <div id="welcome-toast" class="welcome-toast" style="display:none">
+      <div class="welcome-toast-inner">
+        <div class="welcome-wave">👋</div>
+        <h2 id="welcome-toast-name">Welcome!</h2>
+        <p class="welcome-toast-sub">Let's take control of your finances.</p>
+      </div>
+    </div>
+
+    <div id="container" class="auth-slider">
+
+      <!-- ── Sign In Form ── -->
+      <div class="auth-form-wrap sign-in-container">
+        <form class="auth-form" id="signin-form" novalidate>
+          <img src="budgetly.png" alt="Budgetly" class="auth-form-logo" />
+          <h2 class="auth-form-title">Sign In</h2>
+
+          <div class="auth-social-row">
+            <button type="button" class="social-btn" id="signin-google" title="Continue with Google">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            </button>
+            <button type="button" class="social-btn" id="signin-linkedin" title="Continue with LinkedIn">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </button>
+            <button type="button" class="social-btn" id="signin-apple" title="Continue with Apple">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#1a0e06"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            </button>
+          </div>
+
+          <div class="auth-or"><span>or use email</span></div>
+
+          <input type="email"    id="signin-email"    class="auth-input" placeholder="Email address"  autocomplete="email"            required />
+          <div class="password-wrapper">
+            <input type="password" id="signin-password" class="auth-input" placeholder="Password" autocomplete="current-password" required />
+            <button type="button" class="password-toggle" data-target="signin-password" aria-label="Show password">
+              <svg class="eye-icon"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+
+          <p class="auth-error" id="signin-error"></p>
+
+          <button type="button" id="forgot-btn" class="auth-forgot-link">Forgot password?</button>
+
+          <button type="submit" class="btn btn-full">Sign In</button>
+          <button type="button" id="skip-btn" class="btn-skip">Skip for now</button>
+        </form>
+      </div>
+
+      <!-- ── Sign Up Form ── -->
+      <div class="auth-form-wrap sign-up-container">
+        <form class="auth-form" id="signup-form" novalidate>
+          <img src="budgetly.png" alt="Budgetly" class="auth-form-logo" />
+          <h2 class="auth-form-title">Create Account</h2>
+
+          <div class="auth-social-row">
+            <button type="button" class="social-btn" id="signup-google" title="Sign up with Google">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            </button>
+            <button type="button" class="social-btn" id="signup-linkedin" title="Sign up with LinkedIn">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </button>
+            <button type="button" class="social-btn" id="signup-apple" title="Sign up with Apple">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#1a0e06"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            </button>
+          </div>
+
+          <div class="auth-or"><span>or use email</span></div>
+
+          <input type="text"     id="signup-name"     class="auth-input" placeholder="Full name"        autocomplete="name"         />
+          <input type="email"    id="signup-email"    class="auth-input" placeholder="Email address"    autocomplete="email"        required />
+          <div class="password-wrapper">
+            <input type="password" id="signup-password" class="auth-input" placeholder="Password" autocomplete="new-password" required />
+            <button type="button" class="password-toggle" data-target="signup-password" aria-label="Show password">
+              <svg class="eye-icon"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+          <div class="pw-strength" id="pw-strength" style="display:none">
+            <div class="pw-bars">
+              <div class="pw-bar" id="pw-b1"></div>
+              <div class="pw-bar" id="pw-b2"></div>
+              <div class="pw-bar" id="pw-b3"></div>
+              <div class="pw-bar" id="pw-b4"></div>
+            </div>
+            <span class="pw-label" id="pw-label">Weak</span>
+          </div>
+          <div class="password-wrapper">
+            <input type="password" id="signup-confirm" class="auth-input" placeholder="Confirm password" autocomplete="new-password" />
+            <button type="button" class="password-toggle" data-target="signup-confirm" aria-label="Show password">
+              <svg class="eye-icon"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+
+          <p class="auth-error" id="signup-error"></p>
+
+          <button type="submit" class="btn btn-full">Create Account</button>
+        </form>
+      </div>
+
+      <!-- ── Sliding Overlay Panels (desktop) ── -->
+      <div class="auth-overlay-container">
+        <div class="auth-overlay-track">
+          <div class="auth-overlay-panel auth-overlay-panel--left">
+            <img src="budgetly.png" alt="" class="overlay-logo" />
+            <h2>Welcome Back!</h2>
+            <p>Already have an account?<br>Sign in to continue your journey.</p>
+            <button type="button" id="signIn" class="auth-ghost-btn">Sign In</button>
+          </div>
+          <div class="auth-overlay-panel auth-overlay-panel--right">
+            <img src="budgetly.png" alt="" class="overlay-logo" />
+            <h2>Hello, Friend!</h2>
+            <p>Budget brilliantly.<br>Start free — no card needed.</p>
+            <button type="button" id="signUp" class="auth-ghost-btn">Sign Up</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Mobile footer toggle ── -->
+      <div class="auth-mobile-footer" id="auth-mobile-footer">
+        <span id="auth-mobile-msg">Don't have an account?</span>
+        <button type="button" id="auth-mobile-toggle" class="auth-switch-link" onclick="toggleMobile()">Sign Up</button>
+      </div>
+
+    </div><!-- #container -->
+  </div>
 
   <!-- ===== Navigation ===== -->
   <header id="navbar">
     <nav>
-      <div class="logo">Budgetly</div>
+      <a href="index.html" class="logo"><img src="budgetly.png" alt="Budgetly" class="logo-img" /></a>
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
         <li><a href="#about">About</a></li>
-        <li><a href="#features" class="btn btn-small">Get started</a></li>
+        <li id="home-nav-signin"><a href="#" class="btn btn-small" data-show-auth="signin">Sign In</a></li>
+        <li id="home-nav-user" class="nav-user" style="display:none">
+          <a href="app.html" class="btn btn-small">Finance Hub</a>
+          <a href="profile.html" class="account-btn" id="home-account-btn" aria-label="My Account">
+            <div class="account-avatar-ring" id="home-avatar-ring">
+              <svg class="account-person-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="16" cy="11" r="5"/>
+                <path d="M5 28c0-6.075 4.925-11 11-11s11 4.925 11 11"/>
+              </svg>
+            </div>
+            <span class="account-btn-name" id="home-user-email"></span>
+          </a>
+          <button type="button" id="home-signout-btn" class="btn-ghost btn-sm">Sign Out</button>
+        </li>
       </ul>
     </nav>
   </header>
@@ -24,59 +181,577 @@
 
     <!-- ===== Hero ===== -->
     <section id="hero" class="hero">
-      <div class="hero-content">
-        <p class="hero-label">Personal Finance Tracker</p>
-        <h1>Budgetly</h1>
-        <p class="hero-tagline">Smart budgeting made simple.</p>
-        <p class="hero-description">Budgetly is a personal finance tracker that helps users log expenses, organize spending by category, and understand their budget through simple summaries and charts.</p>
-        <a href="#features" class="btn">Get Started</a>
+      <div class="hero-container">
+
+        <!-- Left: Text -->
+        <div class="hero-text" data-animate="fade-up">
+          <p class="hero-eyebrow">Personal Finance Tracker</p>
+          <h1 class="hero-headline">Budget<br>brilliantly</h1>
+          <p class="hero-subtext">See every dollar, hit every goal.<br>Finally, money that actually makes sense.</p>
+          <div class="hero-actions">
+            <a href="#" class="btn hero-btn" id="hero-signin-btn" data-show-auth="signin">Get Started Free</a>
+            <a href="app.html" class="btn hero-btn" id="hero-dashboard-btn" style="display:none">Open Finance Hub</a>
+            <a href="#features" class="hero-learn">See features <span class="hero-arrow">↓</span></a>
+          </div>
+        </div>
+
+        <!-- Right: 3D Floating Mockup -->
+        <div class="hero-visual" data-animate="fade-left">
+          <div class="hero-mockup-wrap">
+            <div class="hero-mockup" id="hero-mockup">
+              <!-- Window chrome -->
+              <div class="mockup-titlebar">
+                <div class="mockup-dots">
+                  <span class="mdot mdot--red"></span>
+                  <span class="mdot mdot--yellow"></span>
+                  <span class="mdot mdot--green"></span>
+                </div>
+                <span class="mockup-url">budgetly-sage.vercel.app</span>
+              </div>
+
+              <!-- App content -->
+              <div class="mockup-body">
+
+                <!-- Stats row -->
+                <div class="mockup-stats">
+                  <div class="mockup-stat-card mockup-stat-card--income">
+                    <span class="msc-label">Income</span>
+                    <span class="msc-value">$5,800</span>
+                  </div>
+                  <div class="mockup-stat-card mockup-stat-card--expense">
+                    <span class="msc-label">Expenses</span>
+                    <span class="msc-value">$2,560</span>
+                  </div>
+                  <div class="mockup-stat-card mockup-stat-card--balance">
+                    <span class="msc-label">Balance</span>
+                    <span class="msc-value">$3,240</span>
+                  </div>
+                </div>
+
+                <!-- Bar chart -->
+                <div class="mockup-chart">
+                  <div class="mockup-chart-bars">
+                    <div class="mbar" style="--h:58%"></div>
+                    <div class="mbar" style="--h:80%"></div>
+                    <div class="mbar" style="--h:42%"></div>
+                    <div class="mbar" style="--h:93%"></div>
+                    <div class="mbar" style="--h:65%"></div>
+                    <div class="mbar" style="--h:71%"></div>
+                    <div class="mbar" style="--h:38%"></div>
+                    <div class="mbar" style="--h:55%"></div>
+                    <div class="mbar" style="--h:82%"></div>
+                    <div class="mbar" style="--h:47%"></div>
+                    <div class="mbar" style="--h:68%"></div>
+                    <div class="mbar" style="--h:90%"></div>
+                  </div>
+                </div>
+
+                <!-- Transaction list -->
+                <div class="mockup-txlist">
+                  <div class="mockup-tx">
+                    <span class="mtx-dot mtx-dot--green"></span>
+                    <span class="mtx-name">Salary deposit</span>
+                    <span class="mtx-amt mtx-amt--income">+$4,200</span>
+                  </div>
+                  <div class="mockup-tx">
+                    <span class="mtx-dot mtx-dot--red"></span>
+                    <span class="mtx-name">Whole Foods</span>
+                    <span class="mtx-amt mtx-amt--expense">−$148.32</span>
+                  </div>
+                  <div class="mockup-tx">
+                    <span class="mtx-dot mtx-dot--amber"></span>
+                    <span class="mtx-name">Netflix</span>
+                    <span class="mtx-amt mtx-amt--expense">−$15.99</span>
+                  </div>
+                  <div class="mockup-tx">
+                    <span class="mtx-dot mtx-dot--blue"></span>
+                    <span class="mtx-name">Car insurance</span>
+                    <span class="mtx-amt mtx-amt--expense">−$89.00</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <!-- Glow behind mockup -->
+            <div class="mockup-glow"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== How It Works ===== -->
+    <section id="how-it-works" class="how-it-works">
+      <div class="hiw-container">
+        <div class="hiw-header" data-animate="fade-up">
+          <span class="hiw-eyebrow">How it works</span>
+          <h2>Up and running<br>in minutes</h2>
+          <p>Three steps. No spreadsheets. No confusion.</p>
+        </div>
+        <div class="hiw-steps">
+
+          <div class="hiw-step" data-step="01" data-animate="fade-up">
+            <div class="hiw-step-top">
+              <div class="hiw-icon">
+                <svg viewBox="0 0 36 36" fill="none">
+                  <path d="M18 8v20M13 13l5-5 5 5" stroke="#c8943a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M11 28h14" stroke="#c8943a" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="hiw-badge">Step 01</span>
+            </div>
+            <h3>Connect your income</h3>
+            <p>Log your salary, freelance work, or any money in. See your real starting balance from day one.</p>
+          </div>
+
+          <div class="hiw-arrow" aria-hidden="true">→</div>
+
+          <div class="hiw-step" data-step="02" data-animate="fade-up" data-animate-delay="120">
+            <div class="hiw-step-top">
+              <div class="hiw-icon">
+                <svg viewBox="0 0 36 36" fill="none">
+                  <rect x="8" y="8" width="20" height="20" rx="4" stroke="#c8943a" stroke-width="2"/>
+                  <line x1="13" y1="14" x2="23" y2="14" stroke="#c8943a" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="13" y1="18" x2="23" y2="18" stroke="#c8943a" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+                  <line x1="13" y1="22" x2="18" y2="22" stroke="#c8943a" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+                </svg>
+              </div>
+              <span class="hiw-badge">Step 02</span>
+            </div>
+            <h3>Track your expenses</h3>
+            <p>Add expenses in seconds across 20+ categories. Your breakdown updates in real time — always accurate.</p>
+          </div>
+
+          <div class="hiw-arrow" aria-hidden="true">→</div>
+
+          <div class="hiw-step" data-step="03" data-animate="fade-up" data-animate-delay="240">
+            <div class="hiw-step-top">
+              <div class="hiw-icon">
+                <svg viewBox="0 0 36 36" fill="none">
+                  <circle cx="18" cy="18" r="9" stroke="rgba(200,148,58,0.3)" stroke-width="4"/>
+                  <circle cx="18" cy="18" r="9" stroke="#c8943a" stroke-width="4" stroke-dasharray="32 56.5" stroke-dashoffset="14" stroke-linecap="round"/>
+                  <path d="M14 18l3 3 5-5" stroke="#c8943a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="hiw-badge">Step 03</span>
+            </div>
+            <h3>Stay on budget effortlessly</h3>
+            <p>Hit your goals, review your weekly digest, and see exactly where to trim. Money clarity, finally.</p>
+          </div>
+
+        </div>
       </div>
     </section>
 
     <!-- ===== Features ===== -->
     <section id="features" class="features">
-      <div class="section-inner">
-        <h2>Everything you need in one place</h2>
-        <p class="section-subtitle">Five focused tools to help you stay on top of your money.</p>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">💸</div>
-            <h3>Add and Save Expenses</h3>
-            <p>Quickly log any expense with an amount, category, and date. Your entries are saved and ready to review any time.</p>
+      <div class="features-container">
+
+        <div class="features-header" data-animate="fade-up">
+          <h2>Everything you need in one place</h2>
+          <p>Five focused tools to help you stay on top of your money.</p>
+        </div>
+
+        <div class="features-bento">
+
+          <!-- Card 1: Add Expenses — Large left -->
+          <div class="feature-card fc-large fc-amber fc-horizontal" data-animate="fade-up" data-tilt>
+            <div class="fc-content">
+              <div class="fc-icon">
+                <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="10" width="28" height="20" rx="4" fill="rgba(100,70,30,0.12)" stroke="rgba(100,70,30,0.4)" stroke-width="1.5"/><line x1="13" y1="18" x2="27" y2="18" stroke="rgba(100,70,30,0.6)" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="22" x2="22" y2="22" stroke="rgba(100,70,30,0.4)" stroke-width="1.5" stroke-linecap="round"/><circle cx="30" cy="28" r="7" fill="#a07848"/><line x1="30" y1="24.5" x2="30" y2="31.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="26.5" y1="28" x2="33.5" y2="28" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <h3>Add and Save Expenses</h3>
+              <p>Log any expense in seconds — amount, category, date. Always saved, always ready.</p>
+            </div>
+            <!-- Mini add-expense form -->
+            <div class="fc-visual fc-visual--form">
+              <div class="fv-form-group">
+                <span class="fv-label">Description</span>
+                <div class="fv-input fv-input--filled">Morning coffee</div>
+              </div>
+              <div class="fv-form-row">
+                <div class="fv-form-group">
+                  <span class="fv-label">Amount</span>
+                  <div class="fv-input fv-input--filled fv-input--mono">$4.50</div>
+                </div>
+                <div class="fv-form-group">
+                  <span class="fv-label">Category</span>
+                  <div class="fv-input fv-input--filled fv-input--cat">Dining Out</div>
+                </div>
+              </div>
+              <button class="fv-submit">+ Add Expense</button>
+            </div>
+            <div class="fc-deco"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="14" width="56" height="36" rx="7"/><line x1="4" y1="27" x2="60" y2="27"/><line x1="12" y1="41" x2="24" y2="41"/><rect x="39" y="35" width="15" height="9" rx="3"/></svg></div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">🧾</div>
-            <h3>View Transaction History</h3>
-            <p>See a clear, chronological list of everything you've spent. Every transaction is stored so nothing gets lost.</p>
+
+          <!-- Card 2: Transaction History -->
+          <div class="feature-card fc-dark" data-animate="fade-up" data-animate-delay="100" data-tilt>
+            <div class="fc-content">
+              <div class="fc-icon">
+                <svg viewBox="0 0 40 40" fill="none"><rect x="8" y="8" width="24" height="24" rx="4" fill="rgba(100,70,30,0.08)" stroke="rgba(100,70,30,0.3)" stroke-width="1.5"/><line x1="13" y1="15" x2="27" y2="15" stroke="rgba(100,70,30,0.7)" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="20" x2="27" y2="20" stroke="rgba(100,70,30,0.5)" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="25" x2="22" y2="25" stroke="rgba(100,70,30,0.35)" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <h3>Transaction History</h3>
+              <p>Every transaction in one clean list, grouped by date. Nothing gets lost.</p>
+            </div>
+            <!-- Mini transaction list -->
+            <div class="fc-visual fc-visual--list">
+              <div class="fv-tx-row">
+                <span class="fv-dot fv-dot--green"></span>
+                <div class="fv-tx-meta"><span class="fv-tx-name">Salary</span><span class="fv-tx-date">Apr 1</span></div>
+                <span class="fv-tx-val fv-tx-val--income">+$4,200</span>
+              </div>
+              <div class="fv-tx-row">
+                <span class="fv-dot fv-dot--red"></span>
+                <div class="fv-tx-meta"><span class="fv-tx-name">Whole Foods</span><span class="fv-tx-date">Apr 3</span></div>
+                <span class="fv-tx-val fv-tx-val--expense">−$148</span>
+              </div>
+              <div class="fv-tx-row">
+                <span class="fv-dot fv-dot--amber"></span>
+                <div class="fv-tx-meta"><span class="fv-tx-name">Netflix</span><span class="fv-tx-date">Apr 4</span></div>
+                <span class="fv-tx-val fv-tx-val--expense">−$15.99</span>
+              </div>
+              <div class="fv-tx-row">
+                <span class="fv-dot fv-dot--blue"></span>
+                <div class="fv-tx-meta"><span class="fv-tx-name">Car insurance</span><span class="fv-tx-date">Apr 5</span></div>
+                <span class="fv-tx-val fv-tx-val--expense">−$89</span>
+              </div>
+            </div>
+            <div class="fc-deco"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="10" width="40" height="48" rx="6"/><rect x="22" y="5" width="20" height="10" rx="3"/><line x1="20" y1="28" x2="44" y2="28"/><line x1="20" y1="38" x2="44" y2="38"/><line x1="20" y1="48" x2="34" y2="48"/></svg></div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3>Budget Summary Dashboard</h3>
-            <p>Get an at-a-glance overview of your total spending, remaining budget, and how you're tracking for the month.</p>
+
+          <!-- Card 3: Dashboard -->
+          <div class="feature-card fc-green" data-animate="fade-up" data-animate-delay="150" data-tilt>
+            <div class="fc-content">
+              <div class="fc-icon">
+                <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="22" width="6" height="12" rx="2" fill="rgba(100,70,30,0.35)"/><rect x="17" y="16" width="6" height="18" rx="2" fill="rgba(100,70,30,0.55)"/><rect x="28" y="10" width="6" height="24" rx="2" fill="#a07848"/></svg>
+              </div>
+              <h3>Budget Dashboard</h3>
+              <p>Income, expenses, and balance at a glance — your full month in one view.</p>
+            </div>
+            <!-- Budget dashboard stats + progress -->
+            <div class="fc-visual fc-visual--dashboard">
+              <div class="fv-kpi-row">
+                <div class="fv-kpi">
+                  <span class="fv-kpi-num fv-kpi-num--income">$5,800</span>
+                  <span class="fv-kpi-label">Income</span>
+                </div>
+                <div class="fv-kpi-divider"></div>
+                <div class="fv-kpi">
+                  <span class="fv-kpi-num fv-kpi-num--expense">$2,560</span>
+                  <span class="fv-kpi-label">Expenses</span>
+                </div>
+                <div class="fv-kpi-divider"></div>
+                <div class="fv-kpi">
+                  <span class="fv-kpi-num">$3,240</span>
+                  <span class="fv-kpi-label">Balance</span>
+                </div>
+              </div>
+              <div class="fv-progress">
+                <div class="fv-progress-header">
+                  <span>Monthly Budget</span>
+                  <span>$1,840 / $2,500</span>
+                </div>
+                <div class="fv-progress-track">
+                  <div class="fv-progress-fill" style="width:73.6%"></div>
+                </div>
+                <span class="fv-progress-remain">$660 remaining — 74% used</span>
+              </div>
+            </div>
+            <div class="fc-deco"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="56" x2="56" y2="56"/><line x1="8" y1="8" x2="8" y2="56"/><rect x="12" y="36" width="10" height="20" rx="3"/><rect x="27" y="22" width="10" height="34" rx="3"/><rect x="42" y="10" width="10" height="46" rx="3"/></svg></div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <h3>Spending Charts by Category</h3>
-            <p>Visualise where your money goes with simple charts broken down by category — groceries, transport, bills, and more.</p>
+
+          <!-- Card 4: Charts -->
+          <div class="feature-card fc-indigo" data-animate="fade-up" data-animate-delay="200" data-tilt>
+            <div class="fc-content">
+              <div class="fc-icon">
+                <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="12" fill="none" stroke="rgba(100,70,30,0.15)" stroke-width="8"/><circle cx="20" cy="20" r="12" fill="none" stroke="#a07848" stroke-width="8" stroke-dasharray="25 50.27" stroke-dashoffset="12.57" stroke-linecap="butt"/><circle cx="20" cy="20" r="12" fill="none" stroke="rgba(100,70,30,0.4)" stroke-width="8" stroke-dasharray="14 50.27" stroke-dashoffset="-12.57" stroke-linecap="butt"/></svg>
+              </div>
+              <h3>Spending Charts</h3>
+              <p>Visual breakdowns by category — see exactly where every dollar went.</p>
+            </div>
+            <!-- Horizontal category bar chart -->
+            <div class="fc-visual fc-visual--chart">
+              <div class="fv-hbar-row">
+                <span class="fv-hbar-label">Housing</span>
+                <div class="fv-hbar-track"><div class="fv-hbar-fill" style="width:68%"></div></div>
+                <span class="fv-hbar-val">$1,200</span>
+              </div>
+              <div class="fv-hbar-row">
+                <span class="fv-hbar-label">Groceries</span>
+                <div class="fv-hbar-track"><div class="fv-hbar-fill fv-hbar-fill--2" style="width:44%"></div></div>
+                <span class="fv-hbar-val">$380</span>
+              </div>
+              <div class="fv-hbar-row">
+                <span class="fv-hbar-label">Transport</span>
+                <div class="fv-hbar-track"><div class="fv-hbar-fill fv-hbar-fill--3" style="width:34%"></div></div>
+                <span class="fv-hbar-val">$290</span>
+              </div>
+              <div class="fv-hbar-row">
+                <span class="fv-hbar-label">Dining</span>
+                <div class="fv-hbar-track"><div class="fv-hbar-fill fv-hbar-fill--4" style="width:24%"></div></div>
+                <span class="fv-hbar-val">$180</span>
+              </div>
+              <div class="fv-hbar-row">
+                <span class="fv-hbar-label">Other</span>
+                <div class="fv-hbar-track"><div class="fv-hbar-fill fv-hbar-fill--5" style="width:18%"></div></div>
+                <span class="fv-hbar-val">$110</span>
+              </div>
+            </div>
+            <div class="fc-deco"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><circle cx="32" cy="32" r="25"/><circle cx="32" cy="32" r="13"/><line x1="32" y1="7" x2="32" y2="19"/><line x1="57" y1="32" x2="45" y2="32"/><line x1="32" y1="57" x2="32" y2="45"/></svg></div>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">🔍</div>
-            <h3>Search and Filter Transactions</h3>
-            <p>Find any transaction fast by searching keywords or filtering by category, date range, or amount.</p>
+
+          <!-- Card 5: Search -->
+          <div class="feature-card fc-slate" data-animate="fade-up" data-animate-delay="250" data-tilt>
+            <div class="fc-content">
+              <div class="fc-icon">
+                <svg viewBox="0 0 40 40" fill="none"><circle cx="17" cy="17" r="9" stroke="rgba(100,70,30,0.6)" stroke-width="2"/><line x1="23.5" y1="23.5" x2="31" y2="31" stroke="rgba(100,70,30,0.6)" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+              <h3>Search and Filter</h3>
+              <p>Find any transaction instantly by keyword, category, or date range.</p>
+            </div>
+            <div class="fc-visual fc-visual--search">
+              <div class="fv-search-bar">
+                <svg viewBox="0 0 16 16" fill="none" width="12" height="12"><circle cx="6.5" cy="6.5" r="4" stroke="rgba(100,70,30,0.5)" stroke-width="1.3"/><line x1="9.5" y1="9.5" x2="13" y2="13" stroke="rgba(100,70,30,0.5)" stroke-width="1.3" stroke-linecap="round"/></svg>
+                <span class="fv-search-text">coffee</span>
+                <span class="fv-search-cursor"></span>
+              </div>
+              <div class="fv-filter-chips">
+                <span class="fv-chip fv-chip--on">Expenses</span>
+                <span class="fv-chip fv-chip--on">Dining</span>
+                <span class="fv-chip">Apr 2026</span>
+              </div>
+              <div class="fv-result">
+                <span class="fv-dot fv-dot--amber"></span>
+                <div class="fv-tx-meta"><span class="fv-tx-name">Blue Bottle Coffee</span><span class="fv-tx-date">Apr 7</span></div>
+                <span class="fv-tx-val fv-tx-val--expense">−$6.50</span>
+              </div>
+              <div class="fv-result">
+                <span class="fv-dot fv-dot--amber"></span>
+                <div class="fv-tx-meta"><span class="fv-tx-name">Starbucks</span><span class="fv-tx-date">Apr 5</span></div>
+                <span class="fv-tx-val fv-tx-val--expense">−$5.75</span>
+              </div>
+              <div class="fv-result">
+                <span class="fv-dot fv-dot--amber"></span>
+                <div class="fv-tx-meta"><span class="fv-tx-name">Morning coffee</span><span class="fv-tx-date">Apr 3</span></div>
+                <span class="fv-tx-val fv-tx-val--expense">−$4.50</span>
+              </div>
+              <span class="fv-result-count">3 results for "coffee"</span>
+            </div>
+            <div class="fc-deco"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><circle cx="26" cy="26" r="18"/><line x1="39" y1="39" x2="57" y2="57"/></svg></div>
           </div>
+
         </div>
       </div>
     </section>
 
     <!-- ===== About ===== -->
     <section id="about" class="about">
-      <div class="section-inner">
-        <h2>About Budgetly</h2>
-        <p class="section-subtitle">A focused project built to make personal finance simple.</p>
-        <div class="about-body">
-          <p>Budgetly is a personal finance tracker designed to give users a clear and honest view of their money. The goal is straightforward — help people log their expenses, stay within their budget, and understand where their money goes through simple summaries and visual charts.</p>
-          <p>This project is built around the core idea that managing your finances should not require complicated tools or financial expertise. Everything in Budgetly is focused on being practical, easy to use, and genuinely useful in day-to-day life.</p>
+      <div class="about-container">
+
+        <!-- Floating ambient orbs -->
+        <div class="about-orb about-orb--1"></div>
+        <div class="about-orb about-orb--2"></div>
+
+        <div class="about-intro" data-animate="fade-up">
+          <h2>Built for real life, <span class="strike-word">not spreadsheets</span>.</h2>
+          <p>Budgetly is a personal finance tracker designed to give you a clear, honest view of your money. Log expenses, stay within budget, and understand your spending — without the complexity.</p>
         </div>
+
+        <!-- Stats -->
+        <div class="about-stats" data-animate="fade-up" data-animate-delay="100">
+          <div class="about-stat">
+            <span class="astat-n" data-count="74" data-suffix="%">74%</span>
+            <span class="astat-l">of people live paycheck to paycheck without a budget</span>
+          </div>
+          <div class="about-stat">
+            <span class="astat-n" data-count="3" data-suffix="×">3×</span>
+            <span class="astat-l">more likely to reach savings goals with regular tracking</span>
+          </div>
+          <div class="about-stat">
+            <span class="astat-n" data-count="400" data-prefix="$">$400</span>
+            <span class="astat-l">average monthly overspend identified after tracking begins</span>
+          </div>
+          <div class="about-stat">
+            <span class="astat-n" data-count="68" data-suffix="%">68%</span>
+            <span class="astat-l">of budgeters report reduced financial stress within 3 months</span>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="charts-row" data-animate="fade-up" data-animate-delay="150">
+
+          <!-- Bar chart: spending by category -->
+          <div class="chart-card">
+            <h3 class="chart-title">Where money typically goes</h3>
+            <p class="chart-subtitle">Average monthly spend breakdown</p>
+            <div class="bar-chart">
+              <div class="bar-row">
+                <div class="bar-header"><span class="bar-label">🏠 Housing</span><span class="bar-value">33%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:33%;background:#9a6e3a"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span class="bar-label">🍔 Food</span><span class="bar-value">18%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:18%;background:#c8855a"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span class="bar-label">🚗 Transport</span><span class="bar-value">16%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:16%;background:#6b9e6b"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span class="bar-label">⚡ Bills</span><span class="bar-value">12%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:12%;background:#6e8ab5"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span class="bar-label">❤️ Health</span><span class="bar-value">9%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:9%;background:#b07090"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span class="bar-label">✦ Other</span><span class="bar-value">12%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width:12%;background:#9a8a7a"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Donut chart -->
+          <div class="chart-card">
+            <h3 class="chart-title">Budgeting adoption</h3>
+            <p class="chart-subtitle">Do people actively track their spending?</p>
+            <div class="donut-wrap">
+              <div class="donut-figure">
+                <svg class="donut-svg" viewBox="0 0 100 100">
+                  <!-- Track (bg ring) -->
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#ede8e0" stroke-width="13"/>
+                  <!-- Don't track 44% — starts at 133.7 units -->
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#d4c4a8" stroke-width="13"
+                    stroke-dasharray="0 238.76" stroke-dashoffset="-133.7" stroke-linecap="butt"
+                    class="donut-arc donut-arc--3"/>
+                  <!-- Track sometimes 24% — starts at 76.4 units -->
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#c8a070" stroke-width="13"
+                    stroke-dasharray="0 238.76" stroke-dashoffset="-76.4" stroke-linecap="butt"
+                    class="donut-arc donut-arc--2"/>
+                  <!-- Actively track 32% — starts at 0 -->
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#9a6e3a" stroke-width="13"
+                    stroke-dasharray="0 238.76" stroke-dashoffset="0" stroke-linecap="butt"
+                    class="donut-arc donut-arc--1"/>
+                </svg>
+                <div class="donut-center">
+                  <span class="donut-center-num">32%</span>
+                  <span class="donut-center-lbl">budgeters</span>
+                </div>
+              </div>
+              <div class="donut-legend">
+                <div class="legend-item"><span class="legend-dot" style="background:#9a6e3a"></span><span>Actively track — <strong>32%</strong></span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#c8a070"></span><span>Track sometimes — <strong>24%</strong></span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#d4c4a8"></span><span>Don't track — <strong>44%</strong></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trend chart -->
+          <div class="chart-card">
+            <h3 class="chart-title">Savings over time</h3>
+            <p class="chart-subtitle">Budgeters vs non-budgeters</p>
+            <div class="trend-chart">
+              <svg viewBox="0 0 280 120" preserveAspectRatio="none" class="trend-svg">
+                <defs>
+                  <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#9a6e3a" stop-opacity="0.22"/>
+                    <stop offset="100%" stop-color="#9a6e3a" stop-opacity="0.01"/>
+                  </linearGradient>
+                </defs>
+                <!-- Grid lines -->
+                <line x1="0" y1="18" x2="280" y2="18" stroke="#ede8e0" stroke-width="1"/>
+                <line x1="0" y1="58" x2="280" y2="58" stroke="#ede8e0" stroke-width="1"/>
+                <line x1="0" y1="98" x2="280" y2="98" stroke="#ede8e0" stroke-width="1"/>
+                <!-- Area fill -->
+                <path d="M 0,98 C 23,98 23,84 47,84 C 70,84 70,66 93,66 C 116,66 116,48 140,48 C 163,48 163,30 187,30 C 210,30 210,16 233,16 C 256,16 256,8 280,8 L 280,120 L 0,120 Z" fill="url(#budgetGrad)" class="trend-area"/>
+                <!-- Without budgeting (flat dashed) -->
+                <path d="M 0,106 C 23,106 23,105 47,105 C 70,105 70,104 93,104 C 116,104 116,103 140,103 C 163,103 163,102 187,102 C 210,102 210,101 233,101 C 256,101 256,100 280,100" fill="none" stroke="#c8a070" stroke-width="1.8" stroke-dasharray="5 4" class="trend-line trend-line--flat"/>
+                <!-- With budgeting (main line) -->
+                <path d="M 0,98 C 23,98 23,84 47,84 C 70,84 70,66 93,66 C 116,66 116,48 140,48 C 163,48 163,30 187,30 C 210,30 210,16 233,16 C 256,16 256,8 280,8" fill="none" stroke="#9a6e3a" stroke-width="2.5" stroke-linecap="round" class="trend-line trend-line--main"/>
+                <!-- Data point dots -->
+                <circle cx="0"   cy="98" r="3.5" fill="#9a6e3a" class="trend-dot" style="animation-delay:.5s"/>
+                <circle cx="93"  cy="66" r="3.5" fill="#9a6e3a" class="trend-dot" style="animation-delay:.8s"/>
+                <circle cx="187" cy="30" r="3.5" fill="#9a6e3a" class="trend-dot" style="animation-delay:1.0s"/>
+                <circle cx="280" cy="8"  r="3.5" fill="#9a6e3a" class="trend-dot" style="animation-delay:1.2s"/>
+              </svg>
+              <div class="trend-labels"><span>Month 1</span><span>Month 3</span><span>Month 6</span><span>Month 12</span></div>
+              <div class="trend-legend">
+                <div class="legend-item"><span class="legend-line" style="background:#9a6e3a"></span>With budgeting</div>
+                <div class="legend-item"><span class="legend-line legend-line--dashed"></span>Without budgeting</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== Social Proof ===== -->
+    <section id="social-proof" class="social-proof">
+      <div class="sp-container">
+
+        <div class="sp-hero" data-animate="fade-up">
+          <div class="sp-count-wrap">
+            <span class="sp-big-num">1,200<span class="sp-big-plus">+</span></span>
+            <span class="sp-big-label">people already in control of their money</span>
+          </div>
+          <div class="sp-meta">
+            <div class="sp-stars-row">
+              <span class="sp-stars">★★★★★</span>
+              <span class="sp-stars-label">4.9 / 5 — loved by real users</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sp-testimonials">
+
+          <div class="sp-card" data-animate="fade-up">
+            <div class="sp-quote-mark">"</div>
+            <p class="sp-quote">Budgetly helped me spot where my money was leaking. Saved over $500 in my first month just by actually seeing the numbers.</p>
+            <div class="sp-author">
+              <div class="sp-avatar">M</div>
+              <div class="sp-author-info">
+                <span class="sp-name">Marcus T.</span>
+                <span class="sp-role">Freelance designer</span>
+              </div>
+              <span class="sp-rating">★★★★★</span>
+            </div>
+          </div>
+
+          <div class="sp-card sp-card--featured" data-animate="fade-up" data-animate-delay="120">
+            <div class="sp-quote-mark">"</div>
+            <p class="sp-quote">I've tried four budget apps. This is the only one I've stuck with past week one. So clean and fast to use.</p>
+            <div class="sp-author">
+              <div class="sp-avatar">S</div>
+              <div class="sp-author-info">
+                <span class="sp-name">Sarah K.</span>
+                <span class="sp-role">Marketing manager</span>
+              </div>
+              <span class="sp-rating">★★★★★</span>
+            </div>
+          </div>
+
+          <div class="sp-card" data-animate="fade-up" data-animate-delay="240">
+            <div class="sp-quote-mark">"</div>
+            <p class="sp-quote">Check it every morning with my coffee. Finally I know exactly how much I can spend each day without stress.</p>
+            <div class="sp-author">
+              <div class="sp-avatar">J</div>
+              <div class="sp-author-info">
+                <span class="sp-name">James R.</span>
+                <span class="sp-role">Software engineer</span>
+              </div>
+              <span class="sp-rating">★★★★★</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="sp-cta" data-animate="fade-up">
+          <a href="#" class="btn sp-cta-btn" data-show-auth="signin">Join them — it's free</a>
+        </div>
+
       </div>
     </section>
 
@@ -84,11 +759,11 @@
 
   <!-- ===== Footer ===== -->
   <footer id="footer">
-    <div class="logo">Budgetly</div>
-    <p class="footer-tagline">A simple personal finance tracker for logging expenses, managing budgets, and visualizing spending.</p>
+    <a href="index.html" class="logo"><img src="budgetly.png" alt="Budgetly" class="logo-img" /></a>
+    <p class="footer-tagline">No spreadsheets. Just clarity.</p>
     <p class="footer-copy">&copy; 2026 Budgetly</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>

@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── User data: only the authenticated owner can read/write ──
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ── Transactions: validate required fields on create/update ──
+    match /users/{uid}/transactions/{txId} {
+      allow read:   if request.auth != null && request.auth.uid == uid;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.userId  == uid
+                    && request.resource.data.amount  is number
+                    && request.resource.data.amount  > 0
+                    && request.resource.data.type    in ['income', 'expense']
+                    && request.resource.data.date    is string
+                    && request.resource.data.description is string;
+      allow update: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.userId  == uid
+                    && request.resource.data.amount  is number
+                    && request.resource.data.amount  > 0
+                    && request.resource.data.type    in ['income', 'expense'];
+    }
+
+    // ── Goals: validate required fields ──
+    match /users/{uid}/goals/{goalId} {
+      allow read:   if request.auth != null && request.auth.uid == uid;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.name   is string
+                    && request.resource.data.target is number
+                    && request.resource.data.target > 0;
+      allow update: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.name   is string
+                    && request.resource.data.target is number
+                    && request.resource.data.target > 0;
+    }
+
+    // ── Settings (profile, badges, paycheck, etc.) ──
+    match /users/{uid}/settings/{settingId} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+  }
+}
