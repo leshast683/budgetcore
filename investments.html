@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#9a6e3a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Budgetly" />
+  <title>Budgetly — Investments</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+</head>
+<body class="app-page">
+
+  <!-- ===== Navigation ===== -->
+  <header id="navbar">
+    <nav>
+      <a href="index.html?home=1" class="logo"><img src="budgetly.png" alt="Budgetly" class="logo-img" /></a>
+      <ul class="nav-links">
+        <li><a href="index.html?home=1">Home</a></li>
+        <li><a href="app.html">Finance Hub</a></li>
+        <li><a href="goals.html">Goals</a></li>
+        <li><a href="analytics.html">Analytics</a></li>
+        <li><span class="nav-active">Investments</span></li>
+        <li><a href="networth.html">Net Worth</a></li>
+        <li id="nav-user" class="nav-user" style="display:none">
+          <span id="user-email" class="nav-user-email"></span>
+          <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===== Auth Loading ===== -->
+  <div id="auth-loading" class="auth-loading">
+    <img src="budgetly.png" alt="Budgetly" class="auth-loading-logo" />
+  </div>
+
+  <main class="app-layout" id="app-content" style="display:none">
+
+    <!-- ===== Header ===== -->
+    <div class="welcome-bar" id="welcome-bar">
+      <div class="welcome-left">
+        <span class="welcome-greeting">Investments</span>
+        <span class="welcome-email" id="welcome-email"></span>
+      </div>
+      <span class="welcome-date" id="welcome-date"></span>
+    </div>
+
+    <!-- ===== Portfolio Overview ===== -->
+    <div class="dashboard" id="inv-dashboard">
+      <div class="stat-card stat-card--balance" id="inv-total-card">
+        <div class="stat-card-top">
+          <span class="stat-label">Portfolio Value</span>
+          <span class="stat-icon" style="color:#2d7a3a">📈</span>
+        </div>
+        <span class="stat-value" id="inv-total-val">$0.00</span>
+        <span class="stat-sub" id="inv-total-sub">0 holdings</span>
+      </div>
+      <div class="stat-card stat-card--income" id="inv-gain-card">
+        <div class="stat-card-top">
+          <span class="stat-label">Total Gain / Loss</span>
+          <span class="stat-icon" style="color:#1a5010">💰</span>
+        </div>
+        <span class="stat-value" id="inv-gain-val">$0.00</span>
+        <span class="stat-sub" id="inv-gain-pct">0.00%</span>
+      </div>
+      <div class="stat-card stat-card--expenses" id="inv-cost-card">
+        <div class="stat-card-top">
+          <span class="stat-label">Total Cost Basis</span>
+          <span class="stat-icon" style="color:#8c2c1c">💳</span>
+        </div>
+        <span class="stat-value" id="inv-cost-val">$0.00</span>
+        <span class="stat-sub">amount invested</span>
+      </div>
+    </div>
+
+    <!-- ===== Portfolio Chart ===== -->
+    <section class="app-card" id="inv-chart-card" style="display:none">
+      <h2 class="card-title">Portfolio Breakdown</h2>
+      <div class="inv-chart-wrap">
+        <div style="position:relative;width:220px;height:220px;flex-shrink:0">
+          <canvas id="inv-pie-chart"></canvas>
+        </div>
+        <div id="inv-legend" class="inv-legend"></div>
+      </div>
+    </section>
+
+    <!-- ===== Add Investment Form ===== -->
+    <section class="app-card">
+      <h2 class="card-title" id="inv-form-title">Add Investment</h2>
+      <form id="inv-form" novalidate>
+        <div class="goals-form-grid">
+          <div class="goal-field">
+            <label class="goal-label">Name</label>
+            <input type="text" id="inv-name" placeholder="e.g. Bitcoin, Apple, S&P 500 ETF…" maxlength="60" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Type</label>
+            <select id="inv-type" class="auth-input" style="padding:0.6rem 0.85rem">
+              <option value="crypto">Crypto</option>
+              <option value="stock">Stock</option>
+              <option value="etf">ETF</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Shares / Units</label>
+            <input type="number" id="inv-shares" placeholder="e.g. 0.5" step="any" min="0.0001" inputmode="decimal" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Purchase Price ($)</label>
+            <input type="number" id="inv-buy-price" placeholder="e.g. 45000" step="any" min="0.01" inputmode="decimal" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Current Price ($)</label>
+            <input type="number" id="inv-cur-price" placeholder="e.g. 65000" step="any" min="0.01" inputmode="decimal" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Purchase Date</label>
+            <input type="date" id="inv-date" required />
+          </div>
+        </div>
+        <p class="profile-error" id="inv-error"></p>
+        <div class="goals-form-actions">
+          <button type="submit" class="btn" id="inv-submit-btn">Add Investment</button>
+          <button type="button" class="btn-ghost btn-sm" id="inv-cancel-btn" style="display:none">Cancel Edit</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== Holdings List ===== -->
+    <section class="app-card" id="inv-list-section">
+      <div class="history-header">
+        <h2 class="card-title">Your Holdings</h2>
+        <span class="tx-count" id="inv-count">0 holdings</span>
+      </div>
+      <div id="inv-list"></div>
+      <p class="empty-state" id="inv-empty" style="display:none">No investments yet — add one above to track your portfolio!</p>
+    </section>
+
+  </main>
+
+  <script type="module" src="investments.js"></script>
+</body>
+</html>

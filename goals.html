@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#9a6e3a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Budgetly" />
   <title>Budgetly — Goals</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+  <link rel="manifest" href="/manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
@@ -19,8 +27,11 @@
       <a href="index.html?home=1" class="logo"><img src="budgetly.png" alt="Budgetly" class="logo-img" /></a>
       <ul class="nav-links">
         <li><a href="index.html?home=1">Home</a></li>
-        <li><a href="app.html">Dashboard</a></li>
+        <li><a href="app.html">Finance Hub</a></li>
         <li><span class="nav-active">Goals</span></li>
+        <li><a href="analytics.html">Analytics</a></li>
+        <li><a href="investments.html">Investments</a></li>
+        <li><a href="networth.html">Net Worth</a></li>
         <li id="nav-user" class="nav-user" style="display:none">
           <span id="user-email" class="nav-user-email"></span>
           <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>

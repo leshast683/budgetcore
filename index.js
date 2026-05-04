@@ -3,7 +3,7 @@
 // Home page: auth state + sliding sign-in / sign-up
 // ============================================================
 
-import { auth, googleProvider, linkedInProvider, appleProvider } from './firebase.js';
+import { auth, googleProvider, db } from './firebase.js';
 import { initPageTransitions } from './transitions.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 import {
@@ -15,6 +15,7 @@ import {
   updateProfile,
   signInWithPopup,
 } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 const stayOnHome = new URLSearchParams(window.location.search).has('home');
@@ -165,15 +166,76 @@ function calcStrength(pw) {
 
 // ── Welcome toast ─────────────────────────────────────────────────────────────
 function showWelcomeToast(name, then) {
-  // Store name so app.html can show the signed-in banner immediately
   sessionStorage.setItem('justSignedIn', name);
-  // Fade out overlay quickly, then navigate
+  const user = auth.currentUser;
+  // Show onboarding for brand-new users (no localStorage flag)
+  if (user && !localStorage.getItem('budgetly_onboarded_' + user.uid)) {
+    hideAuth();
+    showOnboarding(user, then);
+    return;
+  }
   overlay.style.transition = 'opacity 0.22s ease';
   overlay.style.opacity = '0';
   document.body.style.transition = 'opacity 0.22s ease';
   document.body.style.opacity = '0';
   setTimeout(() => { hideAuth(); then(); }, 240);
 }
+
+// ── Onboarding Wizard ─────────────────────────────────────────────────────────
+let _onboardingCallback = null;
+let _obStep = 1;
+
+function showOnboarding(user, callback) {
+  _onboardingCallback = callback;
+  _obStep = 1;
+  showObPane(1);
+  document.getElementById('onboarding-overlay').style.display = 'flex';
+}
+
+function showObPane(n) {
+  [1, 2, 3].forEach(i => {
+    document.getElementById(`ob-pane-${i}`).style.display = i === n ? '' : 'none';
+    document.getElementById(`ob-dot-${i}`).classList.toggle('ob-step--active', i === n);
+    document.getElementById(`ob-dot-${i}`).classList.toggle('ob-step--done', i < n);
+  });
+  _obStep = n;
+}
+
+document.getElementById('ob-next-1').addEventListener('click', () => showObPane(2));
+
+document.getElementById('ob-next-2').addEventListener('click', async () => {
+  const budget = parseFloat(document.getElementById('ob-budget').value);
+  if (!isNaN(budget) && budget > 0) {
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      try {
+        await setDoc(doc(db, 'users', uid, 'settings', 'profile'), { monthlyBudget: budget }, { merge: true });
+      } catch { /* non-fatal */ }
+    }
+  }
+  showObPane(3);
+});
+
+document.getElementById('ob-skip-2').addEventListener('click', () => showObPane(3));
+
+document.getElementById('ob-goals-grid').addEventListener('click', e => {
+  const btn = e.target.closest('.ob-goal-btn');
+  if (!btn) return;
+  document.querySelectorAll('.ob-goal-btn').forEach(b => b.classList.toggle('ob-goal-btn--selected', b === btn));
+});
+
+document.getElementById('ob-finish').addEventListener('click', async () => {
+  const uid  = auth.currentUser?.uid;
+  const goal = document.querySelector('.ob-goal-btn--selected')?.dataset.goal || '';
+  if (uid) {
+    try {
+      await setDoc(doc(db, 'users', uid, 'settings', 'onboarding'), { goal, completedAt: new Date().toISOString() }, { merge: true });
+    } catch { /* non-fatal */ }
+    localStorage.setItem('budgetly_onboarded_' + uid, '1');
+  }
+  document.getElementById('onboarding-overlay').style.display = 'none';
+  if (_onboardingCallback) _onboardingCallback();
+});
 
 // ── Sign In form ──────────────────────────────────────────────────────────────
 document.getElementById('signin-form').addEventListener('submit', async e => {
@@ -242,12 +304,8 @@ async function socialAuth(provider, errorElId) {
   }
 }
 
-document.getElementById('signin-google').addEventListener('click',   () => socialAuth(googleProvider,   'signin-error'));
-document.getElementById('signin-linkedin').addEventListener('click', () => socialAuth(linkedInProvider, 'signin-error'));
-document.getElementById('signin-apple').addEventListener('click',    () => socialAuth(appleProvider,    'signin-error'));
-document.getElementById('signup-google').addEventListener('click',   () => socialAuth(googleProvider,   'signup-error'));
-document.getElementById('signup-linkedin').addEventListener('click', () => socialAuth(linkedInProvider, 'signup-error'));
-document.getElementById('signup-apple').addEventListener('click',    () => socialAuth(appleProvider,    'signup-error'));
+document.getElementById('signin-google').addEventListener('click', () => socialAuth(googleProvider, 'signin-error'));
+document.getElementById('signup-google').addEventListener('click', () => socialAuth(googleProvider, 'signup-error'));
 
 // ── Forgot password ───────────────────────────────────────────────────────────
 document.getElementById('forgot-btn').addEventListener('click', async () => {
@@ -266,11 +324,6 @@ document.getElementById('forgot-btn').addEventListener('click', async () => {
     errorEl.style.borderColor = '';
     errorEl.textContent = friendlyError(err.code);
   }
-});
-
-// ── Skip ─────────────────────────────────────────────────────────────────────
-document.getElementById('skip-btn').addEventListener('click', () => {
-  window.location.href = './app.html?skip=1';
 });
 
 // ── Password toggles ─────────────────────────────────────────────────────────

@@ -10,10 +10,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main:    resolve(__dirname, 'index.html'),
-        app:     resolve(__dirname, 'app.html'),
-        goals:   resolve(__dirname, 'goals.html'),
-        profile: resolve(__dirname, 'profile.html'),
+        main:        resolve(__dirname, 'index.html'),
+        app:         resolve(__dirname, 'app.html'),
+        goals:       resolve(__dirname, 'goals.html'),
+        profile:     resolve(__dirname, 'profile.html'),
+        analytics:   resolve(__dirname, 'analytics.html'),
+        investments: resolve(__dirname, 'investments.html'),
+        networth:    resolve(__dirname, 'networth.html'),
       },
     },
   },

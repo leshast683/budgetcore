@@ -122,6 +122,30 @@ const CATEGORY_STYLES = {
   other:         { bg: '#e4e4e8', color: '#404050' },
 };
 
+const CATEGORY_ICONS = {
+  // Income
+  paycheck:       '💵', salary:        '💼', freelance:     '💻', bonuses:       '🎁',
+  stocks:         '📈', gift:          '🎀', benefits:      '🏛️', retirement:    '🏖️',
+  // Expense — Housing
+  housing:        '🏠', mortgage:      '🏦', utilities:     '⚡',
+  // Expense — Food
+  groceries:      '🛒', dining:        '🍽️', fooddelivery:  '🛵',
+  // Expense — Transport
+  transport:      '🚌', gas:           '⛽', gascharging:   '⛽',
+  carpayment:     '🚗', carinsurance:  '🛡️',
+  // Expense — Health
+  healthins:      '❤️', medical:       '💊',
+  // Expense — Bills / Tech
+  phone:          '📱', internet:      '🌐', subscriptions: '📺',
+  // Expense — Personal / Family
+  childcare:      '👶', education:     '🎓', creditcards:   '💳',
+  personalcare:   '💆', clothing:      '👕',
+  // Expense — Shopping
+  shopping:       '🛍️', onlineshopping:'📦', entertainment: '🎬',
+  // Legacy
+  bills:          '📋', health:        '🏥', other:         '📌',
+};
+
 const CATEGORY_COLORS = {
   // Expense
   housing:       '#c49060',
@@ -156,8 +180,10 @@ const CATEGORY_COLORS = {
 
 // --- Global State ---
 let transactions      = [];
+let investments       = [];
 let currentUser       = null;
 let unsubTransactions = null;
+let unsubInvestments  = null;
 let paycheckReminder  = null;
 
 const state = {
@@ -167,11 +193,11 @@ const state = {
 let monthlyBudget    = null;
 let incomeTarget     = null;
 let expenseLimit     = null;
-let guestMode        = false;
 let catMenuOpen      = false;
 let editingId        = null;
 let preEditType      = null;
-let pieChartInstance = null;
+let pieChartInstance   = null;
+let dailyChartInstance = null;
 
 // Cache for AI Budget Insights.
 // Stores the fingerprint of the last analyzed dataset and its result so we
@@ -252,6 +278,7 @@ function subscribeTransactions(uid) {
           date:        data.date,
           month:       data.month || (data.date ? data.date.substring(0, 7) : todayMonth()),
           isRecurring: data.isRecurring || false,
+          location:    data.location   || null,
           createdAt:   data.createdAt?.seconds ?? 0,
         };
       });
@@ -277,6 +304,19 @@ function subscribeTransactions(uid) {
         errBanner.style.display = '';
       }
     }
+  );
+}
+
+// --- Firestore: Investments ---
+function subscribeInvestments(uid) {
+  if (unsubInvestments) unsubInvestments();
+  unsubInvestments = onSnapshot(
+    collection(db, 'users', uid, 'investments'),
+    snap => {
+      investments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderDailySpendingChart();
+    },
+    () => {}
   );
 }
 
@@ -425,6 +465,67 @@ function renderDashboard() {
   balanceCard.classList.toggle('is-negative', balance < 0);
   balanceVal.classList.toggle('positive', balance > 0);
   balanceVal.classList.toggle('negative', balance < 0);
+
+  // Safe to Spend card
+  const safeCard = document.getElementById('stat-safe-card');
+  const safeVal  = document.getElementById('stat-safe-val');
+  const safeSub  = document.getElementById('stat-safe-sub');
+  if (income > 0 || monthlyBudget > 0) {
+    safeCard.style.display = '';
+    const safe = monthlyBudget > 0 ? monthlyBudget - expenses : balance;
+    safeVal.textContent = formatCurrency(Math.max(0, safe));
+    safeSub.textContent = monthlyBudget > 0 ? 'budget − expenses' : 'income − expenses';
+    safeCard.classList.toggle('is-positive', safe > 0);
+    safeCard.classList.toggle('is-negative', safe < 0);
+    safeVal.classList.toggle('positive', safe > 0);
+    safeVal.classList.toggle('negative', safe < 0);
+  } else {
+    safeCard.style.display = 'none';
+  }
+}
+
+// --- Render: 50/30/20 Rule ---
+const NEEDS_CATS  = new Set(['housing','mortgage','utilities','groceries','transport','gascharging','carpayment','carinsurance','healthins','medical','phone','internet','childcare','creditcards','gas','bills','health']);
+const WANTS_CATS  = new Set(['dining','fooddelivery','entertainment','subscriptions','shopping','onlineshopping','clothing','personalcare','education']);
+
+function render503020() {
+  const section = document.getElementById('rule503020-section');
+  const income  = getTotalIncome();
+  if (income <= 0) { section.style.display = 'none'; return; }
+
+  section.style.display = '';
+  document.getElementById('rule503020-month').textContent = monthLabel(currentMonth);
+
+  const monthTx = getMonthTransactions().filter(tx => tx.type === 'expense');
+  let needs = 0, wants = 0;
+  for (const tx of monthTx) {
+    if (NEEDS_CATS.has(tx.category))       needs += tx.amount;
+    else if (WANTS_CATS.has(tx.category))  wants += tx.amount;
+  }
+  const savings = Math.max(0, income - needs - wants);
+
+  const rows = [
+    { label: 'Needs',   actual: needs,   target: income * 0.50, color: '#e07b54', targetPct: 50 },
+    { label: 'Wants',   actual: wants,   target: income * 0.30, color: '#7b9fe0', targetPct: 30 },
+    { label: 'Savings', actual: savings, target: income * 0.20, color: '#5cba7d', targetPct: 20 },
+  ];
+
+  document.getElementById('rule503020-bars').innerHTML = rows.map(r => {
+    const pct    = Math.min((r.actual / income) * 100, 100);
+    const status = r.actual <= r.target ? 'ok' : 'over';
+    return `
+      <div class="rule-row">
+        <div class="rule-label-row">
+          <span class="rule-label">${r.label}</span>
+          <span class="rule-amounts">${formatCurrency(r.actual)} <span class="rule-target">/ ${r.targetPct}% target (${formatCurrency(r.target)})</span></span>
+        </div>
+        <div class="rule-track">
+          <div class="rule-fill rule-fill--${status}" style="width:${pct.toFixed(1)}%;background:${r.color}"></div>
+          <div class="rule-target-mark" style="left:${r.targetPct}%"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // --- Render: Budget Progress Card ---
@@ -606,10 +707,11 @@ function renderChart() {
     const barW  = ((amount / maxVal) * 100).toFixed(1);
     const { bg, color } = CATEGORY_STYLES[cat] || { bg: '#e8e4f0', color: '#6040a0' };
     const label = CATEGORY_LABELS[cat] || capitalize(cat);
+    const icon  = CATEGORY_ICONS[cat]  || '📌';
     return `
       <div class="cbar-row" style="--i:${i}">
         <div class="cbar-label">
-          <span class="cbar-dot" style="background:${color}"></span>
+          <span class="cbar-icon">${icon}</span>
           <span class="cbar-name">${label}</span>
         </div>
         <div class="cbar-track">
@@ -631,6 +733,152 @@ function renderChart() {
       });
     });
   });
+}
+
+// --- Render: Daily Spending Chart ---
+function renderDailySpendingChart() {
+  const section = document.getElementById('daily-chart-section');
+  const canvas  = document.getElementById('daily-spending-chart');
+  if (!section || !canvas) return;
+
+  const monthTx = getMonthTransactions().filter(tx => tx.type === 'expense');
+  if (!monthTx.length) {
+    section.style.display = 'none';
+    if (dailyChartInstance) { dailyChartInstance.destroy(); dailyChartInstance = null; }
+    return;
+  }
+  section.style.display = '';
+
+  const [y, m] = currentMonth.split('-');
+  const daysInMonth = new Date(+y, +m, 0).getDate();
+  const byDay = {};
+  monthTx.forEach(tx => { byDay[tx.date] = (byDay[tx.date] || 0) + tx.amount; });
+
+  const labels = [], spendData = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${currentMonth}-${String(d).padStart(2,'0')}`;
+    labels.push(d);
+    spendData.push(parseFloat((byDay[key] || 0).toFixed(2)));
+  }
+
+  const totalPortfolio = investments.reduce((s, inv) => s + ((inv.currentPrice || 0) * (inv.shares || 0)), 0);
+  const datasets = [{
+    label: 'Daily Spending',
+    data: spendData,
+    borderColor: '#c8943a',
+    backgroundColor: 'rgba(200,148,58,0.12)',
+    fill: true,
+    tension: 0.4,
+    pointRadius: spendData.map(v => v > 0 ? 4 : 2),
+    pointBackgroundColor: '#c8943a',
+    pointBorderColor: '#fff',
+    pointBorderWidth: 2,
+  }];
+
+  if (totalPortfolio > 0) {
+    datasets.push({
+      label: 'Portfolio Value',
+      data: Array(daysInMonth).fill(parseFloat(totalPortfolio.toFixed(2))),
+      borderColor: '#2d7a3a',
+      backgroundColor: 'transparent',
+      borderDash: [6, 3],
+      fill: false,
+      tension: 0,
+      pointRadius: 0,
+    });
+  }
+
+  if (dailyChartInstance) {
+    dailyChartInstance.data.labels = labels;
+    dailyChartInstance.data.datasets = datasets;
+    dailyChartInstance.update();
+    return;
+  }
+
+  dailyChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { font: { family: 'Inter, sans-serif', size: 11 }, color: '#6b5040', usePointStyle: true },
+        },
+        tooltip: {
+          backgroundColor: 'rgba(26,14,6,0.9)',
+          padding: 10,
+          cornerRadius: 10,
+          callbacks: {
+            title: ctx => `Day ${ctx[0].label}`,
+            label: ctx => `  ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 10 }, color: '#9a7a5a', maxTicksLimit: 10 },
+          grid:  { color: 'rgba(200,148,58,0.08)' },
+        },
+        y: {
+          ticks: { font: { size: 10 }, color: '#9a7a5a', callback: v => '$' + v },
+          grid:  { color: 'rgba(200,148,58,0.08)' },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+}
+
+// --- Render: Recurring Timeline ---
+function renderRecurringTimeline() {
+  const section = document.getElementById('recurring-timeline-section');
+  if (!section) return;
+
+  const today = todayISO();
+  const [ty, tm] = today.split('-');
+  const thisMonth = `${ty}-${tm}`;
+
+  // Deduplicate recurring items by description+type+category (most recent wins)
+  const seen = new Map();
+  for (const tx of [...transactions].filter(t => t.isRecurring).sort((a, b) => b.createdAt - a.createdAt)) {
+    const key = tx.description + '|' + tx.type + '|' + tx.category;
+    if (!seen.has(key)) seen.set(key, tx);
+  }
+
+  const items = [...seen.values()].map(tx => {
+    const dayOfMonth = parseInt(tx.date.split('-')[2], 10);
+    const daysInMonth = new Date(+ty, +tm, 0).getDate();
+    const nextDay = Math.min(dayOfMonth, daysInMonth);
+    const nextDate = `${thisMonth}-${String(nextDay).padStart(2,'0')}`;
+    const todayDate = new Date(today + 'T12:00:00');
+    const targetDate = new Date(nextDate + 'T12:00:00');
+    const diffDays = Math.round((targetDate - todayDate) / 86400000);
+    return { ...tx, nextDate, diffDays };
+  }).sort((a, b) => a.diffDays - b.diffDays);
+
+  if (!items.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  const lane = section.querySelector('#recurring-lane');
+  lane.innerHTML = items.map(item => {
+    const icon   = CATEGORY_ICONS[item.category] || '📌';
+    const { bg, color } = CATEGORY_STYLES[item.category] || { bg: '#e4e4e8', color: '#404050' };
+    const isOverdue = item.diffDays < 0;
+    const isToday   = item.diffDays === 0;
+    const daysLabel = isOverdue ? `${Math.abs(item.diffDays)}d ago` : isToday ? 'Today' : `in ${item.diffDays}d`;
+    const badgeClass = isOverdue ? 'rec-days rec-days--overdue' : isToday ? 'rec-days rec-days--today' : 'rec-days';
+    return `
+      <div class="rec-card" style="--rec-bg:${bg};--rec-color:${color}">
+        <div class="rec-icon">${icon}</div>
+        <div class="rec-info">
+          <span class="rec-desc">${escapeHtml(item.description)}</span>
+          <span class="rec-amount">${item.type === 'income' ? '+' : '−'}${formatCurrency(item.amount)}</span>
+        </div>
+        <span class="${badgeClass}">${daysLabel}</span>
+      </div>`;
+  }).join('');
 }
 
 // --- Render: Transaction List ---
@@ -702,15 +950,18 @@ function renderTransactions() {
         const amountClass = isIncome ? 'tx-amount tx-amount--income' : 'tx-amount tx-amount--expense';
         const catStyle    = CATEGORY_STYLES[tx.category] || { bg: '#e4e4e8', color: '#404050' };
         const catLabel    = CATEGORY_LABELS[tx.category] || capitalize(tx.category);
+        const catIcon     = CATEGORY_ICONS[tx.category]  || '📌';
         const typeIcon    = isIncome ? '↑' : '↓';
         const recurringBadge = tx.isRecurring ? `<span class="tx-recurring-badge" title="Recurring monthly">↻</span>` : '';
+        const locationBadge  = tx.location ? `<span class="tx-location-badge" title="${escapeHtml(tx.location)}">📍 ${escapeHtml(tx.location)}</span>` : '';
 
         return `
           <div class="tx-item" data-id="${tx.id}" style="animation-delay:${delay}s">
             <div class="tx-type-dot tx-type-dot--${tx.type}">${typeIcon}</div>
             <div class="tx-info">
               <span class="tx-desc">${escapeHtml(tx.description)}${recurringBadge}</span>
-              <span class="tx-badge tx-badge--${tx.category}" style="background:${catStyle.bg};color:${catStyle.color}">${catLabel}</span>
+              <span class="tx-badge tx-badge--${tx.category}" style="background:${catStyle.bg};color:${catStyle.color}">${catIcon} ${catLabel}</span>
+              ${locationBadge}
             </div>
             <span class="${amountClass}">${amountText}</span>
             <div class="tx-actions">
@@ -915,6 +1166,85 @@ function renderBudgetAlert() {
   }
 }
 
+// --- Export: CSV ---
+function exportCSV() {
+  const txs = getMonthTransactions();
+  if (!txs.length) { showTxToast('No transactions to export for this month.'); return; }
+
+  const headers = ['Date', 'Type', 'Description', 'Category', 'Amount', 'Recurring', 'Location'];
+  const rows    = txs.map(tx => [
+    tx.date,
+    tx.type,
+    `"${(tx.description || '').replace(/"/g, '""')}"`,
+    CATEGORY_LABELS[tx.category] || tx.category || '',
+    tx.amount.toFixed(2),
+    tx.isRecurring ? 'Yes' : 'No',
+    `"${(tx.location || '').replace(/"/g, '""')}"`,
+  ]);
+
+  const csv     = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob    = new Blob([csv], { type: 'text/csv' });
+  const url     = URL.createObjectURL(blob);
+  const a       = document.createElement('a');
+  a.href        = url;
+  a.download    = `budgetly-${currentMonth}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// --- Export: PDF (print) ---
+function exportPDF() {
+  window.print();
+}
+
+// --- Render: Bill Calendar ---
+function renderBillCalendar() {
+  const section = document.getElementById('bill-cal-section');
+  const recurring = getMonthTransactions().filter(tx => tx.isRecurring && tx.type === 'expense');
+  if (!recurring.length) { section.style.display = 'none'; return; }
+
+  section.style.display = '';
+  document.getElementById('bill-cal-month').textContent = monthLabel(currentMonth);
+
+  const [y, m] = currentMonth.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const firstDow    = new Date(y, m - 1, 1).getDay(); // 0=Sun
+
+  // Group bills by day
+  const byDay = {};
+  for (const tx of recurring) {
+    const day = parseInt(tx.date.split('-')[2], 10);
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(tx);
+  }
+
+  let html = '';
+  // Day-of-week headers
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    html += `<div class="bcal-dow">${d}</div>`;
+  });
+  // Empty cells before first day
+  for (let i = 0; i < firstDow; i++) html += `<div class="bcal-cell bcal-empty"></div>`;
+
+  const todayDay = new Date().getDate();
+  const isCurrentMonth = currentMonth === todayMonth();
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday   = isCurrentMonth && d === todayDay;
+    const bills     = byDay[d] || [];
+    const billsHtml = bills.map(tx => {
+      const icon = CATEGORY_ICONS[tx.category] || '📌';
+      return `<div class="bcal-bill" title="${escapeHtml(tx.description)} ${formatCurrency(tx.amount)}">${icon} <span>${formatCurrency(tx.amount)}</span></div>`;
+    }).join('');
+    html += `<div class="bcal-cell${isToday ? ' bcal-today' : ''}${bills.length ? ' bcal-has-bills' : ''}">
+      <span class="bcal-day">${d}</span>
+      ${billsHtml}
+    </div>`;
+  }
+
+  document.getElementById('bill-cal-grid').innerHTML = html;
+}
+
 // --- Render: All ---
 function renderAll() {
   if (currentMonth === todayMonth() || !getAvailableMonths().includes(currentMonth)) {
@@ -926,8 +1256,12 @@ function renderAll() {
   renderWeeklyDigest();
   renderDashboard();
   renderBudgetCard();
+  render503020();
   renderPieChart();
   renderChart();
+  renderDailySpendingChart();
+  renderRecurringTimeline();
+  renderBillCalendar();
   renderTransactions();
 }
 
@@ -1092,7 +1426,8 @@ function setCategoryOptions(type) {
   const pills = cats.map(c => {
     const { bg, color } = CATEGORY_STYLES[c] || { bg: '#e4e4e8', color: '#404050' };
     const label = CATEGORY_LABELS[c] || capitalize(c);
-    return `<div class="cat-option" role="option" data-value="${c}" style="background-color:${bg};color:${color}">${label}</div>`;
+    const icon  = CATEGORY_ICONS[c]  || '📌';
+    return `<div class="cat-option" role="option" data-value="${c}" style="background-color:${bg};color:${color}">${icon} ${label}</div>`;
   });
 
   // Add "Custom…" option for both income and expenses
@@ -1270,6 +1605,8 @@ function handleTypeToggle(selectedType, animate = true) {
     const showReminder = selectedType === 'income';
     document.getElementById('paycheck-reminder').style.display = showReminder ? 'block' : 'none';
     if (showReminder) renderPaycheckReminder();
+    const locationGroup = document.getElementById('tx-location-group');
+    if (locationGroup) locationGroup.style.display = selectedType === 'expense' ? '' : 'none';
   }
 
   if (!animate || prevType === selectedType) {
@@ -1306,6 +1643,7 @@ async function handleFormSubmit(e) {
     ? customCatRaw.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, ' ')
     : catHidden;
   const isRecurring = document.getElementById('tx-recurring').checked;
+  const location    = (document.getElementById('tx-location')?.value.trim()) || null;
 
   if (!desc || isNaN(amount) || amount <= 0 || !date || !cat) {
     if (!desc)                        markError('tx-description');
@@ -1319,34 +1657,6 @@ async function handleFormSubmit(e) {
     return;
   }
   document.getElementById('form-error').style.display = 'none';
-
-  // --- Guest mode: in-memory only, no Firestore ---
-  if (guestMode) {
-    const now = Date.now() / 1000;
-    if (editingId !== null) {
-      const idx = transactions.findIndex(t => t.id === editingId);
-      if (idx !== -1) {
-        transactions[idx] = { id: editingId, type, description: desc, amount, category: cat, date, month: monthFromDate(date), isRecurring, createdAt: transactions[idx].createdAt };
-      }
-      exitEditMode();
-    } else {
-      transactions.unshift({ id: String(Date.now()), type, description: desc, amount, category: cat, date, month: monthFromDate(date), isRecurring, createdAt: now });
-    }
-    e.target.reset();
-    document.getElementById('tx-date').value = todayISO();
-    const customWrapG = document.getElementById('custom-cat-wrap');
-    if (customWrapG) { customWrapG.style.display = 'none'; }
-    const customInputG = document.getElementById('custom-cat-input');
-    if (customInputG) customInputG.value = '';
-    const activeBtn  = document.querySelector('.type-btn.active');
-    const activeType = activeBtn ? activeBtn.dataset.type : 'income';
-    document.getElementById('tx-type').value = activeType;
-    setCategoryOptions(activeType);
-    setSubmitLabel(activeType);
-    showToast(`✓ ${type === 'income' ? 'Income' : 'Expense'} added — ${formatCurrency(amount)}`, type);
-    renderAll();
-    return;
-  }
 
   // --- Authenticated: Firestore ---
   const uid = currentUser?.uid;
@@ -1363,10 +1673,10 @@ async function handleFormSubmit(e) {
 
   try {
     if (editingId !== null) {
-      await updateDoc(doc(db, 'users', uid, 'transactions', editingId), {
-        userId: uid, type, description: desc, amount, category: cat, date,
-        month: monthFromDate(date), isRecurring,
-      });
+      const updateData = { userId: uid, type, description: desc, amount, category: cat, date,
+        month: monthFromDate(date), isRecurring };
+      if (location) updateData.location = location;
+      await updateDoc(doc(db, 'users', uid, 'transactions', editingId), updateData);
       // Optimistic update for edit
       const idx = transactions.findIndex(t => t.id === editingId);
       if (idx !== -1) {
@@ -1376,10 +1686,10 @@ async function handleFormSubmit(e) {
       renderAll();
     } else {
       const month  = monthFromDate(date);
-      const docRef = await addDoc(collection(db, 'users', uid, 'transactions'), {
-        userId: uid, type, description: desc, amount, category: cat, date,
-        month, isRecurring, createdAt: serverTimestamp(),
-      });
+      const newTxData = { userId: uid, type, description: desc, amount, category: cat, date,
+        month, isRecurring, createdAt: serverTimestamp() };
+      if (location) newTxData.location = location;
+      const docRef = await addDoc(collection(db, 'users', uid, 'transactions'), newTxData);
       // Optimistic update: add to local array if onSnapshot hasn't fired yet
       if (!transactions.find(t => t.id === docRef.id)) {
         transactions.unshift({
@@ -1427,11 +1737,6 @@ async function handleFormSubmit(e) {
 }
 
 async function handleDelete(id) {
-  if (guestMode) {
-    transactions = transactions.filter(tx => tx.id !== id);
-    renderAll();
-    return;
-  }
   const uid = currentUser?.uid;
   if (!uid) return;
   // Optimistic removal
@@ -1548,7 +1853,6 @@ function switchAuthTab(tab) {
   document.getElementById('auth-password').setAttribute(
     'autocomplete', isSignup ? 'new-password' : 'current-password'
   );
-  document.getElementById('skip-btn').style.display = isSignup ? 'none' : '';
   document.getElementById('auth-error').textContent = '';
 }
 
@@ -1569,16 +1873,6 @@ function setWelcomeBar(user) {
     document.getElementById('welcome-email').textContent    = 'Sign in to save your data';
     document.getElementById('welcome-bar').className        = 'welcome-bar welcome-bar--guest';
   }
-}
-
-function handleSkip() {
-  guestMode = true;
-  hideLoader();
-  document.getElementById('auth-gate').style.display   = 'none';
-  document.getElementById('app-content').style.display = '';
-  document.getElementById('nav-guest').style.display   = 'flex';
-  setWelcomeBar(null);
-  renderAll();
 }
 
 // --- Utilities ---
@@ -1634,13 +1928,6 @@ function showToast(message, variant = 'income') {
 
 // --- Init ---
 function init() {
-  // If redirected here with ?skip=1 from the home page, go straight to guest mode.
-  // Call handleSkip() immediately so guestMode=true before onAuthStateChanged fires.
-  if (new URLSearchParams(location.search).get('skip') === '1') {
-    history.replaceState({}, '', location.pathname);
-    handleSkip();
-  }
-
   // Set today's date as the form default
   document.getElementById('tx-date').value = todayISO();
 
@@ -1888,6 +2175,10 @@ function init() {
     });
   });
 
+  // Export buttons
+  document.getElementById('export-csv-btn').addEventListener('click', exportCSV);
+  document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
+
   // AI Budget Insights
   document.getElementById('analyze-btn').addEventListener('click', analyzeBudget);
 
@@ -1906,15 +2197,8 @@ function init() {
   // Auth form submit
   document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
 
-  // Skip button
-  document.getElementById('skip-btn').addEventListener('click', handleSkip);
-
-  // Sign out / leave guest mode
+  // Sign out
   document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
-
-  document.getElementById('guest-signin-btn').addEventListener('click', () => {
-    window.location.href = './index.html';
-  });
 
   // Auth state observer — drives loading screen, auth gate, and app visibility.
   // Fires once immediately on page load with the persisted session (if any),
@@ -1922,7 +2206,6 @@ function init() {
   onAuthStateChanged(auth, async user => {
     if (user) {
       currentUser = user;
-      guestMode   = false;
 
       // Populate welcome bar and nav before revealing the app
       setWelcomeBar(user);
@@ -1931,7 +2214,6 @@ function init() {
       if (nameEl) nameEl.textContent = displayName;
       loadAndApplyAvatar(user.uid, 'account-avatar-ring');
       document.getElementById('nav-user').style.display  = 'flex';
-      document.getElementById('nav-guest').style.display = 'none';
 
       // Show signed-in banner if user just logged in
       const justSignedIn = sessionStorage.getItem('justSignedIn');
@@ -1949,6 +2231,7 @@ function init() {
       // as soon as Firestore responds. Settings load in parallel and trigger a
       // re-render once they arrive.
       subscribeTransactions(user.uid);
+      subscribeInvestments(user.uid);
 
       // Load settings in parallel with the Firestore subscription.
       Promise.all([
@@ -1964,11 +2247,9 @@ function init() {
       });
 
     } else {
-      // Don't interfere if the user chose to continue as guest
-      if (guestMode) return;
-
-      // Cancel the Firestore listener before navigating away
+      // Cancel the Firestore listeners before navigating away
       if (unsubTransactions) { unsubTransactions(); unsubTransactions = null; }
+      if (unsubInvestments)  { unsubInvestments();  unsubInvestments  = null; }
 
       // Redirect to the home page for sign-in
       window.location.replace('./index.html');

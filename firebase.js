@@ -12,10 +12,9 @@
 //      • Firestore Database → Create database (start in Production mode)
 //      • Firestore Database → Rules → paste the contents of firestore.rules
 
-import { initializeApp }                                                from 'firebase/app';
-import { initializeAuth, browserLocalPersistence,
-         GoogleAuthProvider, OAuthProvider }                            from 'firebase/auth';
-import { getFirestore }                                                from 'firebase/firestore';
+import { initializeApp }                    from 'firebase/app';
+import { getAuth, GoogleAuthProvider }      from 'firebase/auth';
+import { getFirestore }                     from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyDX0KJCfpvp4ljNuB2K61DdXEMEOUb1N_w",
@@ -30,8 +29,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const db   = getFirestore(app);
-export const auth = initializeAuth(app, { persistence: browserLocalPersistence });
+export const auth = getAuth(app);
 
-export const googleProvider   = new GoogleAuthProvider();
-export const linkedInProvider = new OAuthProvider('oidc.linkedin');
-export const appleProvider    = new OAuthProvider('apple.com');
+export const googleProvider = new GoogleAuthProvider();

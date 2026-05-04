@@ -113,6 +113,56 @@ const BADGES = [
     goal:  3,
     getProgress: d => ({ current: Math.min(d.monthsUnderBudget, 3), total: 3 }),
   },
+  {
+    id:   'quarter_century',
+    name: 'Quarter Century',
+    desc: 'Log 25 transactions total',
+    icon: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="12"/><path d="M12 12h4v8"/><path d="M10 20h8"/></svg>`,
+    color: '#e07030',
+    bg:    '#fff0e0',
+    goal:  25,
+    getProgress: d => ({ current: Math.min(d.totalTx, 25), total: 25 }),
+  },
+  {
+    id:   'diversified',
+    name: 'Diversified',
+    desc: 'Use 5 different expense categories',
+    icon: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="12"/><path d="M16 4v12l8 4"/></svg>`,
+    color: '#20a080',
+    bg:    '#d8f5ef',
+    goal:  5,
+    getProgress: d => ({ current: Math.min(d.uniqueExpenseCategories, 5), total: 5 }),
+  },
+  {
+    id:   'triple_goal',
+    name: 'Dream Achiever',
+    desc: 'Complete 3 savings goals',
+    icon: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l5 5L14 14M18 16l5 5 5-8"/></svg>`,
+    color: '#c0392b',
+    bg:    '#fde8e8',
+    goal:  3,
+    getProgress: d => ({ current: Math.min(d.completedGoals, 3), total: 3 }),
+  },
+  {
+    id:   'income_pro',
+    name: 'Income Pro',
+    desc: 'Log 10 income transactions',
+    icon: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 28V4M8 12l8-8 8 8"/><path d="M10 20h12"/></svg>`,
+    color: '#3a8a3a',
+    bg:    '#e0f5e0',
+    goal:  10,
+    getProgress: d => ({ current: Math.min(d.incomeTx, 10), total: 10 }),
+  },
+  {
+    id:   'legend',
+    name: 'Legend',
+    desc: 'Log 200 transactions total',
+    icon: `<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2l3.09 6.26L26 9.27l-5 4.87 1.18 6.88L16 18l-6.18 3.02L11 14.14 6 9.27l6.91-1.01L16 2z"/><circle cx="16" cy="16" r="4"/></svg>`,
+    color: '#b8860b',
+    bg:    '#fff8d0',
+    goal:  200,
+    getProgress: d => ({ current: Math.min(d.totalTx, 200), total: 200 }),
+  },
 ];
 
 const USER_TYPE_TIPS = {
@@ -342,9 +392,14 @@ function computeBadgeData() {
   const totalGoals     = goals.length;
   const completedGoals = goals.filter(g => g.current >= g.target).length;
   const hasRecurring   = transactions.some(tx => tx.isRecurring);
-  const hasBudget      = !!profileData.monthlyBudget || totalTx > 0; // rough check
+  const hasBudget      = !!profileData.monthlyBudget || totalTx > 0;
 
-  return { totalTx, positiveMonths, monthsUnderBudget, totalGoals, completedGoals, hasRecurring, hasBudget };
+  const uniqueExpenseCategories = new Set(
+    transactions.filter(tx => tx.type === 'expense' && tx.category).map(tx => tx.category)
+  ).size;
+  const incomeTx = transactions.filter(tx => tx.type === 'income').length;
+
+  return { totalTx, positiveMonths, monthsUnderBudget, totalGoals, completedGoals, hasRecurring, hasBudget, uniqueExpenseCategories, incomeTx };
 }
 
 // ── Render badges ─────────────────────────────────────────────────────────────
@@ -365,7 +420,7 @@ function renderBadges() {
       : null;
 
     return `
-      <div class="badge-card ${earned ? 'badge-earned' : 'badge-locked'}" data-badge="${badge.id}">
+      <div class="badge-card ${earned ? 'badge-earned' : 'badge-locked'}" data-badge="${badge.id}" style="--badge-color:${badge.color}">
         <div class="badge-icon-wrap" style="background:${badge.bg}; color:${badge.color}">
           ${badge.icon}
         </div>
