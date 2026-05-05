@@ -1,3 +1,4 @@
+import { initNav } from './nav.js';
 // ============================================================
 // Budgetly — goals.js
 // Savings Goals page
@@ -326,3 +327,4 @@ onAuthStateChanged(auth, user => {
 
 document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
 initPageTransitions();
+initNav();

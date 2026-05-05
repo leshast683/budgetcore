@@ -143,13 +143,13 @@ footer .logo-img {
   list-style: none;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .nav-links a {
   text-decoration: none;
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 500;
   transition: color 0.2s var(--ease-in-out);
   position: relative;
@@ -181,6 +181,72 @@ footer .logo-img {
 .nav-links a.btn,
 .nav-links a.btn:hover {
   color: #fff;
+}
+
+/* === Hamburger nav (app pages) === */
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--heading);
+  font-size: 1.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.nav-hamburger:hover { background: var(--surface); }
+
+/* Mobile nav drawer — app pages only */
+@media (max-width: 860px) {
+  .app-page .nav-hamburger { display: flex; align-items: center; justify-content: center; }
+
+  .app-page .nav-links {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0; right: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 0.5rem 0;
+    z-index: 999;
+  }
+  .app-page .nav-links.nav-open { display: flex; }
+
+  .app-page .nav-links li {
+    width: 100%;
+  }
+  .app-page .nav-links li a,
+  .app-page .nav-links li span.nav-active {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.92rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--heading);
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .app-page .nav-links li span.nav-active {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .app-page .nav-links li a:hover { background: var(--bg); }
+
+  .app-page .nav-links .nav-user {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    align-items: center;
+    border-bottom: none;
+  }
+  .app-page header { position: relative; }
 }
 
 /* === Buttons === */
@@ -4256,15 +4322,9 @@ input[type="number"] {
    RESPONSIVE — Mobile (≤ 480px)
    ============================================ */
 @media (max-width: 480px) {
-  /* Nav — hide text links, keep logo + CTA */
+  /* Nav */
   header nav {
     padding: 0.9rem 1.25rem;
-  }
-  .nav-links li:not(:last-child) {
-    display: none;
-  }
-  .nav-links {
-    gap: 0;
   }
 
   /* Hero */

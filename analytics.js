@@ -1,3 +1,4 @@
+import { initNav } from './nav.js';
 import Chart from 'chart.js/auto';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -284,3 +285,4 @@ onAuthStateChanged(auth, user => {
 window.addEventListener('scroll', () => {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 8);
 }, { passive: true });
+initNav();

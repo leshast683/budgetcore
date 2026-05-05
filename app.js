@@ -6,6 +6,7 @@ import Chart from 'chart.js/auto';
 import { auth, db } from './firebase.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 import { initPageTransitions } from './transitions.js';
+import { initNav } from './nav.js';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -2503,3 +2504,4 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 initPageTransitions();
+initNav();

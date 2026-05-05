@@ -1,3 +1,4 @@
+import { initNav } from './nav.js';
 // ============================================================
 // Budgetly — networth.js
 // Net Worth Tracker + Debt Payoff Planner
@@ -264,3 +265,4 @@ document.querySelectorAll('.input-clear-btn').forEach(btn => {
     if (target) { target.value = ''; target.focus(); }
   });
 });
+initNav();

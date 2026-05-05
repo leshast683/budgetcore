@@ -4,6 +4,7 @@
 
 import { auth, db } from './firebase.js';
 import { initPageTransitions } from './transitions.js';
+import { initNav } from './nav.js';
 import {
   onAuthStateChanged, signOut, updateProfile, updatePassword, deleteUser,
 } from 'firebase/auth';
@@ -550,3 +551,4 @@ async function saveProfile(updates) {
 }
 
 initPageTransitions();
+initNav();

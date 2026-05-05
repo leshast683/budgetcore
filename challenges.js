@@ -1,3 +1,4 @@
+import { initNav } from './nav.js';
 // ============================================================
 // Budgetly — challenges.js
 // Savings Challenges + Gamification
@@ -337,3 +338,4 @@ function renderBadges() {
     `;
   }).join('');
 }
+initNav();
