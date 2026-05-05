@@ -60,6 +60,13 @@ service cloud.firestore {
                     && request.resource.data.currentPrice  is number;
     }
 
+    // ── Challenges ──
+    match /users/{uid}/challenges/{chId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+                    && request.resource.data.defId is string;
+    }
+
     // ── Net Worth items ──
     match /users/{uid}/networth/{itemId} {
       allow read, delete: if request.auth != null && request.auth.uid == uid;

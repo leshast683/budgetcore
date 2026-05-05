@@ -17,6 +17,7 @@ export default defineConfig({
         analytics:   resolve(__dirname, 'analytics.html'),
         investments: resolve(__dirname, 'investments.html'),
         networth:    resolve(__dirname, 'networth.html'),
+        challenges:  resolve(__dirname, 'challenges.html'),
       },
     },
   },

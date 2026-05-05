@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Budgetly" />
-  <title>Budgetly — Analytics</title>
+  <title>Budgetly — Savings Challenges</title>
   <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
   <link rel="manifest" href="/manifest.json" />
@@ -28,10 +28,10 @@
         <li><a href="index.html?home=1">Home</a></li>
         <li><a href="app.html">Finance Hub</a></li>
         <li><a href="goals.html">Goals</a></li>
-        <li><span class="nav-active">Analytics</span></li>
+        <li><a href="analytics.html">Analytics</a></li>
         <li><a href="investments.html">Investments</a></li>
         <li><a href="networth.html">Net Worth</a></li>
-        <li><a href="challenges.html">Challenges</a></li>
+        <li><span class="nav-active">Challenges</span></li>
         <li id="nav-user" class="nav-user" style="display:none">
           <span id="user-email" class="nav-user-email"></span>
           <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>
@@ -47,45 +47,67 @@
 
   <main class="app-layout" id="app-content" style="display:none">
 
-    <!-- ===== Header ===== -->
+    <!-- Welcome bar -->
     <div class="welcome-bar" id="welcome-bar">
       <div class="welcome-left">
-        <span class="welcome-greeting">Analytics</span>
+        <span class="welcome-greeting">Savings Challenges</span>
         <span class="welcome-email" id="welcome-email"></span>
       </div>
       <span class="welcome-date" id="welcome-date"></span>
     </div>
 
-    <!-- ===== Top 5 Categories ===== -->
-    <section class="app-card" id="top-categories-card">
-      <div class="history-header">
-        <h2 class="card-title">Top 5 Expense Categories</h2>
-        <span class="tx-count" id="top-cat-period"></span>
+    <!-- Stats row -->
+    <section class="dashboard" id="challenges-stats">
+      <div class="stat-card stat-card--income">
+        <div class="stat-card-top">
+          <span class="stat-label">Active</span>
+          <span class="stat-icon" style="color:#c8943a">🔥</span>
+        </div>
+        <span class="stat-value" id="ch-active-count">0</span>
+        <span class="stat-sub">challenges in progress</span>
       </div>
-      <div id="top-cat-bars" class="top-cat-bars"></div>
-      <p class="empty-state" id="top-cat-empty" style="display:none">No expenses yet — start tracking to see your top categories.</p>
+      <div class="stat-card stat-card--balance">
+        <div class="stat-card-top">
+          <span class="stat-label">Completed</span>
+          <span class="stat-icon" style="color:#2d7a3a">🏆</span>
+        </div>
+        <span class="stat-value positive" id="ch-done-count">0</span>
+        <span class="stat-sub">all time</span>
+      </div>
+      <div class="stat-card stat-card--safe">
+        <div class="stat-card-top">
+          <span class="stat-label">Streak</span>
+          <span class="stat-icon" style="color:#e07b54">⚡</span>
+        </div>
+        <span class="stat-value" id="ch-streak">0</span>
+        <span class="stat-sub">days current streak</span>
+      </div>
     </section>
 
-    <!-- ===== Spending Breakdown ===== -->
-    <section class="app-card" id="spending-breakdown-card">
-      <h2 class="card-title">Monthly Spending Trend</h2>
-      <div style="position:relative;height:240px;margin-top:0.75rem">
-        <canvas id="trend-chart"></canvas>
+    <!-- Active challenges -->
+    <section class="app-card" id="active-challenges-section" style="display:none">
+      <div class="history-header">
+        <h2 class="card-title">In Progress</h2>
+        <span class="tx-count" id="active-ch-count">0</span>
       </div>
+      <div id="active-challenges-list"></div>
     </section>
 
-    <!-- ===== Expense Map ===== -->
-    <section class="app-card" id="expense-map-card">
-      <div class="history-header">
-        <h2 class="card-title">Where You Spend</h2>
-        <span class="tx-count" id="map-pin-count">0 locations</span>
-      </div>
-      <div id="expense-map" class="expense-map"></div>
-      <p class="map-hint">Add a location when logging expenses on the Finance Hub to see them here.</p>
+    <!-- Available challenges -->
+    <section class="app-card">
+      <h2 class="card-title">Available Challenges</h2>
+      <p class="rule503020-desc">Pick a challenge to boost your savings habits. Progress is tracked automatically from your transactions.</p>
+      <div class="challenge-grid" id="available-challenges"></div>
+    </section>
+
+    <!-- Completed badges -->
+    <section class="app-card" id="badges-section" style="display:none">
+      <h2 class="card-title">Earned Badges</h2>
+      <div class="badges-grid" id="badges-grid"></div>
     </section>
 
   </main>
 
-  <script type="module" src="analytics.js"></script>
+  <script type="module" src="challenges.js"></script>
 </body>
 </html>

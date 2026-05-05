@@ -1,4 +1,4 @@
-const CACHE = 'budgetly-v4';
+const CACHE = 'budgetly-v5';
 const STATIC = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const STATIC = [
   '/analytics.html',
   '/investments.html',
   '/networth.html',
+  '/challenges.html',
   '/style.css',
   '/favicon.png',
   '/budgetly.png',

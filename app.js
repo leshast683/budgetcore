@@ -1166,6 +1166,245 @@ function renderBudgetAlert() {
   }
 }
 
+// --- Render: Financial Health Score ---
+function renderHealthScore() {
+  const section = document.getElementById('health-score-section');
+  const income   = getTotalIncome();
+  const expenses = getTotalExpenses();
+  if (income === 0 && expenses === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  let score = 0;
+  const factors = [];
+
+  // 1. Savings rate (30 pts)
+  const savingsRate = income > 0 ? (income - expenses) / income : 0;
+  const srPts = income > 0
+    ? savingsRate >= 0.20 ? 30 : savingsRate >= 0.10 ? 20 : savingsRate >= 0 ? 10 : 0
+    : 0;
+  score += srPts;
+  factors.push({ label: 'Savings Rate', pts: srPts, max: 30, detail: income > 0 ? Math.round(savingsRate * 100) + '%' : 'n/a' });
+
+  // 2. Budget adherence (25 pts)
+  let baPts = 0;
+  if (monthlyBudget > 0) {
+    const ratio = expenses / monthlyBudget;
+    baPts = ratio <= 0.9 ? 25 : ratio <= 1.0 ? 18 : ratio <= 1.15 ? 8 : 0;
+  } else {
+    baPts = 12; // partial credit for not having set a budget yet
+  }
+  score += baPts;
+  factors.push({ label: 'Budget Adherence', pts: baPts, max: 25, detail: monthlyBudget > 0 ? (expenses <= monthlyBudget ? 'On track' : 'Over budget') : 'No budget set' });
+
+  // 3. Data history (20 pts)
+  const months = getAvailableMonths();
+  const histPts = months.length >= 3 ? 20 : months.length === 2 ? 13 : months.length === 1 ? 7 : 0;
+  score += histPts;
+  factors.push({ label: 'History & Consistency', pts: histPts, max: 20, detail: months.length + ' month' + (months.length !== 1 ? 's' : '') + ' of data' });
+
+  // 4. Balanced activity (15 pts) — both income and expense tracked
+  const monthTx  = getMonthTransactions();
+  const hasInc   = monthTx.some(tx => tx.type === 'income');
+  const hasExp   = monthTx.some(tx => tx.type === 'expense');
+  const balPts   = hasInc && hasExp ? 15 : (hasInc || hasExp) ? 8 : 0;
+  score += balPts;
+  factors.push({ label: 'Balanced Tracking', pts: balPts, max: 15, detail: hasInc && hasExp ? 'Income & expenses' : 'Partial data' });
+
+  // 5. Debt/credit control (10 pts)
+  const ccSpend = getMonthTransactions().filter(tx => tx.type === 'expense' && tx.category === 'creditcards').reduce((s, t) => s + t.amount, 0);
+  const debtPct = expenses > 0 ? ccSpend / expenses : 0;
+  const debtPts = debtPct < 0.10 ? 10 : debtPct < 0.20 ? 6 : debtPct < 0.35 ? 3 : 0;
+  score += debtPts;
+  factors.push({ label: 'Credit Card Usage', pts: debtPts, max: 10, detail: expenses > 0 ? Math.round(debtPct * 100) + '% of expenses' : 'None' });
+
+  score = Math.min(100, Math.max(0, Math.round(score)));
+
+  // Grade
+  const grade  = score >= 85 ? { label: 'Excellent', color: '#2d7a3a' }
+               : score >= 70 ? { label: 'Good',      color: '#5a9e3a' }
+               : score >= 55 ? { label: 'Fair',       color: '#c8943a' }
+               : score >= 35 ? { label: 'Needs Work', color: '#d06820' }
+               :               { label: 'Poor',       color: '#c03a2b' };
+
+  // SVG gauge — arc from 225° to 315° (270° sweep = 3/4 circle)
+  const R         = 48;
+  const CIRCUM    = 2 * Math.PI * R;
+  const ARC_PCT   = 0.75; // 3/4 circle
+  const arcLen    = CIRCUM * ARC_PCT;
+  const fillLen   = arcLen * (score / 100);
+  const gap       = CIRCUM - arcLen;
+
+  const trackEl = document.querySelector('.gauge-track');
+  const fillEl  = document.getElementById('gauge-fill');
+  if (trackEl) {
+    trackEl.style.strokeDasharray  = `${arcLen} ${gap}`;
+    trackEl.style.strokeDashoffset = `${-(gap / 2 + CIRCUM * 0.125)}`; // rotate start to 7 o'clock
+  }
+  if (fillEl) {
+    fillEl.style.stroke            = grade.color;
+    fillEl.style.strokeDasharray   = `${fillLen} ${CIRCUM - fillLen}`;
+    fillEl.style.strokeDashoffset  = `${-(gap / 2 + CIRCUM * 0.125)}`;
+    fillEl.style.transition        = 'stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)';
+  }
+
+  document.getElementById('health-score-num').textContent  = score;
+  document.getElementById('health-score-num').style.color  = grade.color;
+  document.getElementById('health-score-grade').textContent = grade.label;
+  document.getElementById('health-score-grade').style.color = grade.color;
+
+  document.getElementById('health-factors').innerHTML = factors.map(f => {
+    const pct = (f.pts / f.max) * 100;
+    const barColor = pct >= 80 ? '#2d7a3a' : pct >= 50 ? '#c8943a' : '#c03a2b';
+    return `
+      <div class="hf-row">
+        <div class="hf-label-row">
+          <span class="hf-label">${f.label}</span>
+          <span class="hf-detail">${f.detail}</span>
+          <span class="hf-pts">${f.pts}/${f.max}</span>
+        </div>
+        <div class="hf-track">
+          <div class="hf-fill" style="width:${pct.toFixed(0)}%;background:${barColor}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- Render: Bill Negotiation Alerts ---
+const BILL_TIPS = {
+  subscriptions: { title: 'Negotiation tip: Streaming', msg: 'Call your streaming provider and ask for a retention discount — many offer 2–3 months free to customers who threaten to cancel. Bundling services can save 20%+.' },
+  phone:         { title: 'Negotiation tip: Phone Bill', msg: 'Check if you\'re paying for data you don\'t use. Carriers match competitor prices if you call and ask. Switching to an MVNO (Mint, Visible) often cuts bills in half.' },
+  internet:      { title: 'Negotiation tip: Internet', msg: 'ISPs offer promotional rates to new customers. Call retention and ask to match them — most will. Even a $10/mo reduction saves $120/year.' },
+  carinsurance:  { title: 'Negotiation tip: Car Insurance', msg: 'Comparing quotes annually saves an average of $400/year. Ask your current insurer to price-match. Bundling home+auto can save 15–25%.' },
+  healthins:     { title: 'Tip: Health Insurance', msg: 'If you haven\'t reviewed your plan during open enrollment, you may be over-insured. HSA-eligible high-deductible plans can save significantly on premiums.' },
+  creditcards:   { title: 'Tip: Credit Card Interest', msg: 'Call your card issuer and ask for a rate reduction — a 2019 CreditCards.com study found 69% of those who asked got one. Balance transfer cards at 0% APR can save hundreds.' },
+};
+
+let dismissedBillAlerts = new Set(JSON.parse(localStorage.getItem('dismissed_bill_alerts') || '[]'));
+
+function renderBillAlerts() {
+  const container = document.getElementById('bill-alerts-container');
+  if (!container) return;
+
+  // Find recurring expenses active for 3+ months
+  const catMonths = {};
+  for (const tx of transactions) {
+    if (tx.type !== 'expense' || !tx.isRecurring) continue;
+    const cat   = tx.category;
+    const month = monthFromDate(tx.date);
+    if (!catMonths[cat]) catMonths[cat] = new Set();
+    catMonths[cat].add(month);
+  }
+
+  const alerts = [];
+  for (const [cat, months] of Object.entries(catMonths)) {
+    if (months.size >= 2 && BILL_TIPS[cat] && !dismissedBillAlerts.has(cat)) {
+      alerts.push({ cat, tip: BILL_TIPS[cat] });
+    }
+  }
+
+  container.innerHTML = alerts.map(a => `
+    <div class="bill-alert-card" id="bill-alert-${a.cat}">
+      <div class="bill-alert-icon">💡</div>
+      <div class="bill-alert-body">
+        <span class="bill-alert-title">${a.tip.title}</span>
+        <p class="bill-alert-msg">${a.tip.msg}</p>
+      </div>
+      <button type="button" class="bill-alert-dismiss" data-cat="${a.cat}" title="Dismiss">✕</button>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.bill-alert-dismiss').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      dismissedBillAlerts.add(cat);
+      localStorage.setItem('dismissed_bill_alerts', JSON.stringify([...dismissedBillAlerts]));
+      document.getElementById(`bill-alert-${cat}`)?.remove();
+    });
+  });
+}
+
+// --- Render: AI Spending Predictions ---
+function renderSpendingPredictions() {
+  const section = document.getElementById('predictions-section');
+  const income  = getTotalIncome();
+  if (income === 0 && transactions.length < 4) { section.style.display = 'none'; return; }
+
+  const today    = new Date();
+  const dayOfMonth = today.getDate();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const monthProgress = dayOfMonth / daysInMonth;
+  if (monthProgress < 0.25) { section.style.display = 'none'; return; } // need enough data
+
+  // Historical category averages (past months only, not current)
+  const pastMonths = getAvailableMonths().filter(m => m !== currentMonth);
+  if (pastMonths.length < 1) { section.style.display = 'none'; return; }
+
+  const histByCat = {};
+  for (const month of pastMonths) {
+    const txs = transactions.filter(tx => monthFromDate(tx.date) === month && tx.type === 'expense');
+    for (const tx of txs) {
+      if (!histByCat[tx.category]) histByCat[tx.category] = [];
+      histByCat[tx.category].push(tx.amount);
+    }
+  }
+
+  // Average per category across past months
+  const avgByCat = {};
+  for (const [cat, amounts] of Object.entries(histByCat)) {
+    // sum per month
+    const perMonth = {};
+    for (const tx of transactions.filter(t => t.type === 'expense' && t.category === cat && pastMonths.includes(monthFromDate(t.date)))) {
+      const m = monthFromDate(tx.date);
+      perMonth[m] = (perMonth[m] || 0) + tx.amount;
+    }
+    const vals = Object.values(perMonth);
+    avgByCat[cat] = vals.reduce((s, v) => s + v, 0) / vals.length;
+  }
+
+  // Current month per category
+  const currentByCat = {};
+  for (const tx of getMonthTransactions().filter(t => t.type === 'expense')) {
+    currentByCat[tx.category] = (currentByCat[tx.category] || 0) + tx.amount;
+  }
+
+  // Project end-of-month for each category
+  const predictions = [];
+  for (const [cat, currentSpend] of Object.entries(currentByCat)) {
+    if (!avgByCat[cat]) continue;
+    const projected = currentSpend / monthProgress;
+    const avg       = avgByCat[cat];
+    const overage   = projected - avg;
+    const overPct   = avg > 0 ? overage / avg : 0;
+    if (overPct > 0.2) { // only show if 20%+ over average
+      predictions.push({ cat, projected, avg, overage, overPct });
+    }
+  }
+
+  if (!predictions.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  document.getElementById('predictions-month').textContent = monthLabel(currentMonth);
+
+  predictions.sort((a, b) => b.overPct - a.overPct);
+
+  document.getElementById('predictions-list').innerHTML = predictions.map(p => {
+    const icon    = CATEGORY_ICONS[p.cat] || '📌';
+    const label   = CATEGORY_LABELS[p.cat] || p.cat;
+    const pctStr  = '+' + Math.round(p.overPct * 100) + '%';
+    const severity = p.overPct >= 0.5 ? 'high' : p.overPct >= 0.3 ? 'med' : 'low';
+    return `
+      <div class="prediction-row prediction-row--${severity}">
+        <span class="prediction-icon">${icon}</span>
+        <div class="prediction-info">
+          <span class="prediction-label">${label}</span>
+          <span class="prediction-detail">Projected: ${formatCurrency(p.projected)} · Avg: ${formatCurrency(p.avg)}</span>
+        </div>
+        <div class="prediction-badge prediction-badge--${severity}">${pctStr} over</div>
+      </div>
+    `;
+  }).join('');
+}
+
 // --- Export: CSV ---
 function exportCSV() {
   const txs = getMonthTransactions();
@@ -1255,8 +1494,11 @@ function renderAll() {
   renderMonthRecap();
   renderWeeklyDigest();
   renderDashboard();
+  renderHealthScore();
   renderBudgetCard();
   render503020();
+  renderBillAlerts();
+  renderSpendingPredictions();
   renderPieChart();
   renderChart();
   renderDailySpendingChart();

@@ -404,6 +404,38 @@ const statsObserver = new IntersectionObserver(entries => {
 const statsSection = document.querySelector('.about-stats');
 if (statsSection) statsObserver.observe(statsSection);
 
+// ── 3D tilt + inner parallax on feature cards ─────────────────────────────────
+document.querySelectorAll('[data-tilt]').forEach(card => {
+  let raf = null;
+
+  card.addEventListener('mouseenter', () => {
+    card.style.transition = 'transform 0.12s ease, box-shadow 0.12s ease';
+  });
+
+  card.addEventListener('mousemove', e => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const rect  = card.getBoundingClientRect();
+      const cx    = rect.width  / 2;
+      const cy    = rect.height / 2;
+      const dx    = (e.clientX - rect.left - cx) / cx;   // -1 → 1
+      const dy    = (e.clientY - rect.top  - cy) / cy;   // -1 → 1
+      const rotX  = -dy * 10;
+      const rotY  =  dx * 10;
+      card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.03,1.03,1.03)`;
+      card.style.boxShadow = `${-dx * 16}px ${dy * 16}px 48px rgba(0,0,0,0.16), 0 8px 24px rgba(0,0,0,0.08)`;
+    });
+  });
+
+  card.addEventListener('mouseleave', () => {
+    if (raf) cancelAnimationFrame(raf);
+    card.style.transition = 'transform 0.65s cubic-bezier(0.23,1,0.32,1), box-shadow 0.65s ease';
+    card.style.transform  = '';
+    card.style.boxShadow  = '';
+    setTimeout(() => { card.style.transition = ''; }, 650);
+  });
+});
+
 document.querySelectorAll('[data-tilt]').forEach(card => {
   card.addEventListener('mousemove', e => {
     const r = card.getBoundingClientRect();
