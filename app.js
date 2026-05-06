@@ -467,22 +467,6 @@ function renderDashboard() {
   balanceVal.classList.toggle('positive', balance > 0);
   balanceVal.classList.toggle('negative', balance < 0);
 
-  // Safe to Spend card
-  const safeCard = document.getElementById('stat-safe-card');
-  const safeVal  = document.getElementById('stat-safe-val');
-  const safeSub  = document.getElementById('stat-safe-sub');
-  if (income > 0 || monthlyBudget > 0) {
-    safeCard.style.display = '';
-    const safe = monthlyBudget > 0 ? monthlyBudget - expenses : balance;
-    safeVal.textContent = formatCurrency(Math.max(0, safe));
-    safeSub.textContent = monthlyBudget > 0 ? 'budget − expenses' : 'income − expenses';
-    safeCard.classList.toggle('is-positive', safe > 0);
-    safeCard.classList.toggle('is-negative', safe < 0);
-    safeVal.classList.toggle('positive', safe > 0);
-    safeVal.classList.toggle('negative', safe < 0);
-  } else {
-    safeCard.style.display = 'none';
-  }
 }
 
 // --- Render: 50/30/20 Rule ---

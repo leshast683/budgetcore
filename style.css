@@ -4177,7 +4177,7 @@ input[type="number"] {
   }
 
   .dashboard {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.55rem;
   }
   .stat-card {
@@ -4220,12 +4220,22 @@ input[type="number"] {
     border-radius: 14px;
   }
 
+  .dashboard {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+
   .stat-card {
-    padding: 0.65rem 0.75rem 0.6rem;
+    padding: 0.6rem 0.5rem 0.55rem;
   }
 
   .stat-value {
-    font-size: 1.05rem;
+    font-size: 0.9rem;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
   }
 
   .form-row {
