@@ -746,27 +746,44 @@ function renderDailySpendingChart() {
     spendData.push(parseFloat((byDay[key] || 0).toFixed(2)));
   }
 
+  const ctx = canvas.getContext('2d');
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 220);
+  grad.addColorStop(0,   'rgba(200,148,58,0.38)');
+  grad.addColorStop(0.6, 'rgba(200,148,58,0.08)');
+  grad.addColorStop(1,   'rgba(200,148,58,0)');
+
+  // Highlight the last non-zero point
+  const lastNonZero = spendData.reduce((idx, v, i) => v > 0 ? i : idx, -1);
+  const pointRadii  = spendData.map((v, i) => i === lastNonZero ? 7 : v > 0 ? 3.5 : 0);
+  const pointBgColors = spendData.map((v, i) => i === lastNonZero ? '#e07820' : '#c8943a');
+  const pointBorderWidths = spendData.map((v, i) => i === lastNonZero ? 3 : 2);
+
   const totalPortfolio = investments.reduce((s, inv) => s + ((inv.currentPrice || 0) * (inv.shares || 0)), 0);
   const datasets = [{
     label: 'Daily Spending',
     data: spendData,
     borderColor: '#c8943a',
-    backgroundColor: 'rgba(200,148,58,0.12)',
+    borderWidth: 2.5,
+    backgroundColor: grad,
     fill: true,
-    tension: 0.4,
-    pointRadius: spendData.map(v => v > 0 ? 4 : 2),
-    pointBackgroundColor: '#c8943a',
+    tension: 0.45,
+    pointRadius: pointRadii,
+    pointHoverRadius: 7,
+    pointBackgroundColor: pointBgColors,
     pointBorderColor: '#fff',
-    pointBorderWidth: 2,
+    pointBorderWidth: pointBorderWidths,
   }];
 
   if (totalPortfolio > 0) {
     datasets.push({
       label: 'Portfolio Value',
       data: Array(daysInMonth).fill(parseFloat(totalPortfolio.toFixed(2))),
-      borderColor: '#2d7a3a',
+      borderColor: 'rgba(45,122,58,0.6)',
       backgroundColor: 'transparent',
-      borderDash: [6, 3],
+      borderDash: [5, 4],
+      borderWidth: 1.5,
       fill: false,
       tension: 0,
       pointRadius: 0,
@@ -776,25 +793,39 @@ function renderDailySpendingChart() {
   if (dailyChartInstance) {
     dailyChartInstance.data.labels = labels;
     dailyChartInstance.data.datasets = datasets;
-    dailyChartInstance.update();
+    dailyChartInstance.update('active');
     return;
   }
 
-  dailyChartInstance = new Chart(canvas.getContext('2d'), {
+  dailyChartInstance = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
+      animation: { duration: 600, easing: 'easeOutQuart' },
       plugins: {
         legend: {
-          labels: { font: { family: 'Inter, sans-serif', size: 11 }, color: '#6b5040', usePointStyle: true },
+          labels: {
+            font: { family: 'Inter, sans-serif', size: 11 },
+            color: '#9a7a5a',
+            usePointStyle: true,
+            pointStyleWidth: 10,
+            boxHeight: 6,
+          },
         },
         tooltip: {
-          backgroundColor: 'rgba(26,14,6,0.9)',
-          padding: 10,
-          cornerRadius: 10,
+          backgroundColor: 'rgba(22,12,4,0.92)',
+          titleColor: '#e0b870',
+          bodyColor: '#d4b888',
+          padding: { x: 14, y: 10 },
+          cornerRadius: 12,
+          borderColor: 'rgba(200,148,58,0.3)',
+          borderWidth: 1,
+          displayColors: true,
+          boxWidth: 8,
+          boxHeight: 8,
           callbacks: {
             title: ctx => `Day ${ctx[0].label}`,
             label: ctx => `  ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}`,
@@ -803,12 +834,24 @@ function renderDailySpendingChart() {
       },
       scales: {
         x: {
-          ticks: { font: { size: 10 }, color: '#9a7a5a', maxTicksLimit: 10 },
-          grid:  { color: 'rgba(200,148,58,0.08)' },
+          ticks: {
+            font: { size: 10, family: 'Inter, sans-serif' },
+            color: '#9a8060',
+            maxTicksLimit: 12,
+            maxRotation: 0,
+          },
+          grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
+          border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
         },
         y: {
-          ticks: { font: { size: 10 }, color: '#9a7a5a', callback: v => '$' + v },
-          grid:  { color: 'rgba(200,148,58,0.08)' },
+          ticks: {
+            font: { size: 10, family: 'Inter, sans-serif' },
+            color: '#9a8060',
+            callback: v => v === 0 ? '' : '$' + v,
+            maxTicksLimit: 6,
+          },
+          grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
+          border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
           beginAtZero: true,
         },
       },

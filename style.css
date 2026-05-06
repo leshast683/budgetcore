@@ -5862,44 +5862,120 @@ input[type="number"] {
 .export-btn { font-size: 0.75rem; padding: 0.3rem 0.65rem; }
 
 /* --- Bill Calendar --- */
-.bill-cal-section { }
-.bill-cal-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.bill-cal-section {
+  overflow: visible;
+}
+.bill-cal-section .bill-cal-grid {
+  transition: transform 0.4s ease;
+}
+.bill-cal-section:hover .bill-cal-grid {
+  transform: perspective(800px) rotateX(3deg);
+}
+.bill-cal-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
 .bill-cal-month { font-size: 0.82rem; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 0.18rem 0.65rem; }
+
 .bill-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  gap: 5px;
+  perspective: 800px;
+  transform-style: preserve-3d;
 }
+
 .bcal-dow {
   text-align: center;
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   color: var(--muted);
-  padding: 0.2rem 0;
+  padding: 0.25rem 0 0.4rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
+
 .bcal-cell {
-  min-height: 52px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 5px 3px;
-  background: var(--surface);
+  min-height: 56px;
+  border-radius: 10px;
+  padding: 6px 6px 4px;
   font-size: 0.72rem;
   position: relative;
+  background: var(--surface);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.06), 0 4px 8px rgba(0,0,0,0.04);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transform: translateZ(0px);
 }
-.bcal-empty { background: transparent; border-color: transparent; }
-.bcal-today { background: #fff8f0; border-color: #c8943a; }
-.bcal-has-bills { background: #f5f0ff; border-color: #b090e0; }
-.bcal-day { font-size: 0.72rem; font-weight: 600; color: var(--heading); display: block; margin-bottom: 2px; }
+.bcal-cell:hover {
+  transform: translateZ(8px) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.06);
+  z-index: 2;
+}
+
+.bcal-empty {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+.bcal-empty:hover { transform: none; box-shadow: none; }
+
+.bcal-today {
+  background: linear-gradient(145deg, #fff8f0 0%, #ffefd8 100%);
+  border-color: #c8943a;
+  box-shadow: 0 3px 0 rgba(200,148,58,0.25), 0 5px 14px rgba(200,148,58,0.12);
+  transform: translateZ(6px);
+}
+.bcal-today:hover {
+  transform: translateZ(14px) translateY(-3px);
+  box-shadow: 0 8px 24px rgba(200,148,58,0.22), 0 3px 6px rgba(200,148,58,0.14);
+}
+
+.bcal-has-bills {
+  background: linear-gradient(145deg, #f5f0ff 0%, #ede5ff 100%);
+  border-color: #b090e0;
+  box-shadow: 0 3px 0 rgba(160,100,220,0.2), 0 5px 14px rgba(160,100,220,0.10);
+  transform: translateZ(10px);
+}
+.bcal-has-bills:hover {
+  transform: translateZ(18px) translateY(-3px);
+  box-shadow: 0 10px 28px rgba(160,100,220,0.18), 0 3px 6px rgba(160,100,220,0.12);
+}
+
+.bcal-day {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--heading);
+  display: block;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+.bcal-today .bcal-day { color: #9a6e3a; }
+.bcal-has-bills .bcal-day { color: #7040b0; }
+
 .bcal-bill {
-  display: flex; align-items: center; gap: 2px;
-  font-size: 0.65rem; color: var(--heading);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  background: rgba(154,110,58,0.1); border-radius: 4px;
-  padding: 1px 3px; margin-top: 1px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.63rem;
+  color: var(--heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(154,110,58,0.12);
+  border-radius: 5px;
+  padding: 2px 4px;
+  margin-top: 2px;
+}
+.bcal-has-bills .bcal-bill {
+  background: rgba(160,100,220,0.12);
 }
 .bcal-bill span { overflow: hidden; text-overflow: ellipsis; }
+
 @media (max-width: 480px) {
-  .bcal-cell { min-height: 40px; padding: 2px 3px; }
+  .bill-cal-grid { gap: 3px; perspective: 500px; }
+  .bcal-cell { min-height: 42px; padding: 3px 3px 2px; border-radius: 7px; }
+  .bcal-cell:hover { transform: none; }
+  .bcal-today { transform: translateZ(4px); }
+  .bcal-has-bills { transform: translateZ(6px); }
   .bcal-bill span { display: none; }
 }
 
