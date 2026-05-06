@@ -1167,6 +1167,36 @@ function renderBudgetAlert() {
   }
 }
 
+// --- Render: Income vs Expenses Summary Card ---
+function renderIncomeExpenseCard() {
+  const section  = document.getElementById('income-expense-card');
+  const income   = getTotalIncome();
+  const expenses = getTotalExpenses();
+  if (income === 0 && expenses === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  const monthTx      = getMonthTransactions();
+  const incomeCount  = monthTx.filter(tx => tx.type === 'income').length;
+  const expenseCount = monthTx.filter(tx => tx.type === 'expense').length;
+  const net          = income - expenses;
+
+  document.getElementById('iec-month').textContent        = monthLabel(currentMonth);
+  document.getElementById('iec-income').textContent       = formatCurrency(income);
+  document.getElementById('iec-expenses').textContent     = formatCurrency(expenses);
+  document.getElementById('iec-income-count').textContent = incomeCount + ' transaction' + (incomeCount !== 1 ? 's' : '');
+  document.getElementById('iec-expense-count').textContent= expenseCount + ' transaction' + (expenseCount !== 1 ? 's' : '');
+
+  const netEl = document.getElementById('iec-net');
+  netEl.textContent = (net >= 0 ? '+' : '') + formatCurrency(net);
+  netEl.className = 'iec-net-val ' + (net >= 0 ? 'positive' : 'negative');
+
+  const total = income + expenses;
+  const incomePct  = total > 0 ? ((income  / total) * 100).toFixed(1) : 50;
+  const expensePct = total > 0 ? ((expenses / total) * 100).toFixed(1) : 50;
+  document.getElementById('iec-bar-income').style.width  = incomePct  + '%';
+  document.getElementById('iec-bar-expense').style.width = expensePct + '%';
+}
+
 // --- Render: Financial Health Score ---
 function renderHealthScore() {
   const section = document.getElementById('health-score-section');
@@ -1495,6 +1525,7 @@ function renderAll() {
   renderMonthRecap();
   renderWeeklyDigest();
   renderDashboard();
+  renderIncomeExpenseCard();
   renderHealthScore();
   renderBudgetCard();
   render503020();

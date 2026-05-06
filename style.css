@@ -5983,6 +5983,125 @@ input[type="number"] {
   .feature-card .fc-icon { transform: none !important; }
 }
 
+/* --- Income vs Expenses Card --- */
+.income-expense-card {}
+
+.iec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.iec-month {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.iec-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.iec-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1rem;
+  border-radius: 16px;
+  text-align: center;
+}
+.iec-block--income  { background: rgba(45,122,58,0.08); }
+.iec-block--expense { background: rgba(200,80,60,0.08); }
+
+.iec-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.iec-block--income  .iec-icon { background: rgba(45,122,58,0.15); color: #2d7a3a; }
+.iec-block--expense .iec-icon { background: rgba(200,80,60,0.15); color: #c8503c; }
+.iec-icon svg { width: 18px; height: 18px; }
+
+.iec-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.iec-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.iec-value--income  { color: #2d7a3a; }
+.iec-value--expense { color: #c8503c; }
+
+.iec-count {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.iec-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+.iec-net-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.6rem 0.9rem;
+  min-width: 80px;
+}
+.iec-net-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.iec-net-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.iec-bar-wrap { margin-top: 0.25rem; }
+.iec-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--border);
+  gap: 2px;
+}
+.iec-bar-income  { background: #2d7a3a; border-radius: 99px 0 0 99px; transition: width 0.6s ease; }
+.iec-bar-expense { background: #c8503c; border-radius: 0 99px 99px 0; transition: width 0.6s ease; }
+
+@media (max-width: 500px) {
+  .iec-row { grid-template-columns: 1fr; }
+  .iec-divider { flex-direction: row; }
+  .iec-net-wrap { flex-direction: row; gap: 0.5rem; padding: 0.5rem 1rem; min-width: unset; width: 100%; justify-content: center; }
+  .iec-value { font-size: 1.3rem; }
+}
+
 /* --- Financial Health Score --- */
 .health-score-section { }
 .health-score-inner {
