@@ -2359,7 +2359,7 @@ footer {
 .app-layout {
   max-width: 860px;
   margin: 0 auto;
-  padding: 2.5rem 2rem 5rem;
+  padding: 5.5rem 2rem 5rem;
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
@@ -4172,7 +4172,7 @@ input[type="number"] {
    ============================================ */
 @media (max-width: 700px) {
   .app-layout {
-    padding: 1.5rem 1.25rem 4rem;
+    padding: 5rem 1.25rem 4rem;
     gap: 1.25rem;
   }
 
@@ -4211,7 +4211,7 @@ input[type="number"] {
    ============================================ */
 @media (max-width: 500px) {
   .app-layout {
-    padding: 1rem 1rem 3.5rem;
+    padding: 5rem 1rem 3.5rem;
     gap: 1rem;
   }
 
