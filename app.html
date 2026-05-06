@@ -277,96 +277,6 @@
       </div>
     </section>
 
-    <!-- ===== 1.3 Financial Health Score ===== -->
-    <section class="app-card health-score-section" id="health-score-section" style="display:none">
-      <div class="health-score-inner">
-        <div class="health-gauge-wrap">
-          <svg class="health-gauge" viewBox="0 0 120 120" aria-hidden="true">
-            <!-- bg arc — semicircle top half -->
-            <circle class="gauge-track" cx="60" cy="60" r="48" />
-            <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="48" />
-          </svg>
-          <div class="health-score-center">
-            <span class="health-score-num" id="health-score-num">—</span>
-            <span class="health-score-grade" id="health-score-grade"></span>
-          </div>
-        </div>
-        <div class="health-breakdown">
-          <h2 class="card-title" style="margin-bottom:0.6rem">Financial Health Score</h2>
-          <div class="health-factors" id="health-factors"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 1.4 50/30/20 Rule Overlay ===== -->
-    <section class="app-card rule503020-section" id="rule503020-section" style="display:none">
-      <div class="rule503020-header">
-        <h2 class="card-title" style="margin:0">50 / 30 / 20 Budget Rule</h2>
-        <span class="rule503020-month" id="rule503020-month"></span>
-      </div>
-      <p class="rule503020-desc">50% Needs · 30% Wants · 20% Savings — based on your income this month</p>
-      <div class="rule503020-bars" id="rule503020-bars"></div>
-    </section>
-
-    <!-- ===== 1.45 Bill Negotiation Alerts ===== -->
-    <div id="bill-alerts-container"></div>
-
-    <!-- ===== 1.46 AI Spending Predictions ===== -->
-    <section class="app-card predictions-section" id="predictions-section" style="display:none">
-      <div class="predictions-header">
-        <div class="predictions-title-row">
-          <span class="predictions-icon">🔮</span>
-          <h2 class="card-title" style="margin:0">Spending Predictions</h2>
-        </div>
-        <span class="rule503020-month" id="predictions-month"></span>
-      </div>
-      <p class="rule503020-desc">Projected end-of-month totals based on your current spending pace vs. history.</p>
-      <div id="predictions-list"></div>
-    </section>
-
-    <!-- ===== 1.5 AI Budget Insights ===== -->
-    <section class="app-card ai-insights-section" id="ai-insights-section">
-      <div class="ai-insights-header">
-        <div class="ai-insights-title-wrap">
-          <svg class="ai-insights-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
-          </svg>
-          <h2 class="card-title" style="margin:0">AI Budget Insights</h2>
-        </div>
-        <button type="button" class="btn btn-small" id="analyze-btn">Analyze Budget</button>
-      </div>
-      <div id="ai-insights-result" class="ai-insights-result" style="display:none">
-        <p id="ai-insights-text" class="ai-insights-text"></p>
-        <span id="ai-insights-cache-label" class="ai-insights-cache-label"></span>
-      </div>
-      <p id="ai-insights-error" class="form-error" style="display:none"></p>
-    </section>
-
-    <!-- ===== 1.6 Daily Spending Chart ===== -->
-    <section class="app-card daily-chart-section" id="daily-chart-section" style="display:none">
-      <div class="chart-header-row">
-        <h2 class="card-title" style="margin:0">Daily Spending</h2>
-      </div>
-      <div style="position:relative;height:200px;margin-top:0.75rem">
-        <canvas id="daily-spending-chart"></canvas>
-      </div>
-    </section>
-
-    <!-- ===== 1.7 Upcoming Recurring Expenses ===== -->
-    <section class="app-card recurring-timeline-section" id="recurring-timeline-section" style="display:none">
-      <h2 class="card-title">Upcoming Recurring</h2>
-      <div class="recurring-lane" id="recurring-lane"></div>
-    </section>
-
-    <!-- ===== 1.8 Bill Calendar ===== -->
-    <section class="app-card bill-cal-section" id="bill-cal-section" style="display:none">
-      <div class="bill-cal-header">
-        <h2 class="card-title" style="margin:0">Bill Calendar</h2>
-        <span class="bill-cal-month" id="bill-cal-month"></span>
-      </div>
-      <div class="bill-cal-grid" id="bill-cal-grid"></div>
-    </section>
-
     <!-- ===== 2. Transaction Form ===== -->
     <section class="app-card form-section">
       <h2 class="card-title">Add Transaction</h2>
@@ -468,6 +378,96 @@
         </div>
 
       </div>
+    </section>
+
+    <!-- ===== 1.3 Financial Health Score ===== -->
+    <section class="app-card health-score-section" id="health-score-section" style="display:none">
+      <div class="health-score-inner">
+        <div class="health-gauge-wrap">
+          <svg class="health-gauge" viewBox="0 0 120 120" aria-hidden="true">
+            <!-- bg arc — semicircle top half -->
+            <circle class="gauge-track" cx="60" cy="60" r="48" />
+            <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="48" />
+          </svg>
+          <div class="health-score-center">
+            <span class="health-score-num" id="health-score-num">—</span>
+            <span class="health-score-grade" id="health-score-grade"></span>
+          </div>
+        </div>
+        <div class="health-breakdown">
+          <h2 class="card-title" style="margin-bottom:0.6rem">Financial Health Score</h2>
+          <div class="health-factors" id="health-factors"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 1.4 50/30/20 Rule Overlay ===== -->
+    <section class="app-card rule503020-section" id="rule503020-section" style="display:none">
+      <div class="rule503020-header">
+        <h2 class="card-title" style="margin:0">50 / 30 / 20 Budget Rule</h2>
+        <span class="rule503020-month" id="rule503020-month"></span>
+      </div>
+      <p class="rule503020-desc">50% Needs · 30% Wants · 20% Savings — based on your income this month</p>
+      <div class="rule503020-bars" id="rule503020-bars"></div>
+    </section>
+
+    <!-- ===== 1.45 Bill Negotiation Alerts ===== -->
+    <div id="bill-alerts-container"></div>
+
+    <!-- ===== 1.46 AI Spending Predictions ===== -->
+    <section class="app-card predictions-section" id="predictions-section" style="display:none">
+      <div class="predictions-header">
+        <div class="predictions-title-row">
+          <span class="predictions-icon">🔮</span>
+          <h2 class="card-title" style="margin:0">Spending Predictions</h2>
+        </div>
+        <span class="rule503020-month" id="predictions-month"></span>
+      </div>
+      <p class="rule503020-desc">Projected end-of-month totals based on your current spending pace vs. history.</p>
+      <div id="predictions-list"></div>
+    </section>
+
+    <!-- ===== 1.5 AI Budget Insights ===== -->
+    <section class="app-card ai-insights-section" id="ai-insights-section">
+      <div class="ai-insights-header">
+        <div class="ai-insights-title-wrap">
+          <svg class="ai-insights-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+          </svg>
+          <h2 class="card-title" style="margin:0">AI Budget Insights</h2>
+        </div>
+        <button type="button" class="btn btn-small" id="analyze-btn">Analyze Budget</button>
+      </div>
+      <div id="ai-insights-result" class="ai-insights-result" style="display:none">
+        <p id="ai-insights-text" class="ai-insights-text"></p>
+        <span id="ai-insights-cache-label" class="ai-insights-cache-label"></span>
+      </div>
+      <p id="ai-insights-error" class="form-error" style="display:none"></p>
+    </section>
+
+    <!-- ===== 1.6 Daily Spending Chart ===== -->
+    <section class="app-card daily-chart-section" id="daily-chart-section" style="display:none">
+      <div class="chart-header-row">
+        <h2 class="card-title" style="margin:0">Daily Spending</h2>
+      </div>
+      <div style="position:relative;height:200px;margin-top:0.75rem">
+        <canvas id="daily-spending-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- ===== 1.7 Upcoming Recurring Expenses ===== -->
+    <section class="app-card recurring-timeline-section" id="recurring-timeline-section" style="display:none">
+      <h2 class="card-title">Upcoming Recurring</h2>
+      <div class="recurring-lane" id="recurring-lane"></div>
+    </section>
+
+    <!-- ===== 1.8 Bill Calendar ===== -->
+    <section class="app-card bill-cal-section" id="bill-cal-section" style="display:none">
+      <div class="bill-cal-header">
+        <h2 class="card-title" style="margin:0">Bill Calendar</h2>
+        <span class="bill-cal-month" id="bill-cal-month"></span>
+      </div>
+      <div class="bill-cal-grid" id="bill-cal-grid"></div>
     </section>
 
     <!-- ===== 2.5 Profile — Budget Goals ===== -->
