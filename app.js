@@ -1509,7 +1509,6 @@ function renderAll() {
   renderMonthRecap();
   renderWeeklyDigest();
   renderDashboard();
-  renderIncomeExpenseCard();
   renderHealthScore();
   renderBudgetCard();
   render503020();
