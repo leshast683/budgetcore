@@ -246,8 +246,8 @@ footer .logo-img {
     align-items: center;
     border-bottom: none;
   }
-  .app-page header { position: relative; }
 }
+
 
 /* === Buttons === */
 .btn {
@@ -4177,7 +4177,7 @@ input[type="number"] {
   }
 
   .dashboard {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.55rem;
   }
   .stat-card {
@@ -4263,6 +4263,67 @@ input[type="number"] {
 
   .pie-chart-inner {
     max-width: 100%;
+  }
+
+  /* Investments page */
+  .holdings-table th,
+  .holdings-table td {
+    padding: 0.55rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  .portfolio-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .portfolio-breakdown {
+    flex-direction: column;
+  }
+
+  /* Goals page */
+  .goals-grid {
+    grid-template-columns: 1fr;
+  }
+  .goal-card {
+    padding: 1.2rem;
+  }
+
+  /* Net Worth page */
+  .networth-columns {
+    grid-template-columns: 1fr;
+  }
+  .nw-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .nw-form-row {
+    grid-template-columns: 1fr;
+  }
+  .debt-plan-item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .debt-plan-result {
+    text-align: left;
+    width: 100%;
+  }
+
+  /* Challenges page */
+  .challenge-grid {
+    grid-template-columns: 1fr;
+  }
+  .ch-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .ch-stat-value {
+    font-size: 1.5rem;
+  }
+  .badges-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Analytics page */
+  .top-cat-row {
+    font-size: 0.85rem;
   }
 }
 
