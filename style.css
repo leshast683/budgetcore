@@ -5964,12 +5964,54 @@ input[type="number"] {
 .ob-goal-btn:hover { border-color: #9a6e3a; background: #fff8f0; }
 .ob-goal-btn--selected { border-color: #9a6e3a; background: #fff3e0; color: #6c3d10; font-weight: 600; }
 
-/* --- 3D Tilt: feature cards --- */
+/* --- 3D Continuous Animation: feature cards --- */
+@keyframes fc-float-a {
+  0%   { transform: perspective(900px) rotateX(5deg)  rotateY(-7deg) translateY(0px); }
+  30%  { transform: perspective(900px) rotateX(-3deg) rotateY(5deg)  translateY(-9px); }
+  60%  { transform: perspective(900px) rotateX(4deg)  rotateY(8deg)  translateY(-5px); }
+  100% { transform: perspective(900px) rotateX(5deg)  rotateY(-7deg) translateY(0px); }
+}
+@keyframes fc-float-b {
+  0%   { transform: perspective(900px) rotateX(-4deg) rotateY(6deg)  translateY(0px); }
+  35%  { transform: perspective(900px) rotateX(5deg)  rotateY(-8deg) translateY(-10px); }
+  65%  { transform: perspective(900px) rotateX(-2deg) rotateY(-5deg) translateY(-4px); }
+  100% { transform: perspective(900px) rotateX(-4deg) rotateY(6deg)  translateY(0px); }
+}
+@keyframes fc-float-c {
+  0%   { transform: perspective(900px) rotateX(3deg)  rotateY(8deg)  translateY(0px); }
+  40%  { transform: perspective(900px) rotateX(-5deg) rotateY(-6deg) translateY(-8px); }
+  70%  { transform: perspective(900px) rotateX(6deg)  rotateY(-4deg) translateY(-3px); }
+  100% { transform: perspective(900px) rotateX(3deg)  rotateY(8deg)  translateY(0px); }
+}
+@keyframes fc-float-d {
+  0%   { transform: perspective(900px) rotateX(-6deg) rotateY(-5deg) translateY(0px); }
+  30%  { transform: perspective(900px) rotateX(4deg)  rotateY(7deg)  translateY(-11px); }
+  65%  { transform: perspective(900px) rotateX(-3deg) rotateY(4deg)  translateY(-6px); }
+  100% { transform: perspective(900px) rotateX(-6deg) rotateY(-5deg) translateY(0px); }
+}
+@keyframes fc-float-e {
+  0%   { transform: perspective(900px) rotateX(6deg)  rotateY(4deg)  translateY(0px); }
+  35%  { transform: perspective(900px) rotateX(-4deg) rotateY(-7deg) translateY(-7px); }
+  70%  { transform: perspective(900px) rotateX(3deg)  rotateY(-5deg) translateY(-12px); }
+  100% { transform: perspective(900px) rotateX(6deg)  rotateY(4deg)  translateY(0px); }
+}
+
 .feature-card {
   transform-style: preserve-3d;
   will-change: transform;
   cursor: default;
+  animation: fc-float-a 7s ease-in-out infinite;
 }
+.features-grid .feature-card:nth-child(1) { animation: fc-float-a 7.0s ease-in-out infinite; }
+.features-grid .feature-card:nth-child(2) { animation: fc-float-b 6.5s ease-in-out infinite; animation-delay: -2.1s; }
+.features-grid .feature-card:nth-child(3) { animation: fc-float-c 7.8s ease-in-out infinite; animation-delay: -3.7s; }
+.features-grid .feature-card:nth-child(4) { animation: fc-float-d 6.2s ease-in-out infinite; animation-delay: -1.3s; }
+.features-grid .feature-card:nth-child(5) { animation: fc-float-e 7.3s ease-in-out infinite; animation-delay: -4.5s; }
+
+.feature-card.is-hovered {
+  animation-play-state: paused;
+}
+
 .feature-card .fc-content {
   transform: translateZ(28px);
   transform-style: preserve-3d;
@@ -5984,9 +6026,17 @@ input[type="number"] {
   transform: translateZ(14px);
   display: inline-block;
 }
-/* Disable tilt on touch devices */
+/* Disable on touch devices */
 @media (hover: none) {
-  .feature-card { transform: none !important; box-shadow: none !important; }
+  .feature-card,
+  .features-grid .feature-card:nth-child(1),
+  .features-grid .feature-card:nth-child(2),
+  .features-grid .feature-card:nth-child(3),
+  .features-grid .feature-card:nth-child(4),
+  .features-grid .feature-card:nth-child(5) {
+    animation: none;
+    transform: none !important;
+  }
   .feature-card .fc-content,
   .feature-card .fc-visual,
   .feature-card .fc-deco,
