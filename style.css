@@ -4181,20 +4181,21 @@ input[type="number"] {
     gap: 0.55rem;
   }
   .stat-card {
-    padding: 0.75rem 0.85rem 0.7rem;
+    padding: 0.65rem 0.75rem 0.6rem;
     border-radius: 14px;
+    gap: 0.15rem;
   }
   .stat-card-top {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
   }
   .stat-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 7px;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
   }
-  .stat-icon svg { width: 12px; height: 12px; }
+  .stat-icon svg { width: 13px; height: 13px; }
   .stat-value {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     letter-spacing: -0.03em;
   }
   .stat-sub {
@@ -4226,16 +4227,28 @@ input[type="number"] {
   }
 
   .stat-card {
-    padding: 0.6rem 0.5rem 0.55rem;
+    padding: 0.5rem 0.55rem 0.45rem;
+    border-radius: 12px;
+    gap: 0.1rem;
+  }
+
+  .stat-card-top {
+    margin-bottom: 0.1rem;
+  }
+
+  .stat-icon {
+    display: none;
   }
 
   .stat-value {
-    font-size: 0.9rem;
+    font-size: 1rem;
     letter-spacing: -0.02em;
+    line-height: 1.1;
   }
 
   .stat-label {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
   }
 
   .form-row {
