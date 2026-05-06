@@ -4227,13 +4227,13 @@ input[type="number"] {
   }
 
   .stat-card {
-    padding: 0.5rem 0.55rem 0.45rem;
-    border-radius: 12px;
-    gap: 0.1rem;
+    padding: 0.38rem 0.5rem 0.32rem;
+    border-radius: 10px;
+    gap: 0;
   }
 
   .stat-card-top {
-    margin-bottom: 0.1rem;
+    margin-bottom: 0.08rem;
   }
 
   .stat-icon {
@@ -4241,13 +4241,13 @@ input[type="number"] {
   }
 
   .stat-value {
-    font-size: 1rem;
+    font-size: 0.95rem;
     letter-spacing: -0.02em;
     line-height: 1.1;
   }
 
   .stat-label {
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     letter-spacing: 0.04em;
   }
 
