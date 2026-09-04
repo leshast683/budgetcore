@@ -32,7 +32,6 @@
         <li><a href="analytics.html">Analytics</a></li>
         <li><a href="investments.html">Investments</a></li>
         <li><a href="networth.html">Net Worth</a></li>
-        <li><a href="challenges.html">Challenges</a></li>
         <li><span class="nav-active">Profile</span></li>
         <li id="nav-signout-li" style="display:none">
           <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>
@@ -221,7 +220,61 @@
       </div>
     </section>
 
-    <!-- ── Badges ── -->
+    <!-- ── Savings Challenges ── -->
+    <section class="prof-section prof-section--challenges">
+      <h2 class="prof-section-title">Savings Challenges</h2>
+      <p class="prof-section-sub">Pick a challenge to boost your savings habits. Progress is tracked automatically from your transactions.</p>
+
+      <div class="dashboard" id="challenges-stats">
+        <div class="stat-card stat-card--income">
+          <div class="stat-card-top">
+            <span class="stat-label">Active</span>
+            <span class="stat-icon" style="color:#c8943a">🔥</span>
+          </div>
+          <span class="stat-value" id="ch-active-count">0</span>
+          <span class="stat-sub">challenges in progress</span>
+        </div>
+        <div class="stat-card stat-card--balance">
+          <div class="stat-card-top">
+            <span class="stat-label">Completed</span>
+            <span class="stat-icon" style="color:#2d7a3a">🏆</span>
+          </div>
+          <span class="stat-value positive" id="ch-done-count">0</span>
+          <span class="stat-sub">all time</span>
+        </div>
+        <div class="stat-card stat-card--safe">
+          <div class="stat-card-top">
+            <span class="stat-label">Streak</span>
+            <span class="stat-icon" style="color:#e07b54">⚡</span>
+          </div>
+          <span class="stat-value" id="ch-streak">0</span>
+          <span class="stat-sub">days current streak</span>
+        </div>
+      </div>
+
+      <!-- Active challenges -->
+      <section class="app-card" id="active-challenges-section" style="display:none;margin-top:1.5rem">
+        <div class="history-header">
+          <h2 class="card-title">In Progress</h2>
+          <span class="tx-count" id="active-ch-count">0</span>
+        </div>
+        <div id="active-challenges-list"></div>
+      </section>
+
+      <!-- Available challenges -->
+      <section class="app-card" style="margin-top:1.5rem">
+        <h2 class="card-title">Available Challenges</h2>
+        <div class="challenge-grid" id="available-challenges"></div>
+      </section>
+
+      <!-- Challenge badges -->
+      <section class="app-card" id="challenge-badges-section" style="display:none;margin-top:1.5rem">
+        <h2 class="card-title">Earned Challenge Badges</h2>
+        <div class="badges-grid" id="challenge-badges-grid"></div>
+      </section>
+    </section>
+
+    <!-- ── Achievements ── -->
     <section class="prof-section prof-section--badges">
       <div class="badges-header">
         <h2 class="prof-section-title">Achievements</h2>

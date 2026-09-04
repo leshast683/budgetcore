@@ -8,6 +8,7 @@ export default defineConfig({
     },
   },
   build: {
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       input: {
         main:        resolve(__dirname, 'index.html'),
@@ -17,7 +18,13 @@ export default defineConfig({
         analytics:   resolve(__dirname, 'analytics.html'),
         investments: resolve(__dirname, 'investments.html'),
         networth:    resolve(__dirname, 'networth.html'),
-        challenges:  resolve(__dirname, 'challenges.html'),
+      },
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/firebase')) return 'firebase';
+          if (id.includes('node_modules/chart.js') || id.includes('node_modules/chartjs')) return 'chartjs';
+          if (id.includes('node_modules/leaflet')) return 'leaflet';
+        },
       },
     },
   },
