@@ -37,7 +37,7 @@ BudgetCore is a personal finance tracking web app that helps users manage income
 ## Project Structure
 
 ```
-budgetly/
+budgetcore/
 ├── index.html          # Landing / auth page
 ├── index.js            # Auth logic
 ├── app.html            # Main dashboard (transactions + chart)

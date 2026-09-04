@@ -12,15 +12,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leshast683/budgetly.git"
+    "url": "git+https://github.com/leshast683/budgetcore.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/leshast683/budgetly/issues"
+    "url": "https://github.com/leshast683/budgetcore/issues"
   },
-  "homepage": "https://github.com/leshast683/budgetly#readme",
+  "homepage": "https://github.com/leshast683/budgetcore#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "chart.js": "^4.5.1",
