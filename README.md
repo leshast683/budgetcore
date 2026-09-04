@@ -4,7 +4,7 @@ BudgetCore is a personal finance tracking web app that helps users manage income
 
 ## Live Demo
 
-[https://budgetly-sage.vercel.app](https://budgetly-sage.vercel.app)
+[https://budgetcore.net](https://budgetcore.net)
 
 ---
 

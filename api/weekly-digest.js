@@ -67,9 +67,9 @@ async function buildDigest(uid, email, name) {
         </table>
         ${topCats ? `<p style="font-weight:600;margin-bottom:6px">Top spending categories:</p><ul style="margin:0;padding-left:20px;line-height:2">${topCats}</ul>` : ''}
         <div style="margin-top:24px;text-align:center">
-          <a href="https://budgetly-sage.vercel.app/app.html" style="background:#9a6e3a;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:15px">Open BudgetCore →</a>
+          <a href="https://budgetcore.net/app.html" style="background:#9a6e3a;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:15px">Open BudgetCore →</a>
         </div>
-        <p style="font-size:11px;color:#a89070;margin-top:24px;text-align:center">You're receiving this because you have an account at BudgetCore. <a href="https://budgetly-sage.vercel.app/profile.html" style="color:#9a6e3a">Manage email preferences</a>.</p>
+        <p style="font-size:11px;color:#a89070;margin-top:24px;text-align:center">You're receiving this because you have an account at BudgetCore. <a href="https://budgetcore.net/profile.html" style="color:#9a6e3a">Manage email preferences</a>.</p>
       </div>
     </div>
   `;
