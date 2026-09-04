@@ -341,87 +341,6 @@
       </div>
     </section>
 
-    <!-- ===== 3. Transaction History ===== -->
-    <section class="app-card history-section">
-
-      <div class="history-header">
-        <h2 class="card-title">Transaction History</h2>
-        <div class="history-header-right">
-          <span class="tx-count" id="tx-count">0 transactions</span>
-          <button type="button" class="btn-ghost btn-sm export-btn" id="export-csv-btn" title="Export CSV">⬇ CSV</button>
-          <button type="button" class="btn-ghost btn-sm export-btn" id="export-pdf-btn" title="Export PDF / Print">⬇ PDF</button>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="filters-row">
-        <input type="text" id="search-input" class="filter-search" placeholder="Search transactions…" />
-        <select id="filter-type" class="filter-select">
-          <option value="all">All types</option>
-          <option value="expense">Expenses</option>
-          <option value="income">Income</option>
-        </select>
-        <select id="filter-category" class="filter-select">
-          <option value="all">All categories</option>
-          <optgroup label="── Income ──">
-            <option value="paycheck"   style="background:#d4eccc;color:#1a5010">Paycheck</option>
-            <option value="salary"     style="background:#d8e8f0;color:#1e4868">Salary</option>
-            <option value="freelance"  style="background:#d8d8f0;color:#30288a">Freelance</option>
-            <option value="bonuses"    style="background:#f0e4c4;color:#6c4810">Bonuses</option>
-            <option value="stocks"     style="background:#c8edd8;color:#1a5034">Stocks</option>
-            <option value="gift"       style="background:#f0d4e8;color:#6c1848">Gift</option>
-            <option value="benefits"   style="background:#e0d4f0;color:#3c2070">Gov. Benefits</option>
-            <option value="retirement" style="background:#f0dcd4;color:#6c2c18">Retirement</option>
-            <option value="other"      style="background:#e4e4e8;color:#404050">Other</option>
-          </optgroup>
-          <optgroup label="── Expense ──">
-            <option value="housing"       style="background:#f0e4cc;color:#7a4820">Housing / Rent</option>
-            <option value="mortgage"      style="background:#eddcc8;color:#6c3c18">Mortgage</option>
-            <option value="utilities"     style="background:#e8e4c8;color:#5c5020">Utilities</option>
-            <option value="groceries"     style="background:#f5e6cf;color:#7c5020">Groceries</option>
-            <option value="dining"        style="background:#f5eac4;color:#7a6010">Dining Out</option>
-            <option value="fooddelivery"  style="background:#fce8d4;color:#8c4810">Food Delivery</option>
-            <option value="transport"     style="background:#e8dece;color:#5c3d18">Transportation</option>
-            <option value="gascharging"   style="background:#f5e0c4;color:#7c4010">Gas / Charging</option>
-            <option value="gas"           style="background:#f5e0c4;color:#7c4010">Gas / Fuel (legacy)</option>
-            <option value="carpayment"    style="background:#d8e4f0;color:#24446c">Car Payment</option>
-            <option value="carinsurance"  style="background:#d4ddf0;color:#1e3c6c">Car Insurance</option>
-            <option value="healthins"     style="background:#c8e8d0;color:#1a5c2a">Health Insurance</option>
-            <option value="medical"       style="background:#deecd8;color:#2e6030">Medical</option>
-            <option value="phone"         style="background:#dcd8f0;color:#342880">Phone Bill</option>
-            <option value="internet"      style="background:#d0e4f8;color:#1a4470">Internet</option>
-            <option value="subscriptions" style="background:#e4d4f0;color:#5c2470">Subscriptions</option>
-            <option value="childcare"     style="background:#f8d8e8;color:#7c2050">Childcare</option>
-            <option value="education"     style="background:#e4e8cc;color:#4c5420">Education</option>
-            <option value="creditcards"   style="background:#f5d8cc;color:#8c2c1c">Credit Cards</option>
-            <option value="personalcare"  style="background:#f0d8e4;color:#782448">Personal Care</option>
-            <option value="clothing"      style="background:#d4e8e4;color:#1c5850">Clothing</option>
-            <option value="shopping"      style="background:#e8d8f0;color:#5c2478">Shopping</option>
-            <option value="onlineshopping" style="background:#dcd4f0;color:#4c2478">Online Shopping</option>
-            <option value="entertainment" style="background:#ead4e8;color:#6a2868">Entertainment</option>
-            <option value="other"         style="background:#e4e4e8;color:#404050">Other</option>
-          </optgroup>
-        </select>
-        <input type="date" id="filter-from" class="filter-date" title="From date" />
-        <input type="date" id="filter-to"   class="filter-date" title="To date" />
-        <button id="clear-filters" class="btn-ghost">Clear</button>
-      </div>
-
-      <!-- Spending chart (shown when expense data exists) -->
-      <div class="chart-wrap" id="chart-wrap" style="display:none">
-        <div class="chart-header">
-          <p class="chart-title">Expenses by Category</p>
-          <span id="chart-total-badge" class="chart-total-badge"></span>
-        </div>
-        <div id="chart-bars" class="chart-bars"></div>
-      </div>
-
-      <!-- Transaction list -->
-      <div id="transaction-list"></div>
-      <p class="empty-state" id="list-empty" style="display:none">No transactions found. Add one above!</p>
-
-    </section>
-
     <!-- ===== 4. Budget Targets (monthly income/expense/budget goals) ===== -->
     <section class="app-card profile-section" id="profile-section" style="display:none">
       <h2 class="card-title">Budget Targets</h2>
@@ -577,6 +496,87 @@
         <span class="bill-cal-month" id="bill-cal-month"></span>
       </div>
       <div class="bill-cal-grid" id="bill-cal-grid"></div>
+    </section>
+
+    <!-- ===== 13. Transaction History ===== -->
+    <section class="app-card history-section">
+
+      <div class="history-header">
+        <h2 class="card-title">Transaction History</h2>
+        <div class="history-header-right">
+          <span class="tx-count" id="tx-count">0 transactions</span>
+          <button type="button" class="btn-ghost btn-sm export-btn" id="export-csv-btn" title="Export CSV">⬇ CSV</button>
+          <button type="button" class="btn-ghost btn-sm export-btn" id="export-pdf-btn" title="Export PDF / Print">⬇ PDF</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-row">
+        <input type="text" id="search-input" class="filter-search" placeholder="Search transactions…" />
+        <select id="filter-type" class="filter-select">
+          <option value="all">All types</option>
+          <option value="expense">Expenses</option>
+          <option value="income">Income</option>
+        </select>
+        <select id="filter-category" class="filter-select">
+          <option value="all">All categories</option>
+          <optgroup label="── Income ──">
+            <option value="paycheck"   style="background:#d4eccc;color:#1a5010">Paycheck</option>
+            <option value="salary"     style="background:#d8e8f0;color:#1e4868">Salary</option>
+            <option value="freelance"  style="background:#d8d8f0;color:#30288a">Freelance</option>
+            <option value="bonuses"    style="background:#f0e4c4;color:#6c4810">Bonuses</option>
+            <option value="stocks"     style="background:#c8edd8;color:#1a5034">Stocks</option>
+            <option value="gift"       style="background:#f0d4e8;color:#6c1848">Gift</option>
+            <option value="benefits"   style="background:#e0d4f0;color:#3c2070">Gov. Benefits</option>
+            <option value="retirement" style="background:#f0dcd4;color:#6c2c18">Retirement</option>
+            <option value="other"      style="background:#e4e4e8;color:#404050">Other</option>
+          </optgroup>
+          <optgroup label="── Expense ──">
+            <option value="housing"       style="background:#f0e4cc;color:#7a4820">Housing / Rent</option>
+            <option value="mortgage"      style="background:#eddcc8;color:#6c3c18">Mortgage</option>
+            <option value="utilities"     style="background:#e8e4c8;color:#5c5020">Utilities</option>
+            <option value="groceries"     style="background:#f5e6cf;color:#7c5020">Groceries</option>
+            <option value="dining"        style="background:#f5eac4;color:#7a6010">Dining Out</option>
+            <option value="fooddelivery"  style="background:#fce8d4;color:#8c4810">Food Delivery</option>
+            <option value="transport"     style="background:#e8dece;color:#5c3d18">Transportation</option>
+            <option value="gascharging"   style="background:#f5e0c4;color:#7c4010">Gas / Charging</option>
+            <option value="gas"           style="background:#f5e0c4;color:#7c4010">Gas / Fuel (legacy)</option>
+            <option value="carpayment"    style="background:#d8e4f0;color:#24446c">Car Payment</option>
+            <option value="carinsurance"  style="background:#d4ddf0;color:#1e3c6c">Car Insurance</option>
+            <option value="healthins"     style="background:#c8e8d0;color:#1a5c2a">Health Insurance</option>
+            <option value="medical"       style="background:#deecd8;color:#2e6030">Medical</option>
+            <option value="phone"         style="background:#dcd8f0;color:#342880">Phone Bill</option>
+            <option value="internet"      style="background:#d0e4f8;color:#1a4470">Internet</option>
+            <option value="subscriptions" style="background:#e4d4f0;color:#5c2470">Subscriptions</option>
+            <option value="childcare"     style="background:#f8d8e8;color:#7c2050">Childcare</option>
+            <option value="education"     style="background:#e4e8cc;color:#4c5420">Education</option>
+            <option value="creditcards"   style="background:#f5d8cc;color:#8c2c1c">Credit Cards</option>
+            <option value="personalcare"  style="background:#f0d8e4;color:#782448">Personal Care</option>
+            <option value="clothing"      style="background:#d4e8e4;color:#1c5850">Clothing</option>
+            <option value="shopping"      style="background:#e8d8f0;color:#5c2478">Shopping</option>
+            <option value="onlineshopping" style="background:#dcd4f0;color:#4c2478">Online Shopping</option>
+            <option value="entertainment" style="background:#ead4e8;color:#6a2868">Entertainment</option>
+            <option value="other"         style="background:#e4e4e8;color:#404050">Other</option>
+          </optgroup>
+        </select>
+        <input type="date" id="filter-from" class="filter-date" title="From date" />
+        <input type="date" id="filter-to"   class="filter-date" title="To date" />
+        <button id="clear-filters" class="btn-ghost">Clear</button>
+      </div>
+
+      <!-- Spending chart (shown when expense data exists) -->
+      <div class="chart-wrap" id="chart-wrap" style="display:none">
+        <div class="chart-header">
+          <p class="chart-title">Expenses by Category</p>
+          <span id="chart-total-badge" class="chart-total-badge"></span>
+        </div>
+        <div id="chart-bars" class="chart-bars"></div>
+      </div>
+
+      <!-- Transaction list -->
+      <div id="transaction-list"></div>
+      <p class="empty-state" id="list-empty" style="display:none">No transactions found. Add one above!</p>
+
     </section>
 
   </main>
