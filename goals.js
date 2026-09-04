@@ -1,6 +1,6 @@
 import { initNav } from './nav.js';
 // ============================================================
-// Budgetly — goals.js
+// BudgetCore — goals.js
 // Savings Goals page
 // ============================================================
 

@@ -1,5 +1,5 @@
 // ============================================================
-// Budgetly — index.js
+// BudgetCore — index.js
 // Home page: auth state + sliding sign-in / sign-up
 // ============================================================
 

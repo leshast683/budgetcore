@@ -1,5 +1,5 @@
 // ============================================================
-// Budgetly — app.js
+// BudgetCore — app.js
 // ============================================================
 
 import Chart from 'chart.js/auto';
@@ -1484,7 +1484,7 @@ function exportCSV() {
   const url     = URL.createObjectURL(blob);
   const a       = document.createElement('a');
   a.href        = url;
-  a.download    = `budgetly-${currentMonth}.csv`;
+  a.download    = `budgetcore-${currentMonth}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }

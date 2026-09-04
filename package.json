@@ -1,7 +1,7 @@
 {
-  "name": "budgetly",
+  "name": "budgetcore",
   "version": "1.0.0",
-  "description": "Budgetly is a personal finance tracking web app that helps users manage expenses and understand their spending habits.",
+  "description": "BudgetCore is a personal finance tracking web app that helps users manage expenses and understand their spending habits.",
   "main": "app.js",
   "type": "module",
   "scripts": {

@@ -1,6 +1,6 @@
 {
-  "name": "Budgetly",
-  "short_name": "Budgetly",
+  "name": "BudgetCore",
+  "short_name": "BudgetCore",
   "description": "Track your money, simply.",
   "start_url": "/index.html?home=1",
   "display": "standalone",

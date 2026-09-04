@@ -1,4 +1,4 @@
-// Budgetly — landing page script
+// BudgetCore — landing page script
 
 document.addEventListener('DOMContentLoaded', () => {
   // Sticky nav shadow on scroll

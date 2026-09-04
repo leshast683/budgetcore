@@ -1,5 +1,5 @@
 // ============================================================
-// Budgetly — firebase.js
+// BudgetCore — firebase.js
 // Firebase app initialisation — exported singletons used by app.js
 // ============================================================
 //

@@ -1,6 +1,6 @@
 import { initNav } from './nav.js';
 // ============================================================
-// Budgetly — networth.js
+// BudgetCore — networth.js
 // Net Worth Tracker + Debt Payoff Planner
 // ============================================================
 

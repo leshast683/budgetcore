@@ -1,6 +1,6 @@
 import { initNav } from './nav.js';
 // ============================================================
-// Budgetly — challenges.js
+// BudgetCore — challenges.js
 // Savings Challenges + Gamification
 // ============================================================
 

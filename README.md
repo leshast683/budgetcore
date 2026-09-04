@@ -1,6 +1,6 @@
-# Budgetly
+# BudgetCore
 
-Budgetly is a personal finance tracking web app that helps users manage income and expenses, understand spending habits, and work toward savings goals.
+BudgetCore is a personal finance tracking web app that helps users manage income and expenses, understand spending habits, and work toward savings goals.
 
 ## Live Demo
 

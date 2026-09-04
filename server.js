@@ -1,4 +1,4 @@
-// Budgetly — AI Budget Insights Express server (local dev)
+// BudgetCore — AI Budget Insights Express server (local dev)
 // Run with: node server.js
 // Proxied automatically by Vite during `npm run dev`
 
@@ -66,5 +66,5 @@ ${formatCats(incomeByCategory || {})}`;
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () =>
-  console.log(`Budgetly AI server running → http://localhost:${PORT}`),
+  console.log(`BudgetCore AI server running → http://localhost:${PORT}`),
 );

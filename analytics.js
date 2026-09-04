@@ -190,7 +190,7 @@ async function geocode(locationStr) {
   if (geocodeCache[key]) return geocodeCache[key];
   try {
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationStr)}&format=json&limit=1`;
-    const res = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'Budgetly/1.0' } });
+    const res = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'BudgetCore/1.0' } });
     const data = await res.json();
     if (data[0]) {
       const result = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };

@@ -1,4 +1,4 @@
-// Budgetly — AI Budget Insights (Vercel Serverless Function)
+// BudgetCore — AI Budget Insights (Vercel Serverless Function)
 // Deployed at: /analyze-budget  (rewritten from vercel.json)
 
 import Anthropic from '@anthropic-ai/sdk';

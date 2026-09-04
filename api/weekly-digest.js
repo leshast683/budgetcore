@@ -54,7 +54,7 @@ async function buildDigest(uid, email, name) {
   const html = `
     <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;color:#2a1f14">
       <div style="background:#9a6e3a;padding:24px 32px;border-radius:12px 12px 0 0;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:22px">Budgetly Weekly Digest</h1>
+        <h1 style="color:#fff;margin:0;font-size:22px">BudgetCore Weekly Digest</h1>
         <p style="color:#f5e6d0;margin:4px 0 0;font-size:13px">${start} – ${end}</p>
       </div>
       <div style="background:#fffaf5;padding:28px 32px;border:1px solid #e8dcd0;border-top:none;border-radius:0 0 12px 12px">
@@ -67,14 +67,14 @@ async function buildDigest(uid, email, name) {
         </table>
         ${topCats ? `<p style="font-weight:600;margin-bottom:6px">Top spending categories:</p><ul style="margin:0;padding-left:20px;line-height:2">${topCats}</ul>` : ''}
         <div style="margin-top:24px;text-align:center">
-          <a href="https://budgetly-sage.vercel.app/app.html" style="background:#9a6e3a;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:15px">Open Budgetly →</a>
+          <a href="https://budgetly-sage.vercel.app/app.html" style="background:#9a6e3a;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:15px">Open BudgetCore →</a>
         </div>
-        <p style="font-size:11px;color:#a89070;margin-top:24px;text-align:center">You're receiving this because you have an account at Budgetly. <a href="https://budgetly-sage.vercel.app/profile.html" style="color:#9a6e3a">Manage email preferences</a>.</p>
+        <p style="font-size:11px;color:#a89070;margin-top:24px;text-align:center">You're receiving this because you have an account at BudgetCore. <a href="https://budgetly-sage.vercel.app/profile.html" style="color:#9a6e3a">Manage email preferences</a>.</p>
       </div>
     </div>
   `;
 
-  return { html, subject: `Your Budgetly week: ${fmtUSD(expenses)} spent, ${fmtUSD(Math.abs(saved))} ${saved >= 0 ? 'saved' : 'over'} 📊` };
+  return { html, subject: `Your BudgetCore week: ${fmtUSD(expenses)} spent, ${fmtUSD(Math.abs(saved))} ${saved >= 0 ? 'saved' : 'over'} 📊` };
 }
 
 async function sendEmail(to, subject, html) {
@@ -85,7 +85,7 @@ async function sendEmail(to, subject, html) {
       'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: 'Budgetly <digest@budgetly-sage.vercel.app>',
+      from: 'BudgetCore <digest@budgetly-sage.vercel.app>',
       to,
       subject,
       html,
