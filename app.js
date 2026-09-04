@@ -1066,10 +1066,6 @@ function renderWeeklyDigest() {
   let html = '';
   if (topCat) html += `<span class="digest-chip">Top spend: <b>${CATEGORY_LABELS[topCat[0]] || topCat[0]}</b> ${formatCurrency(topCat[1])}</span>`;
   if (bigTx)  html += `<span class="digest-chip">Biggest: <b>${escapeHtml(bigTx.description)}</b> ${formatCurrency(bigTx.amount)}</span>`;
-  if (income > 0) {
-    const rate = Math.max(0, Math.round((saved / income) * 100));
-    html += `<span class="digest-chip">Savings rate: <b>${rate}%</b></span>`;
-  }
   document.getElementById('digest-highlights').innerHTML = html;
 }
 

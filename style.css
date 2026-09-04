@@ -4212,7 +4212,7 @@ input[type="number"] {
     gap: 0.55rem;
   }
   .stat-card {
-    padding: 0.65rem 0.75rem 0.6rem;
+    padding: 0.9rem 0.75rem 0.85rem;
     border-radius: 14px;
     gap: 0.15rem;
   }
@@ -4258,7 +4258,7 @@ input[type="number"] {
   }
 
   .stat-card {
-    padding: 0.38rem 0.5rem 0.32rem;
+    padding: 0.65rem 0.5rem 0.6rem;
     border-radius: 10px;
     gap: 0;
   }
