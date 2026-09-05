@@ -1,4 +1,4 @@
-const CACHE = 'budgetcore-v8';
+const CACHE = 'budgetcore-v9';
 const STATIC = [
   '/',
   '/index.html',
@@ -29,16 +29,16 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (e.request.url.includes('firestore') || e.request.url.includes('firebase')) return;
 
+  // Network-first: always prefer the latest deployed files. Falls back to
+  // cache only when offline, so redeploys are visible immediately instead
+  // of being masked by a stale cached response.
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const network = fetch(e.request).then(res => {
-        if (res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      });
-      return cached || network;
-    })
+    fetch(e.request).then(res => {
+      if (res.ok) {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return res;
+    }).catch(() => caches.match(e.request))
   );
 });
