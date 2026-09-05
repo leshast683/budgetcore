@@ -4856,12 +4856,21 @@ input[type="number"] {
     height: auto;
     align-self: start;
     padding: 0.85rem 1rem;
+    animation: none !important;
+    transform: none !important;
+    isolation: isolate;
   }
   .fc-visual {
     flex: 0 0 auto;
   }
   .fc-horizontal {
     gap: 0.75rem;
+  }
+  .feature-card .fc-content,
+  .feature-card .fc-visual,
+  .feature-card .fc-deco,
+  .feature-card .fc-icon {
+    transform: none !important;
   }
 
   .about { padding: 5rem 1.25rem; }
@@ -6292,7 +6301,7 @@ input[type="number"] {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  transform: translateY(8px);
+  transform: translateY(16px);
 }
 .health-score-num {
   font-size: 2rem;
