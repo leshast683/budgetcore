@@ -31,8 +31,6 @@
         <li><a href="app.html">Finance Hub</a></li>
         <li><span class="nav-active">Goals</span></li>
         <li><a href="analytics.html">Analytics</a></li>
-        <li><a href="investments.html">Investments</a></li>
-        <li><a href="networth.html">Net Worth</a></li>
         <li id="nav-user" class="nav-user" style="display:none">
           <span id="user-email" class="nav-user-email"></span>
           <button type="button" id="signout-btn" class="btn-ghost btn-sm">Sign Out</button>
@@ -148,8 +146,101 @@
       </div>
     </div>
 
+    <!-- ===== Portfolio Overview ===== -->
+    <div class="dashboard" id="inv-dashboard">
+      <div class="stat-card stat-card--balance" id="inv-total-card">
+        <div class="stat-card-top">
+          <span class="stat-label">Portfolio Value</span>
+          <span class="stat-icon" style="color:#2d7a3a">📈</span>
+        </div>
+        <span class="stat-value" id="inv-total-val">$0.00</span>
+        <span class="stat-sub" id="inv-total-sub">0 holdings</span>
+      </div>
+      <div class="stat-card stat-card--income" id="inv-gain-card">
+        <div class="stat-card-top">
+          <span class="stat-label">Total Gain / Loss</span>
+          <span class="stat-icon" style="color:#1a5010">💰</span>
+        </div>
+        <span class="stat-value" id="inv-gain-val">$0.00</span>
+        <span class="stat-sub" id="inv-gain-pct">0.00%</span>
+      </div>
+      <div class="stat-card stat-card--expenses" id="inv-cost-card">
+        <div class="stat-card-top">
+          <span class="stat-label">Total Cost Basis</span>
+          <span class="stat-icon" style="color:#8c2c1c">💳</span>
+        </div>
+        <span class="stat-value" id="inv-cost-val">$0.00</span>
+        <span class="stat-sub">amount invested</span>
+      </div>
+    </div>
+
+    <!-- ===== Portfolio Chart ===== -->
+    <section class="app-card" id="inv-chart-card" style="display:none">
+      <h2 class="card-title">Portfolio Breakdown</h2>
+      <div class="inv-chart-wrap">
+        <div style="position:relative;width:220px;height:220px;flex-shrink:0">
+          <canvas id="inv-pie-chart"></canvas>
+        </div>
+        <div id="inv-legend" class="inv-legend"></div>
+      </div>
+    </section>
+
+    <!-- ===== Add Investment Form ===== -->
+    <section class="app-card">
+      <h2 class="card-title" id="inv-form-title">Add Investment</h2>
+      <form id="inv-form" novalidate>
+        <div class="goals-form-grid">
+          <div class="goal-field">
+            <label class="goal-label">Name</label>
+            <input type="text" id="inv-name" placeholder="e.g. Bitcoin, Apple, S&P 500 ETF…" maxlength="60" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Type</label>
+            <select id="inv-type" class="auth-input" style="padding:0.6rem 0.85rem">
+              <option value="crypto">Crypto</option>
+              <option value="stock">Stock</option>
+              <option value="etf">ETF</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Shares / Units</label>
+            <input type="number" id="inv-shares" placeholder="e.g. 0.5" step="any" min="0.0001" inputmode="decimal" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Purchase Price ($)</label>
+            <input type="number" id="inv-buy-price" placeholder="e.g. 45000" step="any" min="0.01" inputmode="decimal" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Current Price ($)</label>
+            <input type="number" id="inv-cur-price" placeholder="e.g. 65000" step="any" min="0.01" inputmode="decimal" required />
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Purchase Date</label>
+            <input type="date" id="inv-date" required />
+          </div>
+        </div>
+        <p class="profile-error" id="inv-error"></p>
+        <div class="goals-form-actions">
+          <button type="submit" class="btn" id="inv-submit-btn">Add Investment</button>
+          <button type="button" class="btn-ghost btn-sm" id="inv-cancel-btn" style="display:none">Cancel Edit</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== Holdings List ===== -->
+    <section class="app-card" id="inv-list-section">
+      <div class="history-header">
+        <h2 class="card-title">Your Holdings</h2>
+        <span class="tx-count" id="inv-count">0 holdings</span>
+      </div>
+      <div id="inv-list"></div>
+      <p class="empty-state" id="inv-empty" style="display:none">No investments yet — add one above to track your portfolio!</p>
+    </section>
+
   </main>
 
   <script type="module" src="goals.js"></script>
+  <script type="module" src="investments.js"></script>
 </body>
 </html>

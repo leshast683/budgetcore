@@ -16,8 +16,6 @@ export default defineConfig({
         goals:       resolve(__dirname, 'goals.html'),
         profile:     resolve(__dirname, 'profile.html'),
         analytics:   resolve(__dirname, 'analytics.html'),
-        investments: resolve(__dirname, 'investments.html'),
-        networth:    resolve(__dirname, 'networth.html'),
       },
       output: {
         manualChunks(id) {

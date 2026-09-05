@@ -1,4 +1,3 @@
-import { initNav } from './nav.js';
 // ============================================================
 // BudgetCore — networth.js
 // Net Worth Tracker + Debt Payoff Planner
@@ -35,18 +34,10 @@ let editingId = null;
 let unsub     = null;
 
 // --- Auth ---
-document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
-
 onAuthStateChanged(auth, user => {
-  document.getElementById('auth-loading').style.display = 'none';
-  if (!user) { window.location.replace('./index.html'); return; }
+  if (!user) return;
 
   document.getElementById('app-content').style.display = '';
-  document.getElementById('nav-user').style.display = 'flex';
-  document.getElementById('user-email').textContent = user.displayName || user.email;
-  document.getElementById('welcome-email').textContent = user.displayName || user.email;
-  document.getElementById('welcome-date').textContent  = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-
   subscribeItems(user.uid);
 });
 
@@ -265,4 +256,3 @@ document.querySelectorAll('.input-clear-btn').forEach(btn => {
     if (target) { target.value = ''; target.focus(); }
   });
 });
-initNav();

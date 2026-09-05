@@ -1,4 +1,3 @@
-import { initNav } from './nav.js';
 import Chart from 'chart.js/auto';
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -246,33 +245,15 @@ document.getElementById('inv-list').addEventListener('click', async e => {
 });
 
 // ---- Auth & Init ----
-function setWelcomeBar(user) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now = new Date();
-  document.getElementById('welcome-date').textContent  = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
-  document.getElementById('welcome-email').textContent = user.email;
-}
-
 onAuthStateChanged(auth, user => {
-  document.getElementById('auth-loading').style.display = 'none';
-  if (!user) { window.location.replace('./index.html'); return; }
+  if (!user) return;
 
   currentUser = user;
   document.getElementById('app-content').style.display = '';
-  document.getElementById('nav-user').style.display    = 'flex';
-  document.getElementById('user-email').textContent    = user.displayName || user.email.split('@')[0];
-  setWelcomeBar(user);
-
   document.getElementById('inv-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
 
   onSnapshot(collection(db, 'users', user.uid, 'investments'), snap => {
     investments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderAll();
   });
 });
-
-window.addEventListener('scroll', () => {
-  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 8);
-}, { passive: true });
-initNav();
