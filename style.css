@@ -4131,7 +4131,7 @@ input[type="number"] {
     gap: 0.55rem;
   }
   .stat-card {
-    padding: 1.2rem 0.9rem 1.15rem;
+    padding: 1.4rem 0.9rem 1.35rem;
     border-radius: 14px;
     gap: 0.25rem;
   }
@@ -4177,7 +4177,7 @@ input[type="number"] {
   }
 
   .stat-card {
-    padding: 0.95rem 0.65rem 0.9rem;
+    padding: 1.15rem 0.65rem 1.1rem;
     border-radius: 12px;
     gap: 0.2rem;
   }
