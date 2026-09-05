@@ -4864,6 +4864,10 @@ input[type="number"] {
     isolation: isolate;
   }
   .feature-card:last-child { margin-bottom: 0; }
+  .feature-card.fc-dark,
+  .feature-card.fc-indigo {
+    display: none !important;
+  }
   .fc-visual {
     flex: 0 0 auto;
   }
