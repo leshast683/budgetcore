@@ -5168,7 +5168,7 @@ input[type="number"] {
   width: 100px; height: 100px; border-radius: 50%;
   background: linear-gradient(135deg, #f5e8d4, #ffe0b8);
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+  overflow: hidden; position: relative;
   box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--accent), 0 8px 24px rgba(139,101,52,0.2);
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
@@ -5177,7 +5177,13 @@ input[type="number"] {
   box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--accent), 0 12px 32px rgba(139,101,52,0.3);
 }
 .prof-avatar-default { width: 52px; height: 52px; color: var(--accent); }
-.prof-avatar > svg  { width: 100px; height: 100px; display: block; }
+.prof-avatar > svg  { width: 100px; height: 100px; display: block; transform: scale(1.07) translateY(-4%); transform-origin: center; }
+.prof-avatar::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 50%),
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.30) 100%);
+}
 .prof-avatar-img { width: 100%; height: 100%; object-fit: cover; }
 
 .prof-avatar-upload {
@@ -5231,7 +5237,13 @@ input[type="number"] {
   box-shadow: 0 0 0 3px #fff, 0 0 0 5.5px var(--accent), 0 6px 20px rgba(139,101,52,0.25);
   transform: scale(1.08);
 }
-.avatar-opt svg { width: 58px; height: 58px; display: block; }
+.avatar-opt svg { width: 58px; height: 58px; display: block; transform: scale(1.10) translateY(-5%); transform-origin: center; }
+.avatar-opt::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 50%),
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.30) 100%);
+}
 
 /* Sections */
 .prof-section {
@@ -6263,7 +6275,7 @@ input[type="number"] {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  transform: translateY(-4px);
+  transform: translateY(8px);
 }
 .health-score-num {
   font-size: 2rem;
