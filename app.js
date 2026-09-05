@@ -621,8 +621,9 @@ function renderPieChart() {
             color:           '#4a3020',
             padding:         16,
             usePointStyle:   true,
-            pointStyle:      'circle',
+            pointStyle:      'rect',
             pointStyleWidth: 10,
+            boxHeight:       10,
           },
         },
         tooltip: {
