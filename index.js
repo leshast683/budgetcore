@@ -31,6 +31,14 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+// Re-fetch the avatar if the page is restored from bfcache (e.g. via the
+// browser back button), so a just-saved avatar change doesn't look stale.
+window.addEventListener('pageshow', e => {
+  if (e.persisted && auth.currentUser) {
+    loadAndApplyAvatar(auth.currentUser.uid, 'home-avatar-ring');
+  }
+});
+
 function showLoggedInState(user) {
   hideAuth();
   document.getElementById('home-nav-user').style.display  = 'flex';

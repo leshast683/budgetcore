@@ -1,4 +1,4 @@
-const CACHE = 'budgetcore-v7';
+const CACHE = 'budgetcore-v8';
 const STATIC = [
   '/',
   '/index.html',

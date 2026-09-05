@@ -2500,3 +2500,11 @@ function init() {
 document.addEventListener('DOMContentLoaded', init);
 initPageTransitions();
 initNav();
+
+// Re-fetch the avatar if the page is restored from bfcache (e.g. via the
+// browser back button), so a just-saved avatar change doesn't look stale.
+window.addEventListener('pageshow', e => {
+  if (e.persisted && currentUser) {
+    loadAndApplyAvatar(currentUser.uid, 'account-avatar-ring');
+  }
+});
