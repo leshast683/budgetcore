@@ -4845,6 +4845,7 @@ input[type="number"] {
   .features { padding: 3rem 1rem; }
   .features-bento {
     grid-template-columns: 1fr;
+    grid-auto-rows: min-content;
     gap: 0.5rem;
   }
   .features-bento .feature-card:nth-child(5),
@@ -4854,6 +4855,8 @@ input[type="number"] {
   }
   .feature-card {
     min-height: auto;
+    height: auto;
+    align-self: start;
     padding: 0.85rem 1rem;
   }
   .fc-visual {
