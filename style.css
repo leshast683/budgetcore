@@ -2849,6 +2849,22 @@ footer {
   transition: box-shadow 0.25s var(--ease-in-out), transform 0.25s var(--ease-out), background 0.25s var(--ease-in-out);
 }
 
+.section-divider {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 0.7rem 1.25rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  box-shadow: var(--shadow-xs);
+}
+
 .app-card:hover {
   box-shadow: var(--shadow-md);
 }
