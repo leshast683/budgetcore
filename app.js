@@ -1012,64 +1012,6 @@ function renderTransactions() {
     }).join('');
 }
 
-// --- Weekly Digest helpers ---
-function getWeekRange() {
-  const today = new Date();
-  const dow   = today.getDay(); // 0=Sun local
-  const mon   = new Date(today); mon.setDate(today.getDate() - ((dow + 6) % 7));
-  const sun   = new Date(mon);  sun.setDate(mon.getDate() + 6);
-  // Use LOCAL date (not UTC) to match how transaction dates are stored
-  const fmt = d => {
-    const y  = d.getFullYear();
-    const m  = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${dd}`;
-  };
-  return { start: fmt(mon), end: fmt(sun) };
-}
-
-function getWeekTransactions() {
-  const { start, end } = getWeekRange();
-  return transactions.filter(tx => tx.date >= start && tx.date <= end);
-}
-
-// --- Render: Weekly Digest ---
-function renderWeeklyDigest() {
-  const card   = document.getElementById('weekly-digest');
-  const weekTx = getWeekTransactions();
-
-  if (!weekTx.length) { card.style.display = 'none'; return; }
-  card.style.display = '';
-
-  const income   = weekTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const expenses = weekTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-  const saved    = income - expenses;
-
-  // Week range label
-  const { start, end } = getWeekRange();
-  const fmtShort = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  document.getElementById('digest-range').textContent     = `${fmtShort(start)} – ${fmtShort(end)}`;
-  document.getElementById('digest-income').textContent    = formatCurrency(income);
-  document.getElementById('digest-expenses').textContent  = formatCurrency(expenses);
-
-  const savedEl = document.getElementById('digest-saved');
-  savedEl.textContent = formatCurrency(Math.abs(saved));
-  savedEl.className   = 'digest-stat-value ' + (saved >= 0 ? 'digest-income' : 'digest-expense');
-
-  // Highlights: top category + biggest single expense
-  const catTotals = weekTx
-    .filter(t => t.type === 'expense')
-    .reduce((acc, t) => { acc[t.category] = (acc[t.category] || 0) + t.amount; return acc; }, {});
-  const topCat   = Object.entries(catTotals).sort((a, b) => b[1] - a[1])[0];
-  const bigTx    = weekTx.filter(t => t.type === 'expense').sort((a, b) => b.amount - a.amount)[0];
-
-  let html = '';
-  if (topCat) html += `<span class="digest-chip">Top spend: <b>${CATEGORY_LABELS[topCat[0]] || topCat[0]}</b> ${formatCurrency(topCat[1])}</span>`;
-  if (bigTx)  html += `<span class="digest-chip">Biggest: <b>${escapeHtml(bigTx.description)}</b> ${formatCurrency(bigTx.amount)}</span>`;
-  document.getElementById('digest-highlights').innerHTML = html;
-}
-
-
 // --- Render: Month Picker ---
 function renderMonthPicker() {
   const months  = getAvailableMonths();
@@ -1546,7 +1488,6 @@ function renderAll() {
   renderMonthPicker();
   renderBudgetAlert();
   renderMonthRecap();
-  renderWeeklyDigest();
   renderDashboard();
   renderHealthScore();
   renderBudgetCard();
