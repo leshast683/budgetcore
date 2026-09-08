@@ -16,8 +16,14 @@ supabase.auth.onAuthStateChange((event, session) => {
   document.getElementById('auth-loading').style.display = 'none';
   currentUser = session?.user ?? null;
 
-  if (currentUser && sessionStorage.getItem('oauthPending')) {
-    sessionStorage.removeItem('oauthPending');
+  if (currentUser && sessionStorage.getItem('authPending')) {
+    // Handles every sign-in path (email/password sign-in, sign-up, and OAuth):
+    // supabase.auth's session gets set — and this listener fires — the moment
+    // signUp()/signInWithPassword()/signInWithOAuth() resolves internally, which
+    // can happen before the calling form handler's own code continues. Routing
+    // the welcome/onboarding flow through here (instead of from each form
+    // handler) avoids that race.
+    sessionStorage.removeItem('authPending');
     const name = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
       || currentUser.email?.split('@')[0] || 'there';
     showWelcomeToast(name, currentUser, () => window.location.replace('./app.html'));
@@ -254,14 +260,15 @@ document.getElementById('signin-form').addEventListener('submit', async e => {
   errorEl.textContent = '';
   btn.disabled = true; btn.textContent = 'Signing in…';
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  sessionStorage.setItem('authPending', '1');
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
+    sessionStorage.removeItem('authPending');
     errorEl.textContent = friendlyError(error);
     btn.disabled = false; btn.textContent = 'Sign In';
     return;
   }
-  const name = data.user.user_metadata?.full_name || data.user.email.split('@')[0];
-  showWelcomeToast(name, data.user, () => window.location.replace('./app.html'));
+  // onAuthStateChange picks up the session and shows the welcome toast.
 });
 
 // ── Sign Up form ──────────────────────────────────────────────────────────────
@@ -285,31 +292,32 @@ document.getElementById('signup-form').addEventListener('submit', async e => {
 
   btn.disabled = true; btn.textContent = 'Creating account…';
 
-  const { data, error } = await supabase.auth.signUp({
+  sessionStorage.setItem('authPending', '1');
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: { data: name ? { full_name: name } : {} },
   });
   if (error) {
+    sessionStorage.removeItem('authPending');
     errorEl.textContent = friendlyError(error);
     btn.disabled = false; btn.textContent = 'Create Account';
     return;
   }
-  const displayName = name || email.split('@')[0];
-  showWelcomeToast(displayName, data.user, () => window.location.replace('./app.html'));
+  // onAuthStateChange picks up the session and shows the welcome/onboarding flow.
 });
 
 // ── Social auth (shared) ──────────────────────────────────────────────────────
 async function socialAuth(provider, errorElId) {
   const errorEl = document.getElementById(errorElId);
   errorEl.textContent = '';
-  sessionStorage.setItem('oauthPending', '1');
+  sessionStorage.setItem('authPending', '1');
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: { redirectTo: window.location.origin + '/index.html?home=1' },
   });
   if (error) {
-    sessionStorage.removeItem('oauthPending');
+    sessionStorage.removeItem('authPending');
     errorEl.textContent = friendlyError(error);
   }
   // On success the browser navigates away to the provider; onAuthStateChange
