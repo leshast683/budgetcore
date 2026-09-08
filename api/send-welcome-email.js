@@ -14,9 +14,8 @@ function greetingName(record) {
 function buildWelcomeEmail(name) {
   const html = `
     <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;color:#2a1f14">
-      <div style="background:#9a6e3a;padding:24px 32px;border-radius:12px 12px 0 0;text-align:center">
-        <h1 style="color:#fff;margin:0;font-size:22px">Welcome to BudgetCore</h1>
-      </div>
+      <img src="https://www.budgetcore.net/email-welcome-banner.jpg" alt="Welcome to BudgetCore"
+        width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:12px 12px 0 0" />
       <div style="background:#fffaf5;padding:28px 32px;border:1px solid #e8dcd0;border-top:none;border-radius:0 0 12px 12px">
         <p style="font-size:16px">Hi ${name} 👋</p>
         <p>Your account is ready. BudgetCore helps you track income and expenses, understand your spending habits, and work toward your savings goals.</p>
@@ -43,7 +42,10 @@ async function sendEmail(to, subject, html) {
       'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: 'BudgetCore <welcome@budgetcore.net>',
+      // Falls back to Resend's shared test sender (only delivers to your own
+      // Resend account email) until budgetcore.net is verified in Resend —
+      // then set RESEND_FROM_EMAIL to something like "BudgetCore <welcome@budgetcore.net>".
+      from: process.env.RESEND_FROM_EMAIL || 'BudgetCore <onboarding@resend.dev>',
       to,
       subject,
       html,
