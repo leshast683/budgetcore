@@ -1,6 +1,5 @@
 // Shared avatar utilities
-import { auth, db } from './firebase.js';
-import { getDoc, doc } from 'firebase/firestore';
+import { supabase } from './supabase.js';
 
 // The 6 default avatar SVGs (matching profile.html)
 export const AVATAR_SVGS = {
@@ -15,8 +14,8 @@ export const AVATAR_SVGS = {
 // Apply avatar to a ring element
 export function applyAvatarToRing(ringEl, profileData) {
   if (!ringEl || !profileData) return;
-  if (profileData.avatarData) {
-    ringEl.innerHTML = `<img src="${profileData.avatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />`;
+  if (profileData.avatar_data) {
+    ringEl.innerHTML = `<img src="${profileData.avatar_data}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />`;
   } else if (profileData.avatar && AVATAR_SVGS[String(profileData.avatar)]) {
     ringEl.innerHTML = AVATAR_SVGS[String(profileData.avatar)];
     const svg = ringEl.querySelector('svg');
@@ -27,10 +26,10 @@ export function applyAvatarToRing(ringEl, profileData) {
 // Load profile and apply avatar to a ring element by ID
 export async function loadAndApplyAvatar(uid, ringElId) {
   try {
-    const snap = await getDoc(doc(db, 'users', uid, 'settings', 'userProfile'));
-    if (snap.exists()) {
+    const { data } = await supabase.from('profiles').select('avatar, avatar_data').eq('id', uid).single();
+    if (data) {
       const ringEl = document.getElementById(ringElId);
-      applyAvatarToRing(ringEl, snap.data());
+      applyAvatarToRing(ringEl, data);
     }
   } catch (e) { /* silently ignore */ }
 }

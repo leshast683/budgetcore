@@ -19,7 +19,6 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="prefetch" href="profile.html" />
   <link rel="prefetch" href="goals.html" />
-  <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
 </head>
 <body class="app-page">
 
@@ -119,7 +118,7 @@
 
   <main class="app-layout" id="app-content" style="display:none">
 
-    <!-- Firestore connection error (shown if onSnapshot fails) -->
+    <!-- Database connection error (shown if the transactions fetch fails) -->
     <p id="firestore-error" class="form-error" style="display:none;margin:0.75rem 0 0"></p>
 
     <!-- ===== 0. Welcome Bar ===== -->

@@ -1,15 +1,11 @@
 import Chart from 'chart.js/auto';
-import { auth, db } from './firebase.js';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import {
-  collection, doc, addDoc, updateDoc, deleteDoc,
-  onSnapshot, serverTimestamp,
-} from 'firebase/firestore';
+import { supabase } from './supabase.js';
 
 let investments   = [];
 let currentUser   = null;
 let editingId     = null;
 let invPieChart   = null;
+let channel       = null;
 
 const TYPE_ICONS  = { crypto: '₿', stock: '📊', etf: '📦', other: '💼' };
 const TYPE_COLORS = { crypto: '#f7931a', stock: '#2d7a3a', etf: '#1a6ea8', other: '#9a6e3a' };
@@ -196,7 +192,7 @@ function populateForm(inv) {
 
 document.getElementById('inv-form').addEventListener('submit', async e => {
   e.preventDefault();
-  const uid     = currentUser?.uid;
+  const uid     = currentUser?.id;
   const errorEl = document.getElementById('inv-error');
   const btn     = document.getElementById('inv-submit-btn');
   errorEl.textContent = '';
@@ -214,12 +210,16 @@ document.getElementById('inv-form').addEventListener('submit', async e => {
 
   btn.disabled = true;
   try {
-    const data = { name, type, shares, purchasePrice, currentPrice, purchaseDate, userId: uid };
-    if (editingId) {
-      await updateDoc(doc(db, 'users', uid, 'investments', editingId), data);
-    } else {
-      await addDoc(collection(db, 'users', uid, 'investments'), { ...data, createdAt: serverTimestamp() });
-    }
+    const data = {
+      name, type, shares,
+      purchase_price: purchasePrice,
+      current_price:  currentPrice,
+      purchase_date:  purchaseDate,
+    };
+    const { error } = editingId
+      ? await supabase.from('investments').update(data).eq('id', editingId)
+      : await supabase.from('investments').insert({ ...data, user_id: uid });
+    if (error) throw error;
     clearForm();
   } catch (err) {
     errorEl.textContent = 'Failed to save. Please try again.';
@@ -239,21 +239,41 @@ document.getElementById('inv-list').addEventListener('click', async e => {
   }
   if (deleteBtn) {
     if (!confirm('Delete this investment?')) return;
-    try { await deleteDoc(doc(db, 'users', currentUser.uid, 'investments', deleteBtn.dataset.id)); }
+    try { await supabase.from('investments').delete().eq('id', deleteBtn.dataset.id); }
     catch {}
   }
 });
 
+// ---- Data ----
+async function fetchInvestments(uid) {
+  const { data, error } = await supabase.from('investments').select('*').eq('user_id', uid);
+  if (error) { console.error('Investments fetch error:', error); return; }
+  investments = (data || []).map(row => ({
+    id:            row.id,
+    name:          row.name,
+    type:          row.type,
+    shares:        Number(row.shares),
+    purchasePrice: Number(row.purchase_price),
+    currentPrice:  Number(row.current_price),
+    purchaseDate:  row.purchase_date,
+  }));
+  renderAll();
+}
+
 // ---- Auth & Init ----
-onAuthStateChanged(auth, user => {
+supabase.auth.onAuthStateChange((event, session) => {
+  const user = session?.user;
   if (!user) return;
 
   currentUser = user;
   document.getElementById('app-content').style.display = '';
   document.getElementById('inv-date').value = new Date().toISOString().split('T')[0];
 
-  onSnapshot(collection(db, 'users', user.uid, 'investments'), snap => {
-    investments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderAll();
-  });
+  if (channel) { supabase.removeChannel(channel); channel = null; }
+  channel = supabase
+    .channel(`investments-${user.id}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'investments', filter: `user_id=eq.${user.id}` },
+      () => fetchInvestments(user.id))
+    .subscribe();
+  fetchInvestments(user.id);
 });

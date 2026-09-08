@@ -4,19 +4,13 @@ import { initNav } from './nav.js';
 // Savings Goals page
 // ============================================================
 
-import { auth, db } from './firebase.js';
+import { supabase } from './supabase.js';
 import { initPageTransitions } from './transitions.js';
-import { signOut, onAuthStateChanged } from 'firebase/auth';
-import {
-  collection, doc,
-  addDoc, updateDoc, deleteDoc,
-  onSnapshot, serverTimestamp,
-} from 'firebase/firestore';
 
 // --- State ---
 let goals       = [];
 let currentUser = null;
-let unsub       = null;
+let channel     = null;
 let editingId   = null;
 let contribGoalId = null;
 
@@ -51,6 +45,22 @@ const GOAL_COLORS = [
 
 function goalColor(index) {
   return GOAL_COLORS[index % GOAL_COLORS.length];
+}
+
+// --- Data ---
+async function fetchGoals(uid) {
+  const { data, error } = await supabase.from('goals').select('*').eq('user_id', uid);
+  if (error) { console.error('Goals fetch error:', error); return; }
+  goals = (data || []).map(row => ({
+    id:        row.id,
+    name:      row.name,
+    target:    Number(row.target),
+    saved:     Number(row.saved || 0),
+    deadline:  row.deadline || null,
+    note:      row.note || '',
+    createdAt: new Date(row.created_at).getTime(),
+  }));
+  renderGoals();
 }
 
 // --- Render ---
@@ -196,7 +206,8 @@ document.getElementById('contrib-save-btn').addEventListener('click', async () =
   const goal = goals.find(g => g.id === contribGoalId);
   if (!goal || !currentUser) return;
   const newSaved = Math.min(goal.saved + amount, goal.target * 10); // sanity cap
-  await updateDoc(doc(db, 'users', currentUser.uid, 'goals', goal.id), { saved: newSaved });
+  const { error } = await supabase.from('goals').update({ saved: newSaved }).eq('id', goal.id);
+  if (error) { errorEl.textContent = 'Failed to save. Please try again.'; return; }
   closeContrib();
 });
 
@@ -230,7 +241,7 @@ document.getElementById('goal-cancel-btn').addEventListener('click', cancelEdit)
 // --- Delete ---
 async function deleteGoal(id) {
   if (!currentUser) return;
-  await deleteDoc(doc(db, 'users', currentUser.uid, 'goals', id));
+  await supabase.from('goals').delete().eq('id', id);
 }
 
 // --- Form submit ---
@@ -252,15 +263,15 @@ document.getElementById('goal-form').addEventListener('submit', async e => {
 
   try {
     if (editingId) {
-      await updateDoc(doc(db, 'users', currentUser.uid, 'goals', editingId), {
-        name, target, saved, deadline, note,
-      });
+      const { error } = await supabase.from('goals')
+        .update({ name, target, saved, deadline, note })
+        .eq('id', editingId);
+      if (error) throw error;
       cancelEdit();
     } else {
-      await addDoc(collection(db, 'users', currentUser.uid, 'goals'), {
-        name, target, saved, deadline, note,
-        createdAt: serverTimestamp(),
-      });
+      const { error } = await supabase.from('goals')
+        .insert({ user_id: currentUser.id, name, target, saved, deadline, note });
+      if (error) throw error;
       e.target.reset();
     }
   } catch (err) {
@@ -281,7 +292,6 @@ document.querySelectorAll('.input-clear-btn').forEach(btn => {
 
 // --- Welcome bar ---
 function setWelcomeBar(user) {
-  const displayName = user.displayName || user.email.split('@')[0];
   document.getElementById('welcome-email').textContent = user.email;
   document.getElementById('welcome-date').textContent  =
     new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -290,8 +300,9 @@ function setWelcomeBar(user) {
 }
 
 // --- Auth state ---
-onAuthStateChanged(auth, user => {
+supabase.auth.onAuthStateChange((event, session) => {
   document.getElementById('auth-loading').style.display = 'none';
+  const user = session?.user;
 
   if (!user) {
     window.location.replace('./index.html');
@@ -300,31 +311,21 @@ onAuthStateChanged(auth, user => {
 
   currentUser = user;
   setWelcomeBar(user);
-  const displayName = user.displayName || user.email.split('@')[0];
+  const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
   document.getElementById('user-email').textContent  = displayName;
   document.getElementById('nav-user').style.display  = 'flex';
   document.getElementById('app-content').style.display = '';
 
   // Subscribe to goals (clean up any prior subscription first)
-  if (unsub) { unsub(); unsub = null; }
-  unsub = onSnapshot(
-    collection(db, 'users', user.uid, 'goals'),
-    snap => {
-      goals = snap.docs.map(d => ({
-        id:        d.id,
-        name:      d.data().name,
-        target:    Number(d.data().target),
-        saved:     Number(d.data().saved || 0),
-        deadline:  d.data().deadline || null,
-        note:      d.data().note || '',
-        createdAt: d.data().createdAt?.seconds ?? 0,
-      }));
-      renderGoals();
-    },
-    err => console.error('Goals snapshot error:', err)
-  );
+  if (channel) { supabase.removeChannel(channel); channel = null; }
+  channel = supabase
+    .channel(`goals-${user.id}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'goals', filter: `user_id=eq.${user.id}` },
+      () => fetchGoals(user.id))
+    .subscribe();
+  fetchGoals(user.id);
 });
 
-document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
+document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 initPageTransitions();
 initNav();

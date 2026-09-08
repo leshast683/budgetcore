@@ -1,4 +1,4 @@
-const CACHE = 'budgetcore-v9';
+const CACHE = 'budgetcore-v10';
 const STATIC = [
   '/',
   '/index.html',
@@ -6,6 +6,7 @@ const STATIC = [
   '/goals.html',
   '/profile.html',
   '/analytics.html',
+  '/reset-password.html',
   '/style.css',
   '/favicon.png',
   '/budgetly.png',
@@ -27,7 +28,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  if (e.request.url.includes('firestore') || e.request.url.includes('firebase')) return;
+  if (e.request.url.includes('supabase.co')) return;
 
   // Network-first: always prefer the latest deployed files. Falls back to
   // cache only when offline, so redeploys are visible immediately instead

@@ -2,16 +2,9 @@
 // Vercel Cron: runs every Monday at 8 AM UTC
 // Sends a weekly spending summary to all opted-in users via Resend
 
-import admin from 'firebase-admin';
+import { createClient } from '@supabase/supabase-js';
 
-// Lazy-init Firebase Admin (Vercel functions are stateless but instances may be reused)
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
-  });
-}
-
-const db = admin.firestore();
+const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 function fmtUSD(n) {
   return '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -29,13 +22,13 @@ function getWeekRange() {
 async function buildDigest(uid, email, name) {
   const { start, end } = getWeekRange();
 
-  const snap = await db.collection('users').doc(uid).collection('transactions')
-    .where('date', '>=', start)
-    .where('date', '<=', end)
-    .get();
+  const { data: txs, error } = await supabase.from('transactions')
+    .select('type, amount, category')
+    .eq('user_id', uid)
+    .gte('date', start)
+    .lte('date', end);
 
-  const txs = snap.docs.map(d => d.data());
-  if (!txs.length) return null;
+  if (error || !txs?.length) return null;
 
   const income   = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
   const expenses = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
@@ -108,25 +101,25 @@ export default async function handler(req, res) {
 
   try {
     // Fetch all users — in production you'd paginate, but for small user bases this is fine
-    const usersSnap = await db.collection('users').listDocuments();
+    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+    if (listError) throw listError;
 
-    for (const userRef of usersSnap) {
+    const { data: profiles } = await supabase.from('profiles').select('id, email_digest');
+    const digestOptIn = new Map((profiles || []).map(p => [p.id, p.email_digest !== false]));
+
+    for (const user of users) {
       try {
-        const profileSnap = await userRef.collection('settings').doc('profile').get();
-        const emailDigest = profileSnap.data()?.emailDigest !== false; // default opt-in
+        const emailDigest = digestOptIn.get(user.id) ?? true; // default opt-in
         if (!emailDigest) { skipped++; continue; }
+        if (!user.email) { skipped++; continue; }
 
-        // Get user email via Firebase Auth Admin
-        const userRecord = await admin.auth().getUser(userRef.id).catch(() => null);
-        if (!userRecord?.email) { skipped++; continue; }
-
-        const digest = await buildDigest(userRef.id, userRecord.email, userRecord.displayName);
+        const digest = await buildDigest(user.id, user.email, user.user_metadata?.full_name);
         if (!digest) { skipped++; continue; }
 
-        await sendEmail(userRecord.email, digest.subject, digest.html);
+        await sendEmail(user.email, digest.subject, digest.html);
         sent++;
       } catch (err) {
-        console.error(`digest error for ${userRef.id}:`, err);
+        console.error(`digest error for ${user.id}:`, err);
         errors++;
       }
     }

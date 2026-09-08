@@ -11,15 +11,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       input: {
-        main:        resolve(__dirname, 'index.html'),
-        app:         resolve(__dirname, 'app.html'),
-        goals:       resolve(__dirname, 'goals.html'),
-        profile:     resolve(__dirname, 'profile.html'),
-        analytics:   resolve(__dirname, 'analytics.html'),
+        main:           resolve(__dirname, 'index.html'),
+        app:            resolve(__dirname, 'app.html'),
+        goals:          resolve(__dirname, 'goals.html'),
+        profile:        resolve(__dirname, 'profile.html'),
+        analytics:      resolve(__dirname, 'analytics.html'),
+        resetPassword:  resolve(__dirname, 'reset-password.html'),
       },
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/firebase')) return 'firebase';
+          if (id.includes('node_modules/@supabase')) return 'supabase';
           if (id.includes('node_modules/chart.js') || id.includes('node_modules/chartjs')) return 'chartjs';
           if (id.includes('node_modules/leaflet')) return 'leaflet';
         },

@@ -2,16 +2,9 @@
 // BudgetCore — profile.js
 // ============================================================
 
-import { auth, db } from './firebase.js';
+import { supabase } from './supabase.js';
 import { initPageTransitions } from './transitions.js';
 import { initNav } from './nav.js';
-import {
-  onAuthStateChanged, signOut, updateProfile, updatePassword, deleteUser,
-} from 'firebase/auth';
-import {
-  doc, getDoc, setDoc, updateDoc, collection, getDocs,
-  addDoc, deleteDoc, serverTimestamp,
-} from 'firebase/firestore';
 
 // ── Savings Challenge definitions ───────────────────────────────────────────
 const CHALLENGE_DEFS = [
@@ -419,27 +412,39 @@ let activeChallenges    = [];
 let completedChallenges = [];
 
 // ── Init ─────────────────────────────────────────────────────────────────────
-onAuthStateChanged(auth, async user => {
+supabase.auth.onAuthStateChange(async (event, session) => {
   document.getElementById('auth-loading').style.display = 'none';
+  const user = session?.user;
   if (!user) { window.location.replace('./index.html'); return; }
 
   currentUser = user;
   document.getElementById('nav-signout-li').style.display = '';
-  document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
+  document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 
   // Load data in parallel
-  const [profileSnap, txSnap, goalsSnap, challengesSnap] = await Promise.all([
-    getDoc(doc(db, 'users', user.uid, 'settings', 'userProfile')),
-    getDocs(collection(db, 'users', user.uid, 'transactions')),
-    getDocs(collection(db, 'users', user.uid, 'goals')),
-    getDocs(collection(db, 'users', user.uid, 'challenges')),
+  const [profileRes, txRes, goalsRes, challengesRes] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('transactions').select('*').eq('user_id', user.id),
+    supabase.from('goals').select('*').eq('user_id', user.id),
+    supabase.from('challenges').select('*').eq('user_id', user.id),
   ]);
 
-  profileData  = profileSnap.exists()  ? profileSnap.data()  : {};
-  transactions = txSnap.docs.map(d => d.data());
-  goals        = goalsSnap.docs.map(d => d.data());
+  const profileRow = profileRes.data || {};
+  profileData  = {
+    avatar:     profileRow.avatar,
+    avatarData: profileRow.avatar_data,
+    userType:   profileRow.user_type,
+  };
+  transactions = txRes.data || [];
+  goals        = goalsRes.data || [];
 
-  const allChallenges = challengesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const allChallenges = (challengesRes.data || []).map(row => ({
+    id:          row.id,
+    defId:       row.def_id,
+    status:      row.status,
+    startDate:   row.start_date,
+    completedAt: row.completed_at,
+  }));
   activeChallenges     = allChallenges.filter(c => c.status === 'active');
   completedChallenges  = allChallenges.filter(c => c.status === 'completed');
 
@@ -457,7 +462,7 @@ onAuthStateChanged(auth, async user => {
 
 // ── Render: Hero ─────────────────────────────────────────────────────────────
 function renderHero(user) {
-  const name  = user.displayName || user.email.split('@')[0];
+  const name  = user.user_metadata?.full_name || user.email.split('@')[0];
   document.getElementById('prof-name').textContent  = name;
   document.getElementById('prof-email').textContent = user.email;
   document.getElementById('settings-name-value').textContent = name;
@@ -574,8 +579,14 @@ function renderTip() {
 // ── Savings Challenges ───────────────────────────────────────────────────────
 async function refreshChallenges() {
   if (!currentUser) return;
-  const snap = await getDocs(collection(db, 'users', currentUser.uid, 'challenges'));
-  const all  = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const { data } = await supabase.from('challenges').select('*').eq('user_id', currentUser.id);
+  const all = (data || []).map(row => ({
+    id:          row.id,
+    defId:       row.def_id,
+    status:      row.status,
+    startDate:   row.start_date,
+    completedAt: row.completed_at,
+  }));
   activeChallenges    = all.filter(c => c.status === 'active');
   completedChallenges = all.filter(c => c.status === 'completed');
   renderChallengeStats();
@@ -612,8 +623,8 @@ function renderActiveChallenges() {
     const isComplete = result.progress >= result.total;
 
     if (isComplete && currentUser) {
-      updateDoc(doc(db, 'users', currentUser.uid, 'challenges', ch.id), { status: 'completed', completedAt: todayISO() })
-        .then(refreshChallenges).catch(() => {});
+      supabase.from('challenges').update({ status: 'completed', completed_at: todayISO() }).eq('id', ch.id)
+        .then(refreshChallenges);
     }
 
     return `
@@ -641,7 +652,7 @@ function renderActiveChallenges() {
     btn.addEventListener('click', async () => {
       if (!confirm('Abandon this challenge?')) return;
       if (currentUser) {
-        await deleteDoc(doc(db, 'users', currentUser.uid, 'challenges', btn.dataset.id)).catch(() => {});
+        await supabase.from('challenges').delete().eq('id', btn.dataset.id);
         refreshChallenges();
       }
     });
@@ -678,12 +689,13 @@ function renderAvailableChallenges() {
       if (!currentUser) return;
       btn.disabled = true; btn.textContent = 'Starting…';
       try {
-        await addDoc(collection(db, 'users', currentUser.uid, 'challenges'), {
-          defId:     btn.dataset.id,
-          status:    'active',
-          startDate: todayISO(),
-          createdAt: serverTimestamp(),
+        const { error } = await supabase.from('challenges').insert({
+          user_id:    currentUser.id,
+          def_id:     btn.dataset.id,
+          status:     'active',
+          start_date: todayISO(),
         });
+        if (error) throw error;
         refreshChallenges();
       } catch (err) {
         btn.disabled = false; btn.textContent = 'Start Challenge';
@@ -730,13 +742,12 @@ function setupSettings(user) {
     const errorEl = document.getElementById('settings-name-error');
     errorEl.textContent = '';
     if (!name) { errorEl.textContent = 'Name cannot be empty.'; return; }
-    try {
-      await updateProfile(user, { displayName: name });
-      document.getElementById('prof-name').textContent = name;
-      document.getElementById('settings-name-value').textContent = name;
-      document.getElementById('settings-name-form').style.display = 'none';
-      document.getElementById('settings-name-btn').style.display = '';
-    } catch (e) { errorEl.textContent = 'Could not update name. Please try again.'; }
+    const { error } = await supabase.auth.updateUser({ data: { full_name: name } });
+    if (error) { errorEl.textContent = 'Could not update name. Please try again.'; return; }
+    document.getElementById('prof-name').textContent = name;
+    document.getElementById('settings-name-value').textContent = name;
+    document.getElementById('settings-name-form').style.display = 'none';
+    document.getElementById('settings-name-btn').style.display = '';
   });
 
   // Change password
@@ -756,21 +767,16 @@ function setupSettings(user) {
     const errorEl = document.getElementById('settings-pw-error');
     errorEl.textContent = '';
     if (!pw || pw.length < 6) { errorEl.textContent = 'Minimum 6 characters.'; return; }
-    try {
-      await updatePassword(user, pw);
-      errorEl.style.color = '#2d7a3a';
-      errorEl.textContent = 'Password updated!';
-      document.getElementById('new-pw-input').value = '';
-      setTimeout(() => {
-        document.getElementById('settings-pw-form').style.display = 'none';
-        document.getElementById('settings-pw-btn').style.display = '';
-        errorEl.textContent = ''; errorEl.style.color = '';
-      }, 2000);
-    } catch (e) {
-      if (e.code === 'auth/requires-recent-login') {
-        errorEl.textContent = 'Please sign out and back in first, then try again.';
-      } else { errorEl.textContent = 'Failed to update password.'; }
-    }
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    if (error) { errorEl.textContent = 'Failed to update password.'; return; }
+    errorEl.style.color = '#2d7a3a';
+    errorEl.textContent = 'Password updated!';
+    document.getElementById('new-pw-input').value = '';
+    setTimeout(() => {
+      document.getElementById('settings-pw-form').style.display = 'none';
+      document.getElementById('settings-pw-btn').style.display = '';
+      errorEl.textContent = ''; errorEl.style.color = '';
+    }, 2000);
   });
 
   // Password toggle in settings
@@ -796,12 +802,16 @@ function setupSettings(user) {
     const errorEl = document.getElementById('delete-error');
     errorEl.textContent = '';
     try {
-      await deleteUser(user);
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error('delete failed');
+      await supabase.auth.signOut();
       window.location.replace('./index.html');
     } catch (e) {
-      if (e.code === 'auth/requires-recent-login') {
-        errorEl.textContent = 'Please sign out and sign back in, then try deleting again.';
-      } else { errorEl.textContent = 'Could not delete account. Try again.'; }
+      errorEl.textContent = 'Could not delete account. Try again.';
     }
   });
 }
@@ -809,10 +819,13 @@ function setupSettings(user) {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 async function saveProfile(updates) {
   if (!currentUser) return;
-  try {
-    await setDoc(doc(db, 'users', currentUser.uid, 'settings', 'userProfile'), updates, { merge: true });
-    Object.assign(profileData, updates);
-  } catch (e) { console.error('Profile save error', e); }
+  const columnUpdates = {};
+  if ('avatar' in updates)     columnUpdates.avatar      = updates.avatar;
+  if ('avatarData' in updates) columnUpdates.avatar_data = updates.avatarData;
+  if ('userType' in updates)   columnUpdates.user_type   = updates.userType;
+  const { error } = await supabase.from('profiles').update(columnUpdates).eq('id', currentUser.id);
+  if (error) { console.error('Profile save error', error); return; }
+  Object.assign(profileData, updates);
 }
 
 initPageTransitions();

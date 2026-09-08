@@ -6,3 +6,4 @@ dist/
 chat-export-*.txt
 *.txt
 !public/robots.txt
+.env*.local

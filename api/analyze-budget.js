@@ -1,9 +1,4 @@
 // BudgetCore — AI Budget Insights (Vercel Serverless Function)
-// Deployed at: /analyze-budget  (rewritten from vercel.json)
-
-import Anthropic from '@anthropic-ai/sdk';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,13 +10,15 @@ export default async function handler(req, res) {
 
   const { income, expenses, balance, incomeByCategory, expensesByCategory, month } = req.body;
 
-  // Validate that income and expenses are present and usable numbers
   if (typeof income !== 'number' || typeof expenses !== 'number') {
     return res.status(400).json({ error: 'income and expenses must be numbers.' });
   }
   if (!isFinite(income) || !isFinite(expenses)) {
     return res.status(400).json({ error: 'income and expenses must be finite numbers.' });
   }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'API key not configured.' });
 
   const formatCats = (obj) =>
     Object.entries(obj)
@@ -48,15 +45,30 @@ Income sources:
 ${formatCats(incomeByCategory || {})}`;
 
   try {
-    const message = await client.messages.create({
-      model:      'claude-haiku-4-5-20251001',
-      max_tokens: 220,
-      messages:   [{ role: 'user', content: prompt }],
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 220,
+        messages: [{ role: 'user', content: prompt }],
+      }),
     });
 
-    res.status(200).json({ insight: message.content[0].text });
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('Anthropic API error:', response.status, errBody);
+      return res.status(500).json({ error: `Anthropic API error: ${response.status}` });
+    }
+
+    const data = await response.json();
+    res.status(200).json({ insight: data.content[0].text });
   } catch (err) {
-    console.error('Anthropic error:', err);
-    res.status(500).json({ error: 'Failed to generate insight. Check your API key.' });
+    console.error('Fetch error:', err);
+    res.status(500).json({ error: err?.message || 'Request failed' });
   }
 }

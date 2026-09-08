@@ -2,10 +2,10 @@ import { initNav } from './nav.js';
 import Chart from 'chart.js/auto';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { auth, db } from './firebase.js';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { supabase } from './supabase.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
+
+let channel = null;
 
 // Fix Leaflet default marker icons broken by bundlers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -251,35 +251,43 @@ function setWelcomeBar(user) {
   document.getElementById('welcome-email').textContent = user.email;
 }
 
+async function fetchTransactions(uid) {
+  const { data, error } = await supabase.from('transactions').select('*').eq('user_id', uid);
+  if (error) { console.error('transactions fetch error:', error); return; }
+  transactions = (data || []).map(row => ({
+    id:          row.id,
+    type:        row.type,
+    description: row.description,
+    amount:      Number(row.amount),
+    category:    row.category,
+    date:        row.date,
+    location:    row.location || null,
+  }));
+  renderTopCategories();
+  renderTrendChart();
+  renderMap();
+}
+
 // ---- Auth & Init ----
-onAuthStateChanged(auth, user => {
+supabase.auth.onAuthStateChange((event, session) => {
   document.getElementById('auth-loading').style.display = 'none';
+  const user = session?.user;
   if (!user) { window.location.replace('./index.html'); return; }
 
   document.getElementById('app-content').style.display = '';
   document.getElementById('nav-user').style.display = 'flex';
-  document.getElementById('user-email').textContent = user.displayName || user.email.split('@')[0];
+  document.getElementById('user-email').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
   setWelcomeBar(user);
 
-  document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
+  document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 
-  onSnapshot(collection(db, 'users', user.uid, 'transactions'), snap => {
-    transactions = snap.docs.map(d => {
-      const data = d.data();
-      return {
-        id:          d.id,
-        type:        data.type,
-        description: data.description,
-        amount:      Number(data.amount),
-        category:    data.category,
-        date:        data.date,
-        location:    data.location || null,
-      };
-    });
-    renderTopCategories();
-    renderTrendChart();
-    renderMap();
-  });
+  if (channel) { supabase.removeChannel(channel); channel = null; }
+  channel = supabase
+    .channel(`analytics-transactions-${user.id}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.id}` },
+      () => fetchTransactions(user.id))
+    .subscribe();
+  fetchTransactions(user.id);
 });
 
 window.addEventListener('scroll', () => {

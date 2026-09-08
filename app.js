@@ -3,24 +3,10 @@
 // ============================================================
 
 import Chart from 'chart.js/auto';
-import { auth, db } from './firebase.js';
+import { supabase } from './supabase.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 import { initPageTransitions } from './transitions.js';
 import { initNav } from './nav.js';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updatePassword,
-  updateProfile,
-} from 'firebase/auth';
-import {
-  collection, doc,
-  addDoc, updateDoc, deleteDoc,
-  onSnapshot, getDoc, setDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
 
 // --- Constants ---
 const EXPENSE_CATEGORIES = [
@@ -183,8 +169,8 @@ const CATEGORY_COLORS = {
 let transactions      = [];
 let investments       = [];
 let currentUser       = null;
-let unsubTransactions = null;
-let unsubInvestments  = null;
+let txChannel         = null;
+let invChannel        = null;
 let paycheckReminder  = null;
 
 const state = {
@@ -247,94 +233,94 @@ function showSigninToast(name) {
   setTimeout(dismiss, 3000);
 }
 
-// --- Firestore: Transactions ---
+// --- Supabase: Transactions ---
 function hideLoader() {
   document.getElementById('auth-loading').style.display = 'none';
 }
 
-function subscribeTransactions(uid) {
-  if (unsubTransactions) unsubTransactions();
-
-  let firstSnap = true;
-
-  // Safety net: if Firestore hasn't responded in 1 s (slow network / offline),
-  // show the app anyway so the user is never stuck on the loading screen.
-  const loadTimeout = setTimeout(() => {
-    if (firstSnap) { firstSnap = false; hideLoader(); }
-  }, 1000);
-
-  unsubTransactions = onSnapshot(
-    collection(db, 'users', uid, 'transactions'),
-    snap => {
-      clearTimeout(loadTimeout);
-      transactions = snap.docs.map(d => {
-        const data = d.data();
-        return {
-          id:          d.id,
-          userId:      data.userId,
-          type:        data.type,
-          description: data.description,
-          amount:      Number(data.amount),
-          category:    data.category,
-          date:        data.date,
-          month:       data.month || (data.date ? data.date.substring(0, 7) : todayMonth()),
-          isRecurring: data.isRecurring || false,
-          location:    data.location   || null,
-          createdAt:   data.createdAt?.seconds ?? 0,
-        };
-      });
-
-      // Auto-create recurring transactions for current month if needed
-      autoCreateRecurring(currentUser?.uid);
-
-      if (firstSnap) {
-        firstSnap = false;
-        hideLoader();
-      }
-
-      renderAll();
-    },
-    err => {
-      clearTimeout(loadTimeout);
-      console.error('Firestore sync error:', err);
-      hideLoader();
-      // Show a visible error so the user knows something is wrong
-      const errBanner = document.getElementById('firestore-error');
-      if (errBanner) {
-        errBanner.textContent = 'Could not connect to database. Check your internet connection or Firestore rules.';
-        errBanner.style.display = '';
-      }
+async function fetchTransactions(uid) {
+  const { data, error } = await supabase.from('transactions').select('*').eq('user_id', uid);
+  if (error) {
+    console.error('Supabase sync error:', error);
+    hideLoader();
+    const errBanner = document.getElementById('firestore-error');
+    if (errBanner) {
+      errBanner.textContent = 'Could not connect to database. Check your internet connection or RLS policies.';
+      errBanner.style.display = '';
     }
-  );
-}
-
-// --- Firestore: Investments ---
-function subscribeInvestments(uid) {
-  if (unsubInvestments) unsubInvestments();
-  unsubInvestments = onSnapshot(
-    collection(db, 'users', uid, 'investments'),
-    snap => {
-      investments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderDailySpendingChart();
-    },
-    () => {}
-  );
-}
-
-// --- Firestore: Profile / Budget Goal ---
-async function loadProfileSettings(uid) {
-  try {
-    const snap = await getDoc(doc(db, 'users', uid, 'settings', 'profile'));
-    if (snap.exists()) {
-      monthlyBudget = snap.data().monthlyBudget ?? null;
-      incomeTarget  = snap.data().incomeTarget  ?? null;
-      expenseLimit  = snap.data().expenseLimit  ?? null;
-    } else {
-      monthlyBudget = incomeTarget = expenseLimit = null;
-    }
-  } catch {
-    monthlyBudget = incomeTarget = expenseLimit = null;
+    return;
   }
+
+  transactions = (data || []).map(row => ({
+    id:          row.id,
+    userId:      row.user_id,
+    type:        row.type,
+    description: row.description,
+    amount:      Number(row.amount),
+    category:    row.category,
+    date:        row.date,
+    month:       row.date ? row.date.substring(0, 7) : todayMonth(),
+    isRecurring: row.is_recurring || false,
+    location:    row.location || null,
+    createdAt:   new Date(row.created_at).getTime() / 1000,
+  }));
+
+  // Auto-create recurring transactions for current month if needed
+  await autoCreateRecurring(currentUser?.id);
+
+  hideLoader();
+  renderAll();
+}
+
+function subscribeTransactions(uid) {
+  if (txChannel) { supabase.removeChannel(txChannel); txChannel = null; }
+
+  // Safety net: if the initial fetch hasn't responded in 1 s (slow network),
+  // show the app anyway so the user is never stuck on the loading screen.
+  const loadTimeout = setTimeout(hideLoader, 1000);
+
+  fetchTransactions(uid).finally(() => clearTimeout(loadTimeout));
+
+  txChannel = supabase
+    .channel(`transactions-${uid}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${uid}` },
+      () => fetchTransactions(uid))
+    .subscribe();
+}
+
+// --- Supabase: Investments ---
+async function fetchInvestments(uid) {
+  const { data, error } = await supabase.from('investments').select('*').eq('user_id', uid);
+  if (error) return;
+  investments = (data || []).map(row => ({
+    id:            row.id,
+    name:          row.name,
+    type:          row.type,
+    shares:        Number(row.shares),
+    purchasePrice: Number(row.purchase_price),
+    currentPrice:  Number(row.current_price),
+    purchaseDate:  row.purchase_date,
+  }));
+  renderDailySpendingChart();
+}
+
+function subscribeInvestments(uid) {
+  if (invChannel) { supabase.removeChannel(invChannel); invChannel = null; }
+  invChannel = supabase
+    .channel(`app-investments-${uid}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'investments', filter: `user_id=eq.${uid}` },
+      () => fetchInvestments(uid))
+    .subscribe();
+  fetchInvestments(uid);
+}
+
+// --- Supabase: Profile / Budget Goal ---
+async function loadProfileSettings(uid) {
+  const { data } = await supabase.from('profiles')
+    .select('monthly_budget, income_target, expense_limit').eq('id', uid).single();
+  monthlyBudget = data?.monthly_budget ?? null;
+  incomeTarget  = data?.income_target  ?? null;
+  expenseLimit  = data?.expense_limit  ?? null;
 }
 
 // --- Recurring: auto-create this month's instances ---
@@ -376,33 +362,27 @@ async function autoCreateRecurring(uid) {
     const newDay    = String(Math.min(+day, daysInMonth)).padStart(2, '0');
     const newDate   = `${thisMonth}-${newDay}`;
 
-    try {
-      await addDoc(collection(db, 'users', uid, 'transactions'), {
-        userId:      uid,
-        type:        tx.type,
-        description: tx.description,
-        amount:      tx.amount,
-        category:    tx.category,
-        date:        newDate,
-        month:       thisMonth,
-        isRecurring: true,
-        createdAt:   serverTimestamp(),
-      });
-    } catch (err) {
-      console.error('Failed to auto-create recurring tx:', err);
-    }
+    const { error } = await supabase.from('transactions').insert({
+      user_id:      uid,
+      type:         tx.type,
+      description:  tx.description,
+      amount:       tx.amount,
+      category:     tx.category,
+      date:         newDate,
+      is_recurring: true,
+    });
+    if (error) console.error('Failed to auto-create recurring tx:', error);
   }
 }
 
 
-// --- Firestore: Paycheck Reminder ---
+// --- Supabase: Paycheck Reminder ---
 async function loadPaycheckReminder(uid) {
-  try {
-    const snap = await getDoc(doc(db, 'users', uid, 'settings', 'paycheck'));
-    paycheckReminder = snap.exists() ? snap.data() : null;
-  } catch {
-    paycheckReminder = null;
-  }
+  const { data } = await supabase.from('profiles')
+    .select('paycheck_amount, paycheck_date').eq('id', uid).single();
+  paycheckReminder = (data && data.paycheck_amount != null)
+    ? { amount: data.paycheck_amount, date: data.paycheck_date }
+    : null;
 }
 
 // --- Calculations ---
@@ -1896,8 +1876,8 @@ async function handleFormSubmit(e) {
   }
   document.getElementById('form-error').style.display = 'none';
 
-  // --- Authenticated: Firestore ---
-  const uid = currentUser?.uid;
+  // --- Authenticated: Supabase ---
+  const uid = currentUser?.id;
   const formErrorEl = document.getElementById('form-error');
   if (!uid) {
     formErrorEl.textContent = 'You must be signed in to save transactions.';
@@ -1911,10 +1891,10 @@ async function handleFormSubmit(e) {
 
   try {
     if (editingId !== null) {
-      const updateData = { userId: uid, type, description: desc, amount, category: cat, date,
-        month: monthFromDate(date), isRecurring };
+      const updateData = { type, description: desc, amount, category: cat, date, is_recurring: isRecurring };
       if (location) updateData.location = location;
-      await updateDoc(doc(db, 'users', uid, 'transactions', editingId), updateData);
+      const { error } = await supabase.from('transactions').update(updateData).eq('id', editingId);
+      if (error) throw error;
       // Optimistic update for edit
       const idx = transactions.findIndex(t => t.id === editingId);
       if (idx !== -1) {
@@ -1923,15 +1903,14 @@ async function handleFormSubmit(e) {
       exitEditMode();
       renderAll();
     } else {
-      const month  = monthFromDate(date);
-      const newTxData = { userId: uid, type, description: desc, amount, category: cat, date,
-        month, isRecurring, createdAt: serverTimestamp() };
+      const newTxData = { user_id: uid, type, description: desc, amount, category: cat, date, is_recurring: isRecurring };
       if (location) newTxData.location = location;
-      const docRef = await addDoc(collection(db, 'users', uid, 'transactions'), newTxData);
-      // Optimistic update: add to local array if onSnapshot hasn't fired yet
-      if (!transactions.find(t => t.id === docRef.id)) {
+      const { data: inserted, error } = await supabase.from('transactions').insert(newTxData).select().single();
+      if (error) throw error;
+      // Optimistic update: add to local array if the realtime event hasn't fired yet
+      if (!transactions.find(t => t.id === inserted.id)) {
         transactions.unshift({
-          id: docRef.id,
+          id: inserted.id,
           userId: uid, type, description: desc, amount, category: cat, date,
           month: monthFromDate(date), isRecurring,
           createdAt: Date.now() / 1000,
@@ -1975,16 +1954,15 @@ async function handleFormSubmit(e) {
 }
 
 async function handleDelete(id) {
-  const uid = currentUser?.uid;
+  const uid = currentUser?.id;
   if (!uid) return;
   // Optimistic removal
   transactions = transactions.filter(tx => tx.id !== id);
   renderAll();
-  try {
-    await deleteDoc(doc(db, 'users', uid, 'transactions', id));
-  } catch (err) {
-    console.error('Error deleting transaction:', err);
-    // onSnapshot will restore the transaction if delete failed
+  const { error } = await supabase.from('transactions').delete().eq('id', id);
+  if (error) {
+    console.error('Error deleting transaction:', error);
+    // the realtime subscription will restore the transaction if delete failed
   }
 }
 
@@ -2038,38 +2016,43 @@ async function handleAuthSubmit(e) {
     return;
   }
 
-  try {
-    if (isSignup) {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      if (name) await updateProfile(cred.user, { displayName: name });
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
-    // onAuthStateChanged handles the UI transition
-  } catch (err) {
-    console.error('Auth error:', err.code, err.message);
-    errorEl.textContent   = friendlyAuthError(err.code);
+  let authError = null;
+  if (isSignup) {
+    const { error } = await supabase.auth.signUp({
+      email, password,
+      options: { data: name ? { full_name: name } : {} },
+    });
+    authError = error;
+  } else {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    authError = error;
+  }
+
+  if (authError) {
+    console.error('Auth error:', authError.code, authError.message);
+    errorEl.textContent   = friendlyAuthError(authError);
     submitBtn.disabled    = false;
     submitBtn.textContent = isSignup ? 'Create Account' : 'Sign In';
+    return;
   }
+  // onAuthStateChange handles the UI transition
 }
 
-function friendlyAuthError(code) {
+function friendlyAuthError(err) {
   const map = {
-    'auth/invalid-email':            'Please enter a valid email address.',
-    'auth/user-not-found':           'No account found with that email.',
-    'auth/wrong-password':           'Incorrect password. Please try again.',
-    'auth/email-already-in-use':     'An account with this email already exists.',
-    'auth/weak-password':            'Password must be at least 6 characters.',
-    'auth/too-many-requests':        'Too many attempts. Please try again later.',
-    'auth/network-request-failed':   'Network error. Please check your connection.',
-    'auth/invalid-credential':       'Invalid email or password.',
-    'auth/operation-not-allowed':    'Email/password sign-in is not enabled. Enable it in the Firebase console → Authentication → Sign-in method.',
-    'auth/configuration-not-found':  'Firebase Authentication is not configured. Check your Firebase project settings.',
-    'auth/api-key-not-valid':        'Invalid Firebase API key. Check your config in firebase.js.',
-    'auth/project-not-found':        'Firebase project not found. Check your projectId in firebase.js.',
+    'invalid_credentials':          'Invalid email or password.',
+    'user_already_exists':          'An account with this email already exists.',
+    'email_exists':                 'An account with this email already exists.',
+    'weak_password':                'Password must be at least 6 characters.',
+    'validation_failed':            'Please enter a valid email address.',
+    'email_address_invalid':        'Please enter a valid email address.',
+    'over_email_send_rate_limit':   'Too many attempts. Please try again later.',
+    'over_request_rate_limit':      'Too many attempts. Please try again later.',
+    'signup_disabled':              'Sign-ups are currently disabled.',
   };
-  return map[code] || `Something went wrong (${code}). Please try again.`;
+  if (err?.code && map[err.code]) return map[err.code];
+  if (/network/i.test(err?.message || '')) return 'Network error. Please check your connection.';
+  return err?.message || 'Something went wrong. Please try again.';
 }
 
 function switchAuthTab(tab) {
@@ -2102,7 +2085,7 @@ function setWelcomeBar(user) {
   document.getElementById('welcome-date').textContent = dateStr;
 
   if (user) {
-    const displayName = user.displayName || user.email.split('@')[0];
+    const displayName = user.user_metadata?.full_name || user.email.split('@')[0];
     document.getElementById('welcome-greeting').textContent = `Welcome, ${displayName}`;
     document.getElementById('welcome-email').textContent    = user.email;
     document.getElementById('welcome-bar').className        = 'welcome-bar welcome-bar--user';
@@ -2230,7 +2213,7 @@ function init() {
     document.getElementById('month-recap').style.display = 'none';
   });
 
-  // Edit / Delete via event delegation (IDs are Firestore strings)
+  // Edit / Delete via event delegation (IDs are row UUIDs)
   document.getElementById('transaction-list').addEventListener('click', e => {
     const editBtn = e.target.closest('.tx-edit');
     if (editBtn) { handleEdit(editBtn.dataset.id); return; }
@@ -2243,7 +2226,7 @@ function init() {
 
   // Paycheck reminder
   document.getElementById('reminder-save-btn').addEventListener('click', async () => {
-    const uid    = currentUser?.uid;
+    const uid    = currentUser?.id;
     if (!uid) return;
     const amount = parseFloat(document.getElementById('reminder-amount').value);
     const date   = document.getElementById('reminder-date').value;
@@ -2253,30 +2236,26 @@ function init() {
       return;
     }
     paycheckReminder = { amount, date };
-    try {
-      await setDoc(doc(db, 'users', uid, 'settings', 'paycheck'), paycheckReminder);
-    } catch (err) {
-      console.error('Error saving paycheck reminder:', err);
-    }
+    const { error } = await supabase.from('profiles')
+      .update({ paycheck_amount: amount, paycheck_date: date }).eq('id', uid);
+    if (error) console.error('Error saving paycheck reminder:', error);
     renderPaycheckReminder();
   });
   document.getElementById('reminder-edit-btn').addEventListener('click', showReminderEdit);
   document.getElementById('reminder-cancel-btn').addEventListener('click', renderPaycheckReminder);
   document.getElementById('reminder-remove-btn').addEventListener('click', async () => {
-    const uid = currentUser?.uid;
+    const uid = currentUser?.id;
     if (!uid) return;
     paycheckReminder = null;
-    try {
-      await deleteDoc(doc(db, 'users', uid, 'settings', 'paycheck'));
-    } catch (err) {
-      console.error('Error removing paycheck reminder:', err);
-    }
+    const { error } = await supabase.from('profiles')
+      .update({ paycheck_amount: null, paycheck_date: null }).eq('id', uid);
+    if (error) console.error('Error removing paycheck reminder:', error);
     renderPaycheckReminder();
   });
 
   // Profile — save goals
   document.getElementById('profile-save-btn').addEventListener('click', async () => {
-    const uid     = currentUser?.uid;
+    const uid     = currentUser?.id;
     if (!uid) return;
     const errorEl = document.getElementById('profile-error');
     errorEl.textContent = '';
@@ -2298,11 +2277,12 @@ function init() {
       monthlyBudget = budgetVal;
       incomeTarget  = incomeVal;
       expenseLimit  = expenseVal;
-      await setDoc(doc(db, 'users', uid, 'settings', 'profile'), {
-        monthlyBudget: budgetVal  ?? null,
-        incomeTarget:  incomeVal  ?? null,
-        expenseLimit:  expenseVal ?? null,
-      });
+      const { error } = await supabase.from('profiles').update({
+        monthly_budget: budgetVal  ?? null,
+        income_target:  incomeVal  ?? null,
+        expense_limit:  expenseVal ?? null,
+      }).eq('id', uid);
+      if (error) throw error;
       document.getElementById('profile-budget-input').value  = '';
       document.getElementById('profile-income-input').value  = '';
       document.getElementById('profile-expense-input').value = '';
@@ -2382,24 +2362,19 @@ function init() {
 
     btn.disabled    = true;
     btn.textContent = 'Updating…';
-    try {
-      await updatePassword(user, newPass);
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+    if (!error) {
       errorEl.style.color       = '#2d7a3a';
       errorEl.style.background  = '#edf7f0';
       errorEl.style.borderColor = '#a8d5b5';
       errorEl.textContent = 'Password updated successfully.';
       document.getElementById('new-password-input').value = '';
       setTimeout(closeChangePw, 2000);
-    } catch (err) {
-      if (err.code === 'auth/requires-recent-login') {
-        errorEl.textContent = 'Please sign out and sign back in before changing your password.';
-      } else {
-        errorEl.textContent = 'Failed to update password. Please try again.';
-      }
-    } finally {
-      btn.disabled    = false;
-      btn.textContent = 'Update Password';
+    } else {
+      errorEl.textContent = 'Failed to update password. Please try again.';
     }
+    btn.disabled    = false;
+    btn.textContent = 'Update Password';
   });
 
   // Password toggle in change password modal
@@ -2436,21 +2411,22 @@ function init() {
   document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
 
   // Sign out
-  document.getElementById('signout-btn').addEventListener('click', () => signOut(auth));
+  document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 
   // Auth state observer — drives loading screen, auth gate, and app visibility.
   // Fires once immediately on page load with the persisted session (if any),
   // then again whenever the user signs in or out.
-  onAuthStateChanged(auth, async user => {
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    const user = session?.user;
     if (user) {
       currentUser = user;
 
       // Populate welcome bar and nav before revealing the app
       setWelcomeBar(user);
-      const displayName = user.displayName || user.email.split('@')[0];
+      const displayName = user.user_metadata?.full_name || user.email.split('@')[0];
       const nameEl = document.getElementById('account-btn-name');
       if (nameEl) nameEl.textContent = displayName;
-      loadAndApplyAvatar(user.uid, 'account-avatar-ring');
+      loadAndApplyAvatar(user.id, 'account-avatar-ring');
       document.getElementById('nav-user').style.display  = 'flex';
 
       // Show signed-in banner if user just logged in
@@ -2460,21 +2436,21 @@ function init() {
         showSigninToast(justSignedIn);
       }
 
-      // Show app (still under the loading screen until first snapshot arrives)
+      // Show app (still under the loading screen until first fetch arrives)
       document.getElementById('app-content').style.display = '';
       document.getElementById('auth-gate').style.display   = 'none';
 
       // Start the transaction subscription immediately — don't wait for settings.
-      // hideLoader() fires on the first onSnapshot, so the user sees their data
-      // as soon as Firestore responds. Settings load in parallel and trigger a
-      // re-render once they arrive.
-      subscribeTransactions(user.uid);
-      subscribeInvestments(user.uid);
+      // hideLoader() fires once the first fetch resolves, so the user sees their
+      // data as soon as Supabase responds. Settings load in parallel and trigger
+      // a re-render once they arrive.
+      subscribeTransactions(user.id);
+      subscribeInvestments(user.id);
 
-      // Load settings in parallel with the Firestore subscription.
+      // Load settings in parallel with the transactions fetch.
       Promise.all([
-        loadPaycheckReminder(user.uid),
-        loadProfileSettings(user.uid),
+        loadPaycheckReminder(user.id),
+        loadProfileSettings(user.id),
       ]).then(() => {
         if (document.getElementById('tx-type').value === 'income') {
           renderPaycheckReminder();
@@ -2485,9 +2461,9 @@ function init() {
       });
 
     } else {
-      // Cancel the Firestore listeners before navigating away
-      if (unsubTransactions) { unsubTransactions(); unsubTransactions = null; }
-      if (unsubInvestments)  { unsubInvestments();  unsubInvestments  = null; }
+      // Cancel the realtime subscriptions before navigating away
+      if (txChannel)  { supabase.removeChannel(txChannel);  txChannel  = null; }
+      if (invChannel) { supabase.removeChannel(invChannel); invChannel = null; }
 
       // Redirect to the home page for sign-in
       window.location.replace('./index.html');
@@ -2505,6 +2481,6 @@ initNav();
 // browser back button), so a just-saved avatar change doesn't look stale.
 window.addEventListener('pageshow', e => {
   if (e.persisted && currentUser) {
-    loadAndApplyAvatar(currentUser.uid, 'account-avatar-ring');
+    loadAndApplyAvatar(currentUser.id, 'account-avatar-ring');
   }
 });

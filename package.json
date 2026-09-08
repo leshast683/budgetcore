@@ -23,11 +23,11 @@
   "homepage": "https://github.com/leshast683/budgetcore#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@supabase/supabase-js": "^2.45.4",
     "chart.js": "^4.5.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "firebase": "^12.10.0",
     "leaflet": "^1.9.4"
   },
   "devDependencies": {

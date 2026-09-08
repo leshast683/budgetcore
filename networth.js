@@ -3,12 +3,7 @@
 // Net Worth Tracker + Debt Payoff Planner
 // ============================================================
 
-import { auth, db } from './firebase.js';
-import { signOut, onAuthStateChanged } from 'firebase/auth';
-import {
-  collection, doc, addDoc, updateDoc, deleteDoc,
-  onSnapshot, serverTimestamp,
-} from 'firebase/firestore';
+import { supabase } from './supabase.js';
 
 const ASSET_TYPES = {
   cash:         { label: 'Cash / Checking',     icon: '💵', isLiability: false },
@@ -29,28 +24,43 @@ const ASSET_TYPES = {
 
 const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-let items     = [];
-let editingId = null;
-let unsub     = null;
+let items       = [];
+let editingId   = null;
+let channel     = null;
+let currentUser = null;
 
 // --- Auth ---
-onAuthStateChanged(auth, user => {
+supabase.auth.onAuthStateChange((event, session) => {
+  const user = session?.user;
   if (!user) return;
 
+  currentUser = user;
   document.getElementById('app-content').style.display = '';
-  subscribeItems(user.uid);
+  subscribeItems(user.id);
 });
 
 function subscribeItems(uid) {
-  if (unsub) unsub();
-  unsub = onSnapshot(
-    collection(db, 'users', uid, 'networth'),
-    snap => {
-      items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderAll();
-    },
-    err => console.error('networth sync error:', err)
-  );
+  if (channel) { supabase.removeChannel(channel); channel = null; }
+  channel = supabase
+    .channel(`networth-${uid}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'networth', filter: `user_id=eq.${uid}` },
+      () => fetchItems(uid))
+    .subscribe();
+  fetchItems(uid);
+}
+
+async function fetchItems(uid) {
+  const { data, error } = await supabase.from('networth').select('*').eq('user_id', uid);
+  if (error) { console.error('networth sync error:', error); return; }
+  items = (data || []).map(row => ({
+    id:             row.id,
+    name:           row.name,
+    type:           row.type,
+    value:          Number(row.value),
+    interestRate:   Number(row.interest_rate || 0),
+    monthlyPayment: Number(row.monthly_payment || 0),
+  }));
+  renderAll();
 }
 
 // --- Render ---
@@ -180,18 +190,17 @@ document.getElementById('nw-form').addEventListener('submit', async e => {
   if (!name)          { errEl.textContent = 'Name is required.'; return; }
   if (isNaN(value) || value < 0) { errEl.textContent = 'Enter a valid value.'; return; }
 
-  const uid = auth.currentUser?.uid;
+  const uid = currentUser?.id;
   if (!uid) return;
 
-  const payload = { name, type, value, interestRate: interest, monthlyPayment: payment };
+  const payload = { name, type, value, interest_rate: interest, monthly_payment: payment };
 
   try {
-    if (editingId) {
-      await updateDoc(doc(db, 'users', uid, 'networth', editingId), payload);
-      cancelEdit();
-    } else {
-      await addDoc(collection(db, 'users', uid, 'networth'), { ...payload, createdAt: serverTimestamp() });
-    }
+    const { error } = editingId
+      ? await supabase.from('networth').update(payload).eq('id', editingId)
+      : await supabase.from('networth').insert({ ...payload, user_id: uid });
+    if (error) throw error;
+    if (editingId) cancelEdit();
     resetForm();
   } catch (err) {
     errEl.textContent = 'Failed to save. Please try again.';
@@ -222,7 +231,7 @@ document.getElementById('nw-cancel-btn').addEventListener('click', cancelEdit);
   document.getElementById(listId).addEventListener('click', async e => {
     const editBtn   = e.target.closest('.tx-edit');
     const deleteBtn = e.target.closest('.tx-delete');
-    const uid       = auth.currentUser?.uid;
+    const uid       = currentUser?.id;
     if (!uid) return;
 
     if (editBtn) {
@@ -244,7 +253,7 @@ document.getElementById('nw-cancel-btn').addEventListener('click', cancelEdit);
 
     if (deleteBtn) {
       if (!confirm('Delete this item?')) return;
-      await deleteDoc(doc(db, 'users', uid, 'networth', deleteBtn.dataset.id)).catch(console.error);
+      await supabase.from('networth').delete().eq('id', deleteBtn.dataset.id);
     }
   });
 });

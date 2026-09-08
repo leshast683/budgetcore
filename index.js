@@ -3,29 +3,28 @@
 // Home page: auth state + sliding sign-in / sign-up
 // ============================================================
 
-import { auth, googleProvider, db } from './firebase.js';
+import { supabase } from './supabase.js';
 import { initPageTransitions } from './transitions.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut,
-  sendPasswordResetEmail,
-  updateProfile,
-  signInWithPopup,
-} from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 const stayOnHome = new URLSearchParams(window.location.search).has('home');
 
-onAuthStateChanged(auth, user => {
+let currentUser = null;
+
+supabase.auth.onAuthStateChange((event, session) => {
   document.getElementById('auth-loading').style.display = 'none';
-  if (user && !stayOnHome) {
+  currentUser = session?.user ?? null;
+
+  if (currentUser && sessionStorage.getItem('oauthPending')) {
+    sessionStorage.removeItem('oauthPending');
+    const name = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
+      || currentUser.email?.split('@')[0] || 'there';
+    showWelcomeToast(name, currentUser, () => window.location.replace('./app.html'));
+  } else if (currentUser && !stayOnHome) {
     window.location.replace('./app.html');
-  } else if (user) {
-    showLoggedInState(user);
+  } else if (currentUser) {
+    showLoggedInState(currentUser);
   } else {
     showSignedOutState();
   }
@@ -34,8 +33,8 @@ onAuthStateChanged(auth, user => {
 // Re-fetch the avatar if the page is restored from bfcache (e.g. via the
 // browser back button), so a just-saved avatar change doesn't look stale.
 window.addEventListener('pageshow', e => {
-  if (e.persisted && auth.currentUser) {
-    loadAndApplyAvatar(auth.currentUser.uid, 'home-avatar-ring');
+  if (e.persisted && currentUser) {
+    loadAndApplyAvatar(currentUser.id, 'home-avatar-ring');
   }
 });
 
@@ -43,11 +42,11 @@ function showLoggedInState(user) {
   hideAuth();
   document.getElementById('home-nav-user').style.display  = 'flex';
   document.getElementById('home-nav-signin').style.display = 'none';
-  const name = user.displayName || user.email.split('@')[0];
+  const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
   document.getElementById('home-user-email').textContent = name;
   document.getElementById('hero-dashboard-btn').style.display = '';
   document.getElementById('hero-signin-btn').style.display    = 'none';
-  loadAndApplyAvatar(user.uid, 'home-avatar-ring');
+  loadAndApplyAvatar(user.id, 'home-avatar-ring');
 }
 
 function showSignedOutState() {
@@ -57,7 +56,7 @@ function showSignedOutState() {
   document.getElementById('hero-signin-btn').style.display    = '';
 }
 
-document.getElementById('home-signout-btn').addEventListener('click', () => signOut(auth));
+document.getElementById('home-signout-btn').addEventListener('click', () => supabase.auth.signOut());
 
 // ── Sliding panel logic ───────────────────────────────────────────────────────
 const container      = document.getElementById('container');
@@ -173,11 +172,10 @@ function calcStrength(pw) {
 }
 
 // ── Welcome toast ─────────────────────────────────────────────────────────────
-function showWelcomeToast(name, then) {
+function showWelcomeToast(name, user, then) {
   sessionStorage.setItem('justSignedIn', name);
-  const user = auth.currentUser;
   // Show onboarding for brand-new users (no localStorage flag)
-  if (user && !localStorage.getItem('budgetly_onboarded_' + user.uid)) {
+  if (user && !localStorage.getItem('budgetly_onboarded_' + user.id)) {
     hideAuth();
     showOnboarding(user, then);
     return;
@@ -191,10 +189,12 @@ function showWelcomeToast(name, then) {
 
 // ── Onboarding Wizard ─────────────────────────────────────────────────────────
 let _onboardingCallback = null;
+let _onboardingUser = null;
 let _obStep = 1;
 
 function showOnboarding(user, callback) {
   _onboardingCallback = callback;
+  _onboardingUser = user;
   _obStep = 1;
   showObPane(1);
   document.getElementById('onboarding-overlay').style.display = 'flex';
@@ -213,13 +213,10 @@ document.getElementById('ob-next-1').addEventListener('click', () => showObPane(
 
 document.getElementById('ob-next-2').addEventListener('click', async () => {
   const budget = parseFloat(document.getElementById('ob-budget').value);
-  if (!isNaN(budget) && budget > 0) {
-    const uid = auth.currentUser?.uid;
-    if (uid) {
-      try {
-        await setDoc(doc(db, 'users', uid, 'settings', 'profile'), { monthlyBudget: budget }, { merge: true });
-      } catch { /* non-fatal */ }
-    }
+  if (!isNaN(budget) && budget > 0 && _onboardingUser) {
+    try {
+      await supabase.from('profiles').update({ monthly_budget: budget }).eq('id', _onboardingUser.id);
+    } catch { /* non-fatal */ }
   }
   showObPane(3);
 });
@@ -233,13 +230,14 @@ document.getElementById('ob-goals-grid').addEventListener('click', e => {
 });
 
 document.getElementById('ob-finish').addEventListener('click', async () => {
-  const uid  = auth.currentUser?.uid;
   const goal = document.querySelector('.ob-goal-btn--selected')?.dataset.goal || '';
-  if (uid) {
+  if (_onboardingUser) {
     try {
-      await setDoc(doc(db, 'users', uid, 'settings', 'onboarding'), { goal, completedAt: new Date().toISOString() }, { merge: true });
+      await supabase.from('profiles')
+        .update({ onboarding_goal: goal, onboarded_at: new Date().toISOString() })
+        .eq('id', _onboardingUser.id);
     } catch { /* non-fatal */ }
-    localStorage.setItem('budgetly_onboarded_' + uid, '1');
+    localStorage.setItem('budgetly_onboarded_' + _onboardingUser.id, '1');
   }
   document.getElementById('onboarding-overlay').style.display = 'none';
   if (_onboardingCallback) _onboardingCallback();
@@ -256,14 +254,14 @@ document.getElementById('signin-form').addEventListener('submit', async e => {
   errorEl.textContent = '';
   btn.disabled = true; btn.textContent = 'Signing in…';
 
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    const name = cred.user.displayName || cred.user.email.split('@')[0];
-    showWelcomeToast(name, () => window.location.replace('./app.html'));
-  } catch (err) {
-    errorEl.textContent = friendlyError(err.code);
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    errorEl.textContent = friendlyError(error);
     btn.disabled = false; btn.textContent = 'Sign In';
+    return;
   }
+  const name = data.user.user_metadata?.full_name || data.user.email.split('@')[0];
+  showWelcomeToast(name, data.user, () => window.location.replace('./app.html'));
 });
 
 // ── Sign Up form ──────────────────────────────────────────────────────────────
@@ -287,50 +285,60 @@ document.getElementById('signup-form').addEventListener('submit', async e => {
 
   btn.disabled = true; btn.textContent = 'Creating account…';
 
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    if (name) await updateProfile(cred.user, { displayName: name });
-    const displayName = name || email.split('@')[0];
-    showWelcomeToast(displayName, () => window.location.replace('./app.html'));
-  } catch (err) {
-    errorEl.textContent = friendlyError(err.code);
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: name ? { full_name: name } : {} },
+  });
+  if (error) {
+    errorEl.textContent = friendlyError(error);
     btn.disabled = false; btn.textContent = 'Create Account';
+    return;
   }
+  const displayName = name || email.split('@')[0];
+  showWelcomeToast(displayName, data.user, () => window.location.replace('./app.html'));
 });
 
 // ── Social auth (shared) ──────────────────────────────────────────────────────
 async function socialAuth(provider, errorElId) {
   const errorEl = document.getElementById(errorElId);
   errorEl.textContent = '';
-  try {
-    const cred = await signInWithPopup(auth, provider);
-    const name = cred.user.displayName || cred.user.email?.split('@')[0] || 'there';
-    showWelcomeToast(name, () => window.location.replace('./app.html'));
-  } catch (err) {
-    if (err.code === 'auth/popup-closed-by-user') return;
-    errorEl.textContent = friendlyError(err.code);
+  sessionStorage.setItem('oauthPending', '1');
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: window.location.origin + '/index.html?home=1' },
+  });
+  if (error) {
+    sessionStorage.removeItem('oauthPending');
+    errorEl.textContent = friendlyError(error);
   }
+  // On success the browser navigates away to the provider; onAuthStateChange
+  // picks up the session (and shows the welcome toast) after the redirect back.
 }
 
-document.getElementById('signin-google').addEventListener('click', () => socialAuth(googleProvider, 'signin-error'));
-document.getElementById('signup-google').addEventListener('click', () => socialAuth(googleProvider, 'signup-error'));
+document.getElementById('signin-google').addEventListener('click', () => socialAuth('google', 'signin-error'));
+document.getElementById('signup-google').addEventListener('click', () => socialAuth('google', 'signup-error'));
+document.getElementById('signin-apple').addEventListener('click', () => socialAuth('apple', 'signin-error'));
+document.getElementById('signup-apple').addEventListener('click', () => socialAuth('apple', 'signup-error'));
 
 // ── Forgot password ───────────────────────────────────────────────────────────
 document.getElementById('forgot-btn').addEventListener('click', async () => {
   const email   = document.getElementById('signin-email').value.trim();
   const errorEl = document.getElementById('signin-error');
   if (!email) { errorEl.textContent = 'Enter your email above first.'; return; }
-  try {
-    await sendPasswordResetEmail(auth, email);
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/reset-password.html',
+  });
+  if (error) {
+    errorEl.style.color = '';
+    errorEl.style.background = '';
+    errorEl.style.borderColor = '';
+    errorEl.textContent = friendlyError(error);
+  } else {
     errorEl.style.color      = '#2d7a3a';
     errorEl.style.background = '#edf7f0';
     errorEl.style.borderColor = '#a8d5b5';
     errorEl.textContent      = `Reset link sent to ${email}.`;
-  } catch (err) {
-    errorEl.style.color = '';
-    errorEl.style.background = '';
-    errorEl.style.borderColor = '';
-    errorEl.textContent = friendlyError(err.code);
   }
 });
 
@@ -346,19 +354,23 @@ document.querySelectorAll('.password-toggle').forEach(btn => {
 });
 
 // ── Error messages ────────────────────────────────────────────────────────────
-function friendlyError(code) {
-  return ({
-    'auth/invalid-email':           'Please enter a valid email address.',
-    'auth/user-not-found':          'No account found with that email.',
-    'auth/wrong-password':          'Incorrect password. Please try again.',
-    'auth/email-already-in-use':    'An account with this email already exists.',
-    'auth/weak-password':           'Password must be at least 6 characters.',
-    'auth/too-many-requests':       'Too many attempts. Please try again later.',
-    'auth/network-request-failed':  'Network error. Check your connection.',
-    'auth/invalid-credential':      'Invalid email or password.',
-    'auth/operation-not-allowed':   'This sign-in method is not enabled.',
-    'auth/account-exists-with-different-credential': 'An account already exists with a different sign-in method.',
-  })[code] || `Something went wrong (${code}).`;
+function friendlyError(err) {
+  const code = err?.code;
+  const byCode = {
+    'invalid_credentials':          'Invalid email or password.',
+    'user_already_exists':          'An account with this email already exists.',
+    'email_exists':                 'An account with this email already exists.',
+    'weak_password':                'Password must be at least 6 characters.',
+    'validation_failed':            'Please enter a valid email address.',
+    'email_address_invalid':        'Please enter a valid email address.',
+    'over_email_send_rate_limit':   'Too many attempts. Please try again later.',
+    'over_request_rate_limit':      'Too many attempts. Please try again later.',
+    'signup_disabled':              'Sign-ups are currently disabled.',
+    'email_not_confirmed':          'Please confirm your email before signing in.',
+  };
+  if (code && byCode[code]) return byCode[code];
+  if (/network/i.test(err?.message || '')) return 'Network error. Check your connection.';
+  return err?.message || 'Something went wrong.';
 }
 
 // ── Scroll & animations ───────────────────────────────────────────────────────
