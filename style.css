@@ -2844,6 +2844,7 @@ footer {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.75rem;
+  min-height: 2.4rem;
 }
 
 .stat-icon {
@@ -2889,6 +2890,7 @@ footer {
 .stat-card--balance .stat-card-top {
   position: relative;
   justify-content: center;
+  padding-right: 2.75rem;
 }
 .stat-card--balance .stat-icon--balance {
   position: absolute;
@@ -4346,6 +4348,10 @@ input[type="date"].filter-date {
   }
   .stat-card-top {
     margin-bottom: 0.25rem;
+    min-height: 2.35rem;
+  }
+  .stat-card--balance .stat-card-top {
+    padding-right: 2.3rem;
   }
   .stat-icon {
     width: 32px;
@@ -4393,6 +4399,10 @@ input[type="date"].filter-date {
 
   .stat-card-top {
     margin-bottom: 0.15rem;
+    min-height: 2.1rem;
+  }
+  .stat-card--balance .stat-card-top {
+    padding-right: 1.8rem;
   }
 
   .stat-icon {
