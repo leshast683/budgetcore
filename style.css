@@ -6382,42 +6382,65 @@ input[type="number"] {
 
 /* Left panel — gauge + tip */
 .health-gauge-panel {
+  --gauge-glow: #d06820;
   flex-shrink: 0;
   width: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
-  padding: 1.5rem 1.25rem;
-  border-radius: 20px;
-  background: linear-gradient(160deg, #eef8f1 0%, #e3f2e9 100%);
+  gap: 1.25rem;
+  padding: 1.75rem 1.25rem 1.5rem;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #f0faf3 0%, #e3f2e9 100%);
+  border: 1px solid rgba(45,122,58,0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
 }
 
 .health-gauge-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 130px;
-  height: 130px;
+  width: 138px;
+  height: 138px;
   animation: gauge-float 4s ease-in-out infinite;
   will-change: transform, filter;
 }
+.health-gauge-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gauge-glow) 0%, transparent 68%);
+  opacity: 0.22;
+  filter: blur(14px);
+  z-index: 0;
+}
+.health-gauge-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+  z-index: 0;
+}
+.health-gauge, .health-score-center { position: relative; z-index: 1; }
 .health-gauge {
-  width: 130px; height: 130px; transform: rotate(-225deg);
+  width: 138px; height: 138px; transform: rotate(-225deg);
 }
 .gauge-track {
   fill: none;
-  stroke: rgba(200,148,58,0.15);
-  stroke-width: 10;
+  stroke: rgba(200,148,58,0.14);
+  stroke-width: 11;
   stroke-dasharray: 226 301;
   stroke-linecap: round;
 }
 .gauge-fill {
   fill: none;
-  stroke-width: 10;
+  stroke-width: 11;
   stroke-linecap: round;
   stroke-dasharray: 0 301;
-  transition: stroke-dasharray 1.3s cubic-bezier(0.34,1.56,0.64,1);
-  filter: drop-shadow(0 0 5px currentColor);
+  transition: stroke-dasharray 1.3s cubic-bezier(0.34,1.56,0.64,1), stroke 0.6s ease;
+  filter: drop-shadow(0 2px 6px currentColor);
 }
 .health-score-center {
   position: absolute; inset: 0;
@@ -6426,24 +6449,38 @@ input[type="number"] {
   transform: translateY(16px);
 }
 .health-score-num {
-  font-size: 2rem;
+  font-size: 2.15rem;
   font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--heading);
   transition: color 0.8s ease;
 }
 .health-score-grade {
-  font-size: 0.72rem; font-weight: 600; margin-top: 2px; letter-spacing: 0.03em;
+  font-size: 0.72rem; font-weight: 700; margin-top: 3px; letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .health-tip-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
   font-size: 0.83rem;
   line-height: 1.45;
+  font-weight: 500;
   color: var(--text);
-  text-align: center;
+  text-align: left;
   background: var(--accent-light);
-  border-radius: 14px;
-  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  padding: 0.9rem 1.05rem;
+  transition: background 0.6s ease, color 0.6s ease;
+}
+.health-tip-icon {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+  opacity: 0.85;
 }
 
 /* Right panel — breakdown */
@@ -6470,42 +6507,57 @@ input[type="number"] {
 .health-info-icon svg { width: 17px; height: 17px; }
 .health-info-icon:hover, .health-info-icon:focus-visible { color: var(--accent); background: var(--accent-light); outline: none; }
 
-.health-factors { display: flex; flex-direction: column; gap: 0.9rem; }
-.hf-row { display: flex; align-items: center; gap: 0.75rem; }
+.health-factors { display: flex; flex-direction: column; gap: 0.65rem; }
+.hf-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+.hf-row:hover {
+  box-shadow: var(--shadow-xs);
+  transform: translateY(-1px);
+  border-color: rgba(154,110,58,0.18);
+}
 .hf-body { flex: 1; min-width: 0; }
 
 .hf-icon-badge {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.hf-icon-badge svg { width: 16px; height: 16px; }
-.hf-icon-badge--green  { background: #e8f8ee; color: #1db954; }
-.hf-icon-badge--blue   { background: #e8f0ff; color: #007aff; }
-.hf-icon-badge--purple { background: #efe4fb; color: #7c4dcc; }
-.hf-icon-badge--amber  { background: #fdf0dc; color: #c8943a; }
-.hf-icon-badge--pink   { background: #fbe4ee; color: #d94f8f; }
+.hf-icon-badge svg { width: 17px; height: 17px; }
+.hf-icon-badge--green  { background: linear-gradient(160deg, #eafaf0, #dcf4e4); color: #1db954; }
+.hf-icon-badge--blue   { background: linear-gradient(160deg, #ebf3ff, #dcebff); color: #007aff; }
+.hf-icon-badge--purple { background: linear-gradient(160deg, #f3eafd, #e8dbfa); color: #7c4dcc; }
+.hf-icon-badge--amber  { background: linear-gradient(160deg, #fdf4e4, #fbe9cd); color: #c8943a; }
+.hf-icon-badge--pink   { background: linear-gradient(160deg, #fdeaf2, #fbdce9); color: #d94f8f; }
 
 .hf-label-row {
   display: flex; align-items: baseline; gap: 0.4rem;
-  margin-bottom: 0.3rem; flex-wrap: wrap;
+  margin-bottom: 0.35rem; flex-wrap: wrap;
 }
 .hf-label { font-size: 0.82rem; font-weight: 600; color: var(--heading); }
 .hf-detail { font-size: 0.75rem; color: var(--muted); flex: 1; }
-.hf-pts { font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+.hf-pts { font-size: 0.72rem; font-weight: 700; color: var(--muted); }
 .hf-track {
-  height: 5px;
-  background: var(--border);
+  height: 6px;
+  background: var(--bg-alt);
   border-radius: 99px;
   overflow: hidden;
 }
 .hf-fill {
   height: 100%; border-radius: 99px;
-  transition: width 0.9s cubic-bezier(0.34,1.56,0.64,1);
+  transition: width 0.9s cubic-bezier(0.34,1.56,0.64,1), background 0.6s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

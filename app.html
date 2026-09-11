@@ -424,6 +424,12 @@
         <div class="health-gauge-panel">
           <div class="health-gauge-wrap">
             <svg class="health-gauge" viewBox="0 0 120 120" aria-hidden="true">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop id="gaugeGradStart" offset="0%" stop-color="#f0a868"/>
+                  <stop id="gaugeGradEnd" offset="100%" stop-color="#d06820"/>
+                </linearGradient>
+              </defs>
               <!-- bg arc — semicircle top half -->
               <circle class="gauge-track" cx="60" cy="60" r="48" />
               <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="48" />
@@ -433,7 +439,10 @@
               <span class="health-score-grade" id="health-score-grade"></span>
             </div>
           </div>
-          <p class="health-tip-box" id="health-tip-box"></p>
+          <p class="health-tip-box" id="health-tip-box">
+            <svg class="health-tip-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5c-2.9 0-5.2 2.3-5.2 5.1 0 1.9 1 3.1 1.9 4 .5.5.8 1 .8 1.5v.4h5v-.4c0-.5.3-1 .8-1.5.9-.9 1.9-2.1 1.9-4 0-2.8-2.3-5.1-5.2-5.1z"/><path d="M8.3 16.3h3.4M8.7 17.9h2.6"/></svg>
+            <span id="health-tip-text"></span>
+          </p>
         </div>
 
         <div class="health-breakdown">

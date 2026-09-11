@@ -1197,11 +1197,11 @@ function renderHealthScore() {
   score = Math.min(100, Math.max(0, Math.round(score)));
 
   // Grade
-  const grade  = score >= 85 ? { label: 'Excellent', color: '#2d7a3a' }
-               : score >= 70 ? { label: 'Good',      color: '#5a9e3a' }
-               : score >= 55 ? { label: 'Fair',       color: '#c8943a' }
-               : score >= 35 ? { label: 'Needs Work', color: '#d06820' }
-               :               { label: 'Poor',       color: '#c03a2b' };
+  const grade  = score >= 85 ? { label: 'Excellent', color: '#2d7a3a', from: '#6fcf7d', to: '#2d7a3a', tint: '#e3f6e8' }
+               : score >= 70 ? { label: 'Good',      color: '#5a9e3a', from: '#8bc34a', to: '#5a9e3a', tint: '#eef7e2' }
+               : score >= 55 ? { label: 'Fair',       color: '#c8943a', from: '#e8b458', to: '#c8943a', tint: '#faf0da' }
+               : score >= 35 ? { label: 'Needs Work', color: '#d06820', from: '#f0a868', to: '#d06820', tint: '#fbe8d3' }
+               :               { label: 'Poor',       color: '#c03a2b', from: '#e0665a', to: '#c03a2b', tint: '#fbe0dc' };
 
   // SVG gauge — arc from 225° to 315° (270° sweep = 3/4 circle)
   const R         = 48;
@@ -1213,16 +1213,23 @@ function renderHealthScore() {
 
   const trackEl = document.querySelector('.gauge-track');
   const fillEl  = document.getElementById('gauge-fill');
+  const gaugeWrapEl = document.querySelector('.health-gauge-wrap');
   if (trackEl) {
     trackEl.style.strokeDasharray  = `${arcLen} ${gap}`;
     trackEl.style.strokeDashoffset = `${-(gap / 2 + CIRCUM * 0.125)}`; // rotate start to 7 o'clock
   }
   if (fillEl) {
-    fillEl.style.stroke            = grade.color;
+    fillEl.style.stroke            = 'url(#gaugeGrad)';
+    fillEl.style.color             = grade.color; // feeds the currentColor drop-shadow glow
     fillEl.style.strokeDasharray   = `${fillLen} ${CIRCUM - fillLen}`;
     fillEl.style.strokeDashoffset  = `${-(gap / 2 + CIRCUM * 0.125)}`;
     fillEl.style.transition        = 'stroke-dasharray 1.2s cubic-bezier(0.34,1.56,0.64,1)';
   }
+  const gradStart = document.getElementById('gaugeGradStart');
+  const gradEnd   = document.getElementById('gaugeGradEnd');
+  if (gradStart) gradStart.setAttribute('stop-color', grade.from);
+  if (gradEnd)   gradEnd.setAttribute('stop-color', grade.to);
+  if (gaugeWrapEl) gaugeWrapEl.style.setProperty('--gauge-glow', grade.color);
 
   document.getElementById('health-score-num').textContent  = score;
   document.getElementById('health-score-num').style.color  = grade.color;
@@ -1236,12 +1243,20 @@ function renderHealthScore() {
               : score >= 55 ? "You're doing okay — tighten up a factor or two for a big jump."
               : score >= 35 ? "You're on your way! Keep tracking to improve your score."
               :               "Let's turn this around — log a few more transactions to see real progress.";
-    tipEl.textContent = tip;
+    document.getElementById('health-tip-text').textContent = tip;
+    tipEl.style.background = grade.tint;
+    tipEl.style.color      = grade.color;
   }
+
+  const BAR_TIERS = {
+    good: { from: '#6fcf7d', to: '#2d7a3a' },
+    mid:  { from: '#e8b458', to: '#c8943a' },
+    bad:  { from: '#e0665a', to: '#c03a2b' },
+  };
 
   document.getElementById('health-factors').innerHTML = factors.map(f => {
     const pct = (f.pts / f.max) * 100;
-    const barColor = pct >= 80 ? '#2d7a3a' : pct >= 50 ? '#c8943a' : '#c03a2b';
+    const tier = pct >= 80 ? BAR_TIERS.good : pct >= 50 ? BAR_TIERS.mid : BAR_TIERS.bad;
     const icon = HF_ICONS[f.key] || HF_ICONS.default;
     return `
       <div class="hf-row">
@@ -1253,7 +1268,7 @@ function renderHealthScore() {
             <span class="hf-pts">${f.pts}/${f.max}</span>
           </div>
           <div class="hf-track">
-            <div class="hf-fill" style="width:${pct.toFixed(0)}%;background:${barColor}"></div>
+            <div class="hf-fill" style="width:${pct.toFixed(0)}%;background:linear-gradient(90deg, ${tier.from}, ${tier.to});box-shadow:0 0 6px 0 ${tier.to}66"></div>
           </div>
         </div>
       </div>
