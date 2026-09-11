@@ -666,6 +666,10 @@ function renderChart() {
   const total  = entries.reduce((s, [, v]) => s + v, 0);
   const maxVal = entries[0][1];
 
+  const countByCategory = getMonthTransactions()
+    .filter(tx => tx.type === 'expense')
+    .reduce((acc, tx) => { acc[tx.category] = (acc[tx.category] || 0) + 1; return acc; }, {});
+
   if (totalEl) totalEl.textContent = formatCurrency(total);
 
   barsEl.innerHTML = entries.map(([cat, amount], i) => {
@@ -674,19 +678,24 @@ function renderChart() {
     const { bg, color } = CATEGORY_STYLES[cat] || { bg: '#e8e4f0', color: '#6040a0' };
     const label = CATEGORY_LABELS[cat] || capitalize(cat);
     const icon  = CATEGORY_ICONS[cat]  || '📌';
+    const count = countByCategory[cat] || 0;
     return `
       <div class="cbar-row" style="--i:${i}">
-        <div class="cbar-label">
-          <span class="cbar-icon">${icon}</span>
-          <span class="cbar-name">${label}</span>
+        <div class="cbar-top">
+          <div class="cbar-label">
+            <span class="cbar-icon-badge" style="background:${bg};color:${color}">${icon}</span>
+            <span class="cbar-text">
+              <span class="cbar-name">${label}</span>
+              <span class="cbar-count">${count} transaction${count !== 1 ? 's' : ''}</span>
+            </span>
+          </div>
+          <div class="cbar-meta">
+            <span class="cbar-amount">${formatCurrency(amount)}</span>
+            <span class="cbar-pct">${pct}% of expenses</span>
+          </div>
         </div>
         <div class="cbar-track">
-          <div class="cbar-fill" data-w="${barW}%"
-               style="background:${bg};box-shadow:inset 3px 0 0 ${color}"></div>
-        </div>
-        <div class="cbar-meta">
-          <span class="cbar-amount">${formatCurrency(amount)}</span>
-          <span class="cbar-pct">${pct}%</span>
+          <div class="cbar-fill" data-w="${barW}%" style="background:${color}"></div>
         </div>
       </div>`;
   }).join('');
@@ -959,8 +968,10 @@ function renderTransactions() {
         const amountClass = isIncome ? 'tx-amount tx-amount--income' : 'tx-amount tx-amount--expense';
         const catStyle    = CATEGORY_STYLES[tx.category] || { bg: '#e4e4e8', color: '#404050' };
         const catLabel    = CATEGORY_LABELS[tx.category] || capitalize(tx.category);
-        const catIcon     = CATEGORY_ICONS[tx.category]  || '📌';
         const typeIcon    = isIncome ? '↑' : '↓';
+        const timeStr     = tx.createdAt
+          ? new Date(tx.createdAt * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+          : '';
         const recurringBadge = tx.isRecurring ? `<span class="tx-recurring-badge" title="Recurring monthly">↻</span>` : '';
         const locationBadge  = tx.location ? `<span class="tx-location-badge" title="${escapeHtml(tx.location)}">📍 ${escapeHtml(tx.location)}</span>` : '';
 
@@ -969,13 +980,30 @@ function renderTransactions() {
             <div class="tx-type-dot tx-type-dot--${tx.type}">${typeIcon}</div>
             <div class="tx-info">
               <span class="tx-desc">${escapeHtml(tx.description)}${recurringBadge}</span>
-              <span class="tx-badge tx-badge--${tx.category}" style="background:${catStyle.bg};color:${catStyle.color}">${catIcon} ${catLabel}</span>
+              <span class="tx-cat-row">
+                <span class="tx-cat-dot" style="background:${catStyle.color}"></span>
+                <span class="tx-cat-label">${catLabel}</span>
+              </span>
               ${locationBadge}
             </div>
-            <span class="${amountClass}">${amountText}</span>
-            <div class="tx-actions">
-              <button class="tx-edit"   data-id="${tx.id}" title="Edit"   aria-label="Edit">✎</button>
-              <button class="tx-delete" data-id="${tx.id}" title="Delete" aria-label="Delete">✕</button>
+            <div class="tx-amount-wrap">
+              <span class="${amountClass}">${amountText}</span>
+              ${timeStr ? `<span class="tx-time">${timeStr}</span>` : ''}
+            </div>
+            <div class="tx-menu">
+              <button type="button" class="tx-menu-btn" data-id="${tx.id}" title="More options" aria-label="More options" aria-haspopup="true" aria-expanded="false">
+                <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4.5" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="10" cy="15.5" r="1.6"/></svg>
+              </button>
+              <div class="tx-menu-dropdown">
+                <button type="button" class="tx-menu-item tx-edit" data-id="${tx.id}">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5l3 3L6 17H3v-3z"/></svg>
+                  Edit
+                </button>
+                <button type="button" class="tx-menu-item tx-menu-item--danger tx-delete" data-id="${tx.id}">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4h4v2M6 6l.7 10a1 1 0 001 .9h4.6a1 1 0 001-.9L14 6"/></svg>
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -2272,10 +2300,33 @@ function init() {
 
   // Edit / Delete via event delegation (IDs are row UUIDs)
   document.getElementById('transaction-list').addEventListener('click', e => {
+    const menuBtn = e.target.closest('.tx-menu-btn');
+    if (menuBtn) {
+      e.stopPropagation();
+      const menu    = menuBtn.closest('.tx-menu');
+      const wasOpen = menu.classList.contains('open');
+      document.querySelectorAll('.tx-menu.open').forEach(m => {
+        m.classList.remove('open');
+        m.querySelector('.tx-menu-btn')?.setAttribute('aria-expanded', 'false');
+      });
+      if (!wasOpen) {
+        menu.classList.add('open');
+        menuBtn.setAttribute('aria-expanded', 'true');
+      }
+      return;
+    }
     const editBtn = e.target.closest('.tx-edit');
     if (editBtn) { handleEdit(editBtn.dataset.id); return; }
     const delBtn = e.target.closest('.tx-delete');
     if (delBtn) handleDelete(delBtn.dataset.id);
+  });
+
+  // Close any open transaction menu when clicking elsewhere
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.tx-menu.open').forEach(m => {
+      m.classList.remove('open');
+      m.querySelector('.tx-menu-btn')?.setAttribute('aria-expanded', 'false');
+    });
   });
 
   // Edit cancel

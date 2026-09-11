@@ -531,17 +531,31 @@
     <section class="app-card history-section">
 
       <div class="history-header">
-        <h2 class="card-title">Transaction History</h2>
+        <div class="history-header-left">
+          <h2 class="card-title" style="margin-bottom:0.3rem">Transaction History</h2>
+          <p class="history-subtitle">Keep track of your income and expenses.</p>
+        </div>
         <div class="history-header-right">
           <span class="tx-count" id="tx-count">0 transactions</span>
-          <button type="button" class="btn-ghost btn-sm export-btn" id="export-csv-btn" title="Export CSV">⬇ CSV</button>
-          <button type="button" class="btn-ghost btn-sm export-btn" id="export-pdf-btn" title="Export PDF / Print">⬇ PDF</button>
+          <div class="history-export-group">
+            <button type="button" class="export-btn" id="export-csv-btn" title="Export CSV">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5h6l3 3V16a1 1 0 01-1 1H6a1 1 0 01-1-1V3.5a1 1 0 011-1z"/><path d="M12 2.5V6h3"/></svg>
+              CSV
+            </button>
+            <button type="button" class="export-btn" id="export-pdf-btn" title="Export PDF / Print">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5h6l3 3V16a1 1 0 01-1 1H6a1 1 0 01-1-1V3.5a1 1 0 011-1z"/><path d="M12 2.5V6h3"/></svg>
+              PDF
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Filters -->
       <div class="filters-row">
-        <input type="text" id="search-input" class="filter-search" placeholder="Search transactions…" />
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M17 17l-4-4"/></svg>
+          <input type="text" id="search-input" class="filter-search" placeholder="Search transactions…" />
+        </div>
         <select id="filter-type" class="filter-select">
           <option value="all">All types</option>
           <option value="expense">Expenses</option>
