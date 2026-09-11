@@ -318,7 +318,21 @@
 
     <!-- ===== 4. Budget Targets (monthly income/expense/budget goals) ===== -->
     <section class="app-card profile-section" id="profile-section" style="display:none">
-      <h2 class="card-title">Budget Targets</h2>
+
+      <div class="targets-header">
+        <div class="targets-header-text">
+          <h2 class="card-title" style="margin-bottom:0.4rem">Budget Targets</h2>
+          <p class="profile-desc" style="margin-bottom:0">Set monthly targets to track your progress on the dashboard.</p>
+        </div>
+        <span class="targets-header-icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="21" cy="27" r="15.5"/>
+            <circle cx="21" cy="27" r="9.5"/>
+            <circle cx="21" cy="27" r="3.2"/>
+            <path d="M31 17 L43 5 M43 5 L37 6 M43 5 L42 11" stroke-width="2.4"/>
+          </svg>
+        </span>
+      </div>
 
       <!-- Saved state -->
       <div class="profile-saved" id="profile-saved" style="display:none">
@@ -341,41 +355,61 @@
 
       <!-- Edit / set state -->
       <div class="profile-form" id="profile-form">
-        <p class="profile-desc">Set monthly targets to track your progress on the dashboard.</p>
 
         <div class="goals-grid">
 
           <div class="goal-field">
-            <label class="goal-label">Monthly Budget Goal</label>
-            <div class="goal-input-wrap">
-              <input type="number" id="profile-budget-input" placeholder="e.g. 2500.00"
-                     step="any" inputmode="decimal" min="0.01" />
-              <button type="button" class="input-clear-btn" data-target="profile-budget-input" title="Clear">&#x2715;</button>
+            <span class="goal-icon-badge goal-icon-badge--budget" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="profile-budget-input">Monthly Budget Goal</label>
+              <div class="goal-input-wrap">
+                <span class="goal-input-dollar">$</span>
+                <input type="number" id="profile-budget-input" placeholder="e.g. 2500.00"
+                       step="any" inputmode="decimal" min="0.01" />
+                <button type="button" class="input-clear-btn" data-target="profile-budget-input" title="Clear">&#x2715;</button>
+              </div>
             </div>
           </div>
 
           <div class="goal-field">
-            <label class="goal-label">Total Income Target</label>
-            <div class="goal-input-wrap">
-              <input type="number" id="profile-income-input" placeholder="e.g. 4000.00"
-                     step="any" inputmode="decimal" min="0.01" />
-              <button type="button" class="input-clear-btn" data-target="profile-income-input" title="Clear">&#x2715;</button>
+            <span class="goal-icon-badge goal-icon-badge--income" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l4.5-5 3 3L17 5"/><path d="M12.5 5H17v4.5"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="profile-income-input">Total Income Target</label>
+              <div class="goal-input-wrap">
+                <span class="goal-input-dollar">$</span>
+                <input type="number" id="profile-income-input" placeholder="e.g. 4000.00"
+                       step="any" inputmode="decimal" min="0.01" />
+                <button type="button" class="input-clear-btn" data-target="profile-income-input" title="Clear">&#x2715;</button>
+              </div>
             </div>
           </div>
 
           <div class="goal-field">
-            <label class="goal-label">Total Expenses Limit</label>
-            <div class="goal-input-wrap">
-              <input type="number" id="profile-expense-input" placeholder="e.g. 1500.00"
-                     step="any" inputmode="decimal" min="0.01" />
-              <button type="button" class="input-clear-btn" data-target="profile-expense-input" title="Clear">&#x2715;</button>
+            <span class="goal-icon-badge goal-icon-badge--expense" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l4.5 5 3-3L17 15"/><path d="M12.5 15H17v-4.5"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="profile-expense-input">Total Expenses Limit</label>
+              <div class="goal-input-wrap">
+                <span class="goal-input-dollar">$</span>
+                <input type="number" id="profile-expense-input" placeholder="e.g. 1500.00"
+                       step="any" inputmode="decimal" min="0.01" />
+                <button type="button" class="input-clear-btn" data-target="profile-expense-input" title="Clear">&#x2715;</button>
+              </div>
             </div>
           </div>
 
         </div>
 
         <div class="profile-actions">
-          <button type="button" class="btn" id="profile-save-btn">Save Goals</button>
+          <button type="button" class="btn goals-save-btn" id="profile-save-btn">
+            <span>Save Goals</span>
+            <svg class="goals-save-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+          </button>
           <button type="button" class="btn-ghost btn-sm" id="profile-cancel-btn" style="display:none">Cancel</button>
         </div>
         <p class="profile-error" id="profile-error"></p>
@@ -386,21 +420,32 @@
     <!-- ===== 5. Financial Health Score ===== -->
     <section class="app-card health-score-section" id="health-score-section" style="display:none">
       <div class="health-score-inner">
-        <div class="health-gauge-wrap">
-          <svg class="health-gauge" viewBox="0 0 120 120" aria-hidden="true">
-            <!-- bg arc — semicircle top half -->
-            <circle class="gauge-track" cx="60" cy="60" r="48" />
-            <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="48" />
-          </svg>
-          <div class="health-score-center">
-            <span class="health-score-num" id="health-score-num">—</span>
-            <span class="health-score-grade" id="health-score-grade"></span>
+
+        <div class="health-gauge-panel">
+          <div class="health-gauge-wrap">
+            <svg class="health-gauge" viewBox="0 0 120 120" aria-hidden="true">
+              <!-- bg arc — semicircle top half -->
+              <circle class="gauge-track" cx="60" cy="60" r="48" />
+              <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="48" />
+            </svg>
+            <div class="health-score-center">
+              <span class="health-score-num" id="health-score-num">—</span>
+              <span class="health-score-grade" id="health-score-grade"></span>
+            </div>
           </div>
+          <p class="health-tip-box" id="health-tip-box"></p>
         </div>
+
         <div class="health-breakdown">
-          <h2 class="card-title" style="margin-bottom:0.6rem">Financial Health Score</h2>
+          <div class="health-breakdown-header">
+            <h2 class="card-title" style="margin-bottom:0">Financial Health Score</h2>
+            <span class="health-info-icon" tabindex="0" title="Combines savings rate, budget adherence, tracking history, balanced tracking, and credit card usage.">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="8.3"/><path d="M10 9v5" stroke-linecap="round"/><circle cx="10" cy="6.3" r="0.9" fill="currentColor" stroke="none"/></svg>
+            </span>
+          </div>
           <div class="health-factors" id="health-factors"></div>
         </div>
+
       </div>
     </section>
 

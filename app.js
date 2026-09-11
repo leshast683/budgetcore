@@ -1160,7 +1160,7 @@ function renderHealthScore() {
     ? savingsRate >= 0.20 ? 30 : savingsRate >= 0.10 ? 20 : savingsRate >= 0 ? 10 : 0
     : 0;
   score += srPts;
-  factors.push({ label: 'Savings Rate', pts: srPts, max: 30, detail: income > 0 ? Math.round(savingsRate * 100) + '%' : 'n/a' });
+  factors.push({ key: 'savings', label: 'Savings Rate', pts: srPts, max: 30, detail: income > 0 ? Math.round(savingsRate * 100) + '%' : 'n/a' });
 
   // 2. Budget adherence (25 pts)
   let baPts = 0;
@@ -1171,13 +1171,13 @@ function renderHealthScore() {
     baPts = 12; // partial credit for not having set a budget yet
   }
   score += baPts;
-  factors.push({ label: 'Budget Adherence', pts: baPts, max: 25, detail: monthlyBudget > 0 ? (expenses <= monthlyBudget ? 'On track' : 'Over budget') : 'No budget set' });
+  factors.push({ key: 'adherence', label: 'Budget Adherence', pts: baPts, max: 25, detail: monthlyBudget > 0 ? (expenses <= monthlyBudget ? 'On track' : 'Over budget') : 'No budget set' });
 
   // 3. Data history (20 pts)
   const months = getAvailableMonths();
   const histPts = months.length >= 3 ? 20 : months.length === 2 ? 13 : months.length === 1 ? 7 : 0;
   score += histPts;
-  factors.push({ label: 'History & Consistency', pts: histPts, max: 20, detail: months.length + ' month' + (months.length !== 1 ? 's' : '') + ' of data' });
+  factors.push({ key: 'history', label: 'History & Consistency', pts: histPts, max: 20, detail: months.length + ' month' + (months.length !== 1 ? 's' : '') + ' of data' });
 
   // 4. Balanced activity (15 pts) — both income and expense tracked
   const monthTx  = getMonthTransactions();
@@ -1185,14 +1185,14 @@ function renderHealthScore() {
   const hasExp   = monthTx.some(tx => tx.type === 'expense');
   const balPts   = hasInc && hasExp ? 15 : (hasInc || hasExp) ? 8 : 0;
   score += balPts;
-  factors.push({ label: 'Balanced Tracking', pts: balPts, max: 15, detail: hasInc && hasExp ? 'Income & expenses' : 'Partial data' });
+  factors.push({ key: 'balanced', label: 'Balanced Tracking', pts: balPts, max: 15, detail: hasInc && hasExp ? 'Income & expenses' : 'Partial data' });
 
   // 5. Debt/credit control (10 pts)
   const ccSpend = getMonthTransactions().filter(tx => tx.type === 'expense' && tx.category === 'creditcards').reduce((s, t) => s + t.amount, 0);
   const debtPct = expenses > 0 ? ccSpend / expenses : 0;
   const debtPts = debtPct < 0.10 ? 10 : debtPct < 0.20 ? 6 : debtPct < 0.35 ? 3 : 0;
   score += debtPts;
-  factors.push({ label: 'Credit Card Usage', pts: debtPts, max: 10, detail: expenses > 0 ? Math.round(debtPct * 100) + '% of expenses' : 'None' });
+  factors.push({ key: 'credit', label: 'Credit Card Usage', pts: debtPts, max: 10, detail: expenses > 0 ? Math.round(debtPct * 100) + '% of expenses' : 'None' });
 
   score = Math.min(100, Math.max(0, Math.round(score)));
 
@@ -1229,23 +1229,65 @@ function renderHealthScore() {
   document.getElementById('health-score-grade').textContent = grade.label;
   document.getElementById('health-score-grade').style.color = grade.color;
 
+  const tipEl = document.getElementById('health-tip-box');
+  if (tipEl) {
+    const tip = score >= 85 ? "Excellent work! You're managing your money like a pro."
+              : score >= 70 ? "Great job! A few small tweaks and you'll hit the top tier."
+              : score >= 55 ? "You're doing okay — tighten up a factor or two for a big jump."
+              : score >= 35 ? "You're on your way! Keep tracking to improve your score."
+              :               "Let's turn this around — log a few more transactions to see real progress.";
+    tipEl.textContent = tip;
+  }
+
   document.getElementById('health-factors').innerHTML = factors.map(f => {
     const pct = (f.pts / f.max) * 100;
     const barColor = pct >= 80 ? '#2d7a3a' : pct >= 50 ? '#c8943a' : '#c03a2b';
+    const icon = HF_ICONS[f.key] || HF_ICONS.default;
     return `
       <div class="hf-row">
-        <div class="hf-label-row">
-          <span class="hf-label">${f.label}</span>
-          <span class="hf-detail">${f.detail}</span>
-          <span class="hf-pts">${f.pts}/${f.max}</span>
-        </div>
-        <div class="hf-track">
-          <div class="hf-fill" style="width:${pct.toFixed(0)}%;background:${barColor}"></div>
+        <span class="hf-icon-badge hf-icon-badge--${icon.tone}" aria-hidden="true">${icon.svg}</span>
+        <div class="hf-body">
+          <div class="hf-label-row">
+            <span class="hf-label">${f.label}</span>
+            <span class="hf-detail">${f.detail}</span>
+            <span class="hf-pts">${f.pts}/${f.max}</span>
+          </div>
+          <div class="hf-track">
+            <div class="hf-fill" style="width:${pct.toFixed(0)}%;background:${barColor}"></div>
+          </div>
         </div>
       </div>
     `;
   }).join('');
 }
+
+// Icon + tone per health-score factor (mirrors the .stat-icon badge language used on the dashboard)
+const HF_ICONS = {
+  savings: {
+    tone: 'green',
+    svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11c0-3.3 3-5.5 6.5-5.5 1 0 1.9.15 2.7.45L14 4.3l1 2.2c1.2.9 1.9 2.2 1.9 3.6v.2c0 .5-.4.9-.9.9H15v1.6c0 .55-.45 1-1 1h-1.2c-.55 0-1-.45-1-1v-.4H8v.4c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1.9C3.8 13.2 3 12.2 3 11z"/><circle cx="12.3" cy="9" r="0.6" fill="currentColor" stroke="none"/></svg>'
+  },
+  adherence: {
+    tone: 'blue',
+    svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V9M10 16V4M16 16v-6"/></svg>'
+  },
+  history: {
+    tone: 'purple',
+    svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="12.5" rx="2.2"/><path d="M3 8h14M6.5 2.5V5M13.5 2.5V5"/><path d="M7 12.3l1.8 1.8 3.7-3.9"/></svg>'
+  },
+  balanced: {
+    tone: 'amber',
+    svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M4 6h4M12 6h4M4 6l-1.6 4A2 2 0 006.3 10L4 6zM16 6l-1.6 4a2 2 0 003.9 0L16 6z"/><path d="M6 17h8"/></svg>'
+  },
+  credit: {
+    tone: 'pink',
+    svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M2.5 8h15"/><path d="M5 12.2h3"/></svg>'
+  },
+  default: {
+    tone: 'blue',
+    svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7"/></svg>'
+  }
+};
 
 // --- Render: Bill Negotiation Alerts ---
 const BILL_TIPS = {
