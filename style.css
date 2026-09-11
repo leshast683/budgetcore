@@ -2823,7 +2823,7 @@ footer {
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-radius: 24px;
-  padding: 2.3rem 1.6rem 2.1rem;
+  padding: 2.7rem 1.6rem 2.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -4326,7 +4326,7 @@ input[type="date"].filter-date {
     gap: 0.55rem;
   }
   .stat-card {
-    padding: 2rem 0.9rem 1.9rem;
+    padding: 2.3rem 0.9rem 2.2rem;
     border-radius: 14px;
     gap: 0.25rem;
   }
@@ -4372,7 +4372,7 @@ input[type="date"].filter-date {
   }
 
   .stat-card {
-    padding: 1.65rem 0.65rem 1.55rem;
+    padding: 1.9rem 0.65rem 1.8rem;
     border-radius: 12px;
     gap: 0.2rem;
   }
