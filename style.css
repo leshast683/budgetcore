@@ -6446,7 +6446,7 @@ input[type="number"] {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  transform: translateY(16px);
+  transform: translateY(4px);
 }
 .health-score-num {
   font-size: 2.15rem;
