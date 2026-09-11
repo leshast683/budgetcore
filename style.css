@@ -6446,9 +6446,9 @@ input[type="date"].filter-date {
 
 /* --- Financial Health Score --- */
 @keyframes gauge-float {
-  0%   { transform: translateY(0px) scale(1); filter: drop-shadow(0 6px 14px rgba(200,148,58,0.20)); }
-  50%  { transform: translateY(-6px) scale(1.02); filter: drop-shadow(0 14px 24px rgba(200,148,58,0.30)); }
-  100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 6px 14px rgba(200,148,58,0.20)); }
+  0%   { transform: translateY(0px) scale(1); }
+  50%  { transform: translateY(-6px) scale(1.02); }
+  100% { transform: translateY(0px) scale(1); }
 }
 
 .health-score-section { }
@@ -6481,7 +6481,7 @@ input[type="date"].filter-date {
   width: 138px;
   height: 138px;
   animation: gauge-float 4s ease-in-out infinite;
-  will-change: transform, filter;
+  will-change: transform;
 }
 .health-gauge-wrap::after {
   content: '';
