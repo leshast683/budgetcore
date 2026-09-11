@@ -1238,7 +1238,6 @@ function renderHealthScore() {
 
   const trackEl = document.querySelector('.gauge-track');
   const fillEl  = document.getElementById('gauge-fill');
-  const gaugeWrapEl = document.querySelector('.health-gauge-wrap');
   if (trackEl) {
     trackEl.style.strokeDasharray  = `${arcLen} ${gap}`;
     trackEl.style.strokeDashoffset = `${-(gap / 2 + CIRCUM * 0.125)}`; // rotate start to 7 o'clock
@@ -1254,7 +1253,6 @@ function renderHealthScore() {
   const gradEnd   = document.getElementById('gaugeGradEnd');
   if (gradStart) gradStart.setAttribute('stop-color', grade.from);
   if (gradEnd)   gradEnd.setAttribute('stop-color', grade.to);
-  if (gaugeWrapEl) gaugeWrapEl.style.setProperty('--gauge-glow', grade.color);
 
   document.getElementById('health-score-num').textContent  = score;
   document.getElementById('health-score-num').style.color  = grade.color;
