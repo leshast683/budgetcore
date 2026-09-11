@@ -904,10 +904,7 @@ let txFirstRender = true;
 function renderTransactions() {
   const list     = document.getElementById('transaction-list');
   const empty    = document.getElementById('list-empty');
-  const counter  = document.getElementById('tx-count');
   const filtered = getFilteredTransactions();
-
-  counter.textContent = filtered.length + ' transaction' + (filtered.length !== 1 ? 's' : '');
 
   if (!filtered.length) {
     list.innerHTML = '';
