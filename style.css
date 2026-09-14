@@ -4083,6 +4083,13 @@ input[type="date"].filter-date {
 }
 .goal-cat-btn.active .goal-cat-label { color: var(--accent); }
 
+@media (max-width: 700px) {
+  .goal-cat-icon { width: 62px; height: 62px; }
+  .goal-cat-icon svg { width: 26px; height: 26px; }
+  .goal-cat-icon img { width: 34px; height: 34px; }
+  .goal-cat-label { font-size: 0.8rem; }
+}
+
 /* "More" dropdown — fixed-positioned (coords set in JS) so it escapes the
    picker row's horizontal scroll clipping instead of being cut off. */
 .goal-cat-more-dropdown {
