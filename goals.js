@@ -49,26 +49,16 @@ function goalColor(index) {
 
 // --- Categories ---
 const GOAL_MAIN_CATEGORIES = [
-  { id: 'travel',    label: 'Travel',
-    icon: '<path d="M14.8 8.5 L16.2 5 C18.6 3.3 19.3 5.6 16.8 6.7 L6.8 5.4 L9.6 10.1 L2.8 8.3 L6.3 13.1 L8 10.9 L9.5 17.2 L11.7 11.4 Z"/>' },
-  { id: 'car',       label: 'Car',
-    icon: '<path d="M4 9.5L6.5 6a1.5 1.5 0 011.2-.6h4.6a1.5 1.5 0 011.2.6L16 9.5"/><path d="M3 9.5h14"/><path d="M2.3 8.3c-.9 0-1.3.4-1.3 1s.4 1 1.3 1h1.3M17.7 8.3c.9 0 1.3.4 1.3 1s-.4 1-1.3 1h-1.3"/><path d="M3.3 9.5v3.2a2 2 0 002 2h9.4a2 2 0 002-2V9.5"/><path d="M6 12l2.3.9M14 12l-2.3.9"/><path d="M7.5 15.7h5"/><path d="M3.3 14.7h2M14.7 14.7h2"/>' },
-  { id: 'house',     label: 'House',
-    icon: '<path d="M2.2 9.7L10 3l7.8 6.7"/><rect x="13.7" y="5.3" width="1.8" height="4.3"/><path d="M4.3 8.9v7.4h11.4V8.9"/><rect x="8.2" y="11.3" width="3.6" height="5" rx="0.3"/><circle cx="10.9" cy="14" r="0.4" fill="currentColor" stroke="none"/>' },
-  { id: 'education', label: 'Education',
-    icon: '<path d="M2.2 9.8L10 4.3l7.8 5.5"/><path d="M2.2 9.8L10 12.2l7.8-2.4"/><path d="M3.6 9.7V13.3C3.6 15 6.5 15.6 10 15.6C13.5 15.6 16.4 15 16.4 13.3V9.7"/><path d="M17.8 9.8v2.4"/><circle cx="17.8" cy="13.1" r="0.9"/><path d="M17.1 14l.6 3.4a.3.3 0 00.6 0l.6-3.4"/>' },
-  { id: 'health',    label: 'Health',
-    icon: '<path d="M10 17s-6.5-4.2-6.5-9A4 4 0 0110 5.5 4 4 0 0116.5 8c0 4.8-6.5 9-6.5 9z"/><path d="M9 8.4h2v2h2v2h-2v2H9v-2H7v-2h2z"/>' },
-  { id: 'wedding',   label: 'Wedding',
-    icon: '<path d="M7.3 5.6L10 4.3l2.7 1.3M10 4.3v1.3M7.3 5.6h5.4M7.3 5.6L10 8.3l2.7-2.7M10 5.6v2.7M7.3 5.6L7.9 9M12.7 5.6L12.1 9"/><path d="M10 1.4v2.3M7.3 2.3l1.2 1.5M12.7 2.3l-1.2 1.5"/><circle cx="10" cy="13.3" r="4.6"/><circle cx="10" cy="13.3" r="3.5"/>' },
-  { id: 'business',  label: 'Business',
-    icon: '<rect x="2.3" y="7.2" width="15.4" height="9.6" rx="2"/><path d="M7.4 7.2V5.8a1.8 1.8 0 011.8-1.8h1.6a1.8 1.8 0 011.8 1.8v1.4"/><path d="M2.3 11.1l6.3 1.9h2.8l6.3-1.9"/><rect x="8.8" y="12" width="2.4" height="2.6" rx="0.5"/>' },
-  { id: 'debt',      label: 'Debt',
-    icon: '<path d="M7.3 5.2c.5-.6 1.2-.6 1.7-.1.5.5 1.5.5 2 0 .5-.5 1.2-.5 1.7.1"/><rect x="7.6" y="5.1" width="4.8" height="1.3" rx="0.6"/><path d="M7.7 6.3C5 7.7 3.3 10 3.3 12.4c0 3 3 4.9 6.7 4.9 1.1 0 2.1-.2 3-.4"/><path d="M12.3 6.3c1.6 1 2.9 2.6 3.4 4.4"/><path d="M8.4 9.9a1.8 1.8 0 011.6-.9c1 0 1.7.6 1.7 1.3 0 1.7-3.4.9-3.4 2.6 0 .7.7 1.3 1.7 1.3a1.8 1.8 0 001.7-1"/><path d="M10 8v7.3"/><circle cx="14.6" cy="14.2" r="3.1"/><path d="M13.1 14.2h3"/>' },
-  { id: 'purchase',  label: 'Big Purchase',
-    icon: '<path d="M2 6.3h2.5l1.7 2"/><path d="M6.2 8.3H16.5L14.9 13.2H7.8Z"/><path d="M7 13.6h9"/><circle cx="9" cy="16.3" r="1.3"/><circle cx="13.8" cy="16.3" r="1.3"/><path d="M8.7 7L11 3.5l2.3 3.5"/><path d="M8.7 7h4.6"/><path d="M11 3.5v3.5"/><path d="M8.7 7L11 9.5l2.3-2.5"/>' },
-  { id: 'moving',    label: 'Moving',
-    icon: '<path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z"/><path d="M3 6.5l7 3.5 7-3.5M10 10.2V17"/><path d="M6.3 5L13 8.6"/><path d="M12.6 10.5v2.8l-1.5-.8v-2.7z"/>' },
+  { id: 'travel',    label: 'Travel',    img: 'goal-icons/cat-travel.png' },
+  { id: 'car',       label: 'Car',       img: 'goal-icons/cat-car.png' },
+  { id: 'house',     label: 'House',     img: 'goal-icons/cat-house.png' },
+  { id: 'education', label: 'Education', img: 'goal-icons/cat-education.png' },
+  { id: 'health',    label: 'Health',    img: 'goal-icons/cat-health.png' },
+  { id: 'wedding',   label: 'Wedding',   img: 'goal-icons/cat-wedding.png' },
+  { id: 'business',  label: 'Business',  img: 'goal-icons/cat-business.png' },
+  { id: 'debt',      label: 'Debt',      img: 'goal-icons/cat-debt.png' },
+  { id: 'purchase',  label: 'Big Purchase', img: 'goal-icons/cat-purchase.png' },
+  { id: 'moving',    label: 'Moving',    img: 'goal-icons/cat-moving.png' },
 ];
 
 const GOAL_EXTRA_CATEGORIES = [
@@ -99,7 +89,8 @@ const GOAL_CATEGORY_MAP = Object.fromEntries(
 GOAL_CATEGORY_MAP.other = { id: 'other', label: 'Other', icon: MORE_ICON_PATH };
 
 function categoryIconSvg(catId, strokeWidth = '1.7') {
-  const cat  = GOAL_CATEGORY_MAP[catId];
+  const cat = GOAL_CATEGORY_MAP[catId];
+  if (cat && cat.img) return `<img src="${cat.img}" alt="" class="goal-cat-img" />`;
   const path = cat ? cat.icon : (catId === 'other' ? MORE_ICON_PATH : CUSTOM_ICON_PATH);
   return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
 }

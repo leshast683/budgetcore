@@ -4065,6 +4065,7 @@ input[type="date"].filter-date {
               color 0.18s var(--ease-out), transform 0.15s var(--ease-spring);
 }
 .goal-cat-icon svg { width: 22px; height: 22px; }
+.goal-cat-icon img { width: 27px; height: 27px; object-fit: contain; }
 
 .goal-cat-btn:hover .goal-cat-icon { transform: translateY(-1px); }
 
@@ -4165,6 +4166,7 @@ input[type="date"].filter-date {
   pointer-events: none;
 }
 .goal-input-icon svg { width: 16px; height: 16px; }
+.goal-input-icon img { width: 18px; height: 18px; object-fit: contain; }
 .goal-input-wrap input[type="text"] { padding-left: 2.6rem; }
 
 /* Fields + photo upload side by side */
@@ -4613,6 +4615,7 @@ input[type="date"].filter-date {
   border: 2px solid var(--surface);
 }
 .goal-cat-badge svg { width: 12px; height: 12px; }
+.goal-cat-badge img { width: 15px; height: 15px; object-fit: contain; filter: invert(1); }
 
 .goal-card-body {
   flex: 1;
