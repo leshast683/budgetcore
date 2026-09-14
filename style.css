@@ -3914,55 +3914,32 @@ input[type="date"].filter-date {
 }
 
 /* ===== Goals Page — Hero ===== */
-.accent-word { color: var(--accent); }
-
 .goals-hero {
-  position: relative;
   overflow: hidden;
-  padding: 2.25rem 2rem;
   border-radius: 24px;
-  background:
-    radial-gradient(220px circle at 94% 6%, rgba(154,110,58,0.14), transparent 70%),
-    radial-gradient(260px circle at 80% 95%, rgba(154,110,58,0.09), transparent 65%),
-    linear-gradient(135deg, #fdf7ee 0%, #f6e5c9 100%);
   border: 1px solid rgba(200,180,155,0.4);
   box-shadow: var(--shadow-sm);
+  background: var(--surface);
 }
 
-.goals-hero-text { position: relative; z-index: 1; max-width: 520px; }
-
-.goals-hero-eyebrow {
+.goals-hero-banner {
   display: block;
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--accent);
-  margin-bottom: 0.6rem;
-}
-
-.goals-hero-title {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  color: var(--heading);
-  margin-bottom: 0.65rem;
+  width: 100%;
+  height: auto;
 }
 
 .goals-hero-sub {
   font-size: 0.95rem;
   color: var(--text);
-  max-width: 400px;
+  text-align: center;
+  padding: 1.5rem 2rem 0;
 }
 
 .goals-hero-features {
-  position: relative;
-  z-index: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
-  margin-top: 1.75rem;
+  padding: 1.5rem 2rem 2rem;
 }
 
 .goals-hero-feature {
@@ -3980,7 +3957,7 @@ input[type="date"].filter-date {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface);
+  background: var(--bg);
   color: var(--accent);
   border: 1px solid rgba(200,180,155,0.5);
 }
@@ -3994,9 +3971,8 @@ input[type="date"].filter-date {
 }
 
 @media (max-width: 700px) {
-  .goals-hero { padding: 1.6rem 1.4rem; border-radius: 18px; }
-  .goals-hero-title { font-size: 1.5rem; }
-  .goals-hero-features { grid-template-columns: repeat(2, 1fr); gap: 1.25rem 0.75rem; }
+  .goals-hero-sub { padding: 1.25rem 1.4rem 0; font-size: 0.88rem; }
+  .goals-hero-features { grid-template-columns: repeat(2, 1fr); gap: 1.25rem 0.75rem; padding: 1.25rem 1.4rem 1.6rem; }
 }
 
 /* ===== Savings / Investment mode toggle ===== */
