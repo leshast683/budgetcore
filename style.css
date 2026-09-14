@@ -4573,13 +4573,14 @@ input[type="date"].filter-date {
   .tip-slide-art { display: none; }
   .tip-headline { font-size: 1.2rem; }
 
-  .tip-chips { flex-wrap: nowrap; gap: 0.3rem; }
-  .tip-chip { flex: 1; min-width: 0; padding: 0.45rem 0.4rem; gap: 0.32rem; }
-  .tip-chip-icon { width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0; }
-  .tip-chip-icon svg { width: 13px; height: 13px; }
+  .tip-slide { padding: 1.4rem 1.1rem 1.6rem; }
+  .tip-chips { flex-wrap: nowrap; align-items: stretch; gap: 0.28rem; }
+  .tip-chip { flex: 1; min-width: 0; min-height: 72px; box-sizing: border-box; padding: 0.5rem 0.3rem; gap: 0.34rem; }
+  .tip-chip-icon { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; }
+  .tip-chip-icon svg { width: 17px; height: 17px; }
   .tip-chip-text { min-width: 0; }
-  .tip-chip-title { font-size: 0.7rem; white-space: normal; line-height: 1.15; }
-  .tip-chip-sub { font-size: 0.56rem; white-space: normal; line-height: 1.2; }
+  .tip-chip-title { font-size: 0.72rem; white-space: normal; line-height: 1.15; }
+  .tip-chip-sub { font-size: 0.58rem; white-space: normal; line-height: 1.2; }
 }
 
 /* Separate backdrop element (injected by JS on mobile) */
