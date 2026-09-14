@@ -88,115 +88,59 @@ function categoryIconSvg(catId, strokeWidth = '1.7') {
   return `<img src="${CUSTOM_ICON_IMG}" alt="" class="goal-cat-img" />`;
 }
 
-function isMainCategory(catId) {
-  return GOAL_MAIN_CATEGORIES.some(c => c.id === catId);
+const GOAL_ALL_CATEGORIES = [...GOAL_MAIN_CATEGORIES, ...GOAL_EXTRA_CATEGORIES];
+
+function isPresetCategory(catId) {
+  return GOAL_ALL_CATEGORIES.some(c => c.id === catId);
 }
 
 let selectedCategory  = GOAL_MAIN_CATEGORIES[0].id;
 let pendingPhotoUrl   = null;
 
 function renderCategoryPicker() {
-  const picker   = document.getElementById('goal-cat-picker');
-  const dropdown = document.getElementById('goal-cat-more-dropdown');
+  const picker = document.getElementById('goal-cat-picker');
 
-  const mainButtons = GOAL_MAIN_CATEGORIES.map(cat => `
+  const catButtons = GOAL_ALL_CATEGORIES.map(cat => `
     <button type="button" class="goal-cat-btn${cat.id === selectedCategory ? ' active' : ''}" data-cat="${cat.id}">
       <span class="goal-cat-icon">${categoryIconSvg(cat.id, '2')}</span>
       <span class="goal-cat-label">${cat.label}</span>
     </button>
   `).join('');
 
-  const moreActive = !isMainCategory(selectedCategory);
-  const morePreset = GOAL_EXTRA_CATEGORIES.find(c => c.id === selectedCategory);
-  const moreLabel  = moreActive ? (morePreset ? morePreset.label : escapeHtml(selectedCategory)) : 'More';
-  const moreIcon   = moreActive
-    ? categoryIconSvg(selectedCategory, '2')
-    : `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${MORE_ICON_PATH}</svg>`;
+  const isCustom    = !isPresetCategory(selectedCategory);
+  const customLabel = isCustom ? escapeHtml(selectedCategory) : 'Custom';
 
-  // Dropdown lives outside the card (see goals.html) so its position:fixed
-  // coordinates aren't trapped by .app-card's backdrop-filter containing block.
   picker.innerHTML = `
-    ${mainButtons}
-    <button type="button" class="goal-cat-btn${moreActive ? ' active' : ''}" id="goal-cat-more-btn">
-      <span class="goal-cat-icon">${moreIcon}</span>
-      <span class="goal-cat-label">${moreLabel}</span>
+    ${catButtons}
+    <button type="button" class="goal-cat-btn${isCustom ? ' active' : ''}" id="goal-cat-custom-btn">
+      <span class="goal-cat-icon"><img src="${CUSTOM_ICON_IMG}" alt="" /></span>
+      <span class="goal-cat-label">${customLabel}</span>
     </button>
-  `;
-
-  dropdown.innerHTML = `
-    ${GOAL_EXTRA_CATEGORIES.map(cat => `
-      <button type="button" class="goal-cat-more-item${cat.id === selectedCategory ? ' active' : ''}" data-cat="${cat.id}">
-        <span class="goal-cat-more-item-icon">${categoryIconSvg(cat.id, '1.7')}</span>
-        ${cat.label}
-      </button>
-    `).join('')}
-    <button type="button" class="goal-cat-more-item" id="goal-cat-custom-btn">
-      <span class="goal-cat-more-item-icon"><img src="${CUSTOM_ICON_IMG}" alt="" /></span>
-      Custom…
-    </button>
-    <div class="goal-cat-custom-input-wrap" id="goal-cat-custom-input-wrap">
-      <input type="text" id="goal-cat-custom-input" placeholder="Name your category…" maxlength="30" />
-    </div>
   `;
 
   picker.querySelectorAll('.goal-cat-btn[data-cat]').forEach(btn => {
-    btn.addEventListener('click', () => { selectCategory(btn.dataset.cat); closeMoreDropdown(); });
+    btn.addEventListener('click', () => selectCategory(btn.dataset.cat));
   });
-  dropdown.querySelectorAll('.goal-cat-more-item[data-cat]').forEach(btn => {
-    btn.addEventListener('click', () => { selectCategory(btn.dataset.cat); closeMoreDropdown(); });
-  });
-  document.getElementById('goal-cat-more-btn').addEventListener('click', e => {
-    e.stopPropagation();
-    toggleMoreDropdown();
-  });
-  document.getElementById('goal-cat-custom-btn').addEventListener('click', e => {
-    e.stopPropagation();
-    dropdown.classList.add('show-custom-input');
-    const input = document.getElementById('goal-cat-custom-input');
-    input.value = moreActive && !morePreset ? selectedCategory : '';
-    input.focus();
-  });
-  const customInput = document.getElementById('goal-cat-custom-input');
-  customInput.addEventListener('click', e => e.stopPropagation());
-  customInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const val = customInput.value.trim();
-      if (val) { selectCategory(val); closeMoreDropdown(); }
-    } else if (e.key === 'Escape') {
-      closeMoreDropdown();
-    }
-  });
+  document.getElementById('goal-cat-custom-btn').addEventListener('click', toggleCustomInput);
 }
 
-function toggleMoreDropdown() {
-  const dropdown = document.getElementById('goal-cat-more-dropdown');
-  const wasOpen  = dropdown.classList.contains('open');
-  closeMoreDropdown();
-  if (!wasOpen) {
-    const btn  = document.getElementById('goal-cat-more-btn');
-    const rect = btn.getBoundingClientRect();
-    dropdown.style.top  = `${rect.bottom + 6}px`;
-    dropdown.style.left = `${Math.max(8, Math.min(rect.right - 230, window.innerWidth - 238))}px`;
-    dropdown.classList.add('open');
+function toggleCustomInput() {
+  const row = document.getElementById('goal-cat-custom-row');
+  const isOpen = row.style.display !== 'none';
+  if (isOpen) {
+    row.style.display = 'none';
+    return;
   }
+  row.style.display = 'flex';
+  const input = document.getElementById('goal-cat-custom-input');
+  input.value = !isPresetCategory(selectedCategory) ? selectedCategory : '';
+  input.focus();
 }
-
-function closeMoreDropdown() {
-  const dropdown = document.getElementById('goal-cat-more-dropdown');
-  dropdown?.classList.remove('open', 'show-custom-input');
-}
-
-document.addEventListener('click', e => {
-  const dropdown = document.getElementById('goal-cat-more-dropdown');
-  if (dropdown && dropdown.classList.contains('open') && !dropdown.contains(e.target)) {
-    closeMoreDropdown();
-  }
-});
 
 function selectCategory(catId) {
   selectedCategory = catId;
   document.getElementById('goal-name-icon').innerHTML = categoryIconSvg(catId);
+  document.getElementById('goal-cat-custom-row').style.display = 'none';
   renderCategoryPicker();
 }
 
@@ -246,6 +190,20 @@ function clearPhoto() {
 // --- Category picker + photo upload: initial wiring ---
 renderCategoryPicker();
 document.getElementById('goal-name-icon').innerHTML = categoryIconSvg(selectedCategory);
+
+const goalCatCustomInput = document.getElementById('goal-cat-custom-input');
+goalCatCustomInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const val = goalCatCustomInput.value.trim();
+    if (val) selectCategory(val);
+  } else if (e.key === 'Escape') {
+    document.getElementById('goal-cat-custom-row').style.display = 'none';
+  }
+});
+document.getElementById('goal-cat-custom-cancel').addEventListener('click', () => {
+  document.getElementById('goal-cat-custom-row').style.display = 'none';
+});
 
 const goalPhotoUpload = document.getElementById('goal-photo-upload');
 const goalPhotoInput  = document.getElementById('goal-photo-input');
