@@ -47,6 +47,116 @@ function goalColor(index) {
   return GOAL_COLORS[index % GOAL_COLORS.length];
 }
 
+// --- Categories ---
+const GOAL_CATEGORIES = [
+  { id: 'travel',    label: 'Travel',
+    icon: '<path d="M17 3L3 9.5l5.5 2 2 5.5L17 3z"/><path d="M8.5 11.5L17 3"/>' },
+  { id: 'car',       label: 'Car',
+    icon: '<path d="M3 12.5l1.2-4A2 2 0 016.1 7h7.8a2 2 0 011.9 1.5l1.2 4"/><rect x="2.3" y="12.5" width="15.4" height="4" rx="1.5"/><circle cx="6" cy="16.5" r="1.3"/><circle cx="14" cy="16.5" r="1.3"/>' },
+  { id: 'house',     label: 'House',
+    icon: '<path d="M3 10l7-6 7 6"/><path d="M5 9v7a1 1 0 001 1h8a1 1 0 001-1V9"/>' },
+  { id: 'education', label: 'Education',
+    icon: '<path d="M10 3l8 4-8 4-8-4z"/><path d="M6 9v4c0 1.1 1.8 2 4 2s4-.9 4-2V9"/><path d="M18 7v5"/>' },
+  { id: 'health',    label: 'Health',
+    icon: '<path d="M10 17s-6.5-4.2-6.5-9A4 4 0 0110 5.5 4 4 0 0116.5 8c0 4.8-6.5 9-6.5 9z"/>' },
+  { id: 'wedding',   label: 'Wedding',
+    icon: '<circle cx="10" cy="13" r="4.3"/><path d="M10 8.7L7.2 3.5h5.6z"/>' },
+  { id: 'other',     label: 'More',
+    icon: '<circle cx="5" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.3" fill="currentColor" stroke="none"/>' },
+];
+const GOAL_CATEGORY_MAP = Object.fromEntries(GOAL_CATEGORIES.map(c => [c.id, c]));
+
+function categoryIconSvg(catId, strokeWidth = '1.7') {
+  const cat = GOAL_CATEGORY_MAP[catId] || GOAL_CATEGORY_MAP.other;
+  return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg>`;
+}
+
+let selectedCategory  = GOAL_CATEGORIES[0].id;
+let pendingPhotoUrl   = null;
+
+function renderCategoryPicker() {
+  const picker = document.getElementById('goal-cat-picker');
+  picker.innerHTML = GOAL_CATEGORIES.map(cat => `
+    <button type="button" class="goal-cat-btn${cat.id === selectedCategory ? ' active' : ''}" data-cat="${cat.id}">
+      <span class="goal-cat-icon">${categoryIconSvg(cat.id, '2')}</span>
+      <span class="goal-cat-label">${cat.label}</span>
+    </button>
+  `).join('');
+
+  picker.querySelectorAll('.goal-cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectCategory(btn.dataset.cat));
+  });
+}
+
+function selectCategory(catId) {
+  selectedCategory = catId;
+  document.querySelectorAll('#goal-cat-picker .goal-cat-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === catId);
+  });
+  document.getElementById('goal-name-icon').innerHTML = categoryIconSvg(catId);
+}
+
+// --- Photo upload ---
+async function handlePhotoFile(file) {
+  const errorEl = document.getElementById('goal-photo-error');
+  errorEl.textContent = '';
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { errorEl.textContent = 'Please choose an image file.'; return; }
+  if (file.size > 5 * 1024 * 1024) { errorEl.textContent = 'Image must be under 5MB.'; return; }
+  if (!currentUser) return;
+
+  const ext  = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const path = `${currentUser.id}/${Date.now()}.${ext}`;
+
+  try {
+    const { error: uploadError } = await supabase.storage.from('goal-photos').upload(path, file, { upsert: false });
+    if (uploadError) throw uploadError;
+    const { data } = supabase.storage.from('goal-photos').getPublicUrl(path);
+    pendingPhotoUrl = data.publicUrl;
+    setPhotoPreview(pendingPhotoUrl);
+  } catch (err) {
+    console.error('Photo upload failed:', err);
+    errorEl.textContent = 'Upload failed. Please try again.';
+  }
+}
+
+function setPhotoPreview(url) {
+  const preview = document.getElementById('goal-photo-preview');
+  const removeBtn = document.getElementById('goal-photo-remove-btn');
+  if (url) {
+    preview.innerHTML = `<img src="${url}" alt="" />`;
+    removeBtn.style.display = 'flex';
+  } else {
+    preview.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="15" height="13" rx="2"/><circle cx="7" cy="8" r="1.6"/><path d="M4 14l4-4 3 3 3-3.5 3 4.5"/></svg>';
+    removeBtn.style.display = 'none';
+  }
+}
+
+function clearPhoto() {
+  pendingPhotoUrl = null;
+  document.getElementById('goal-photo-input').value = '';
+  document.getElementById('goal-photo-error').textContent = '';
+  setPhotoPreview(null);
+}
+
+// --- Category picker + photo upload: initial wiring ---
+renderCategoryPicker();
+document.getElementById('goal-name-icon').innerHTML = categoryIconSvg(selectedCategory);
+
+const goalPhotoUpload = document.getElementById('goal-photo-upload');
+const goalPhotoInput  = document.getElementById('goal-photo-input');
+
+goalPhotoUpload.addEventListener('click', () => goalPhotoInput.click());
+goalPhotoUpload.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goalPhotoInput.click(); }
+});
+goalPhotoInput.addEventListener('change', () => handlePhotoFile(goalPhotoInput.files[0]));
+
+document.getElementById('goal-photo-remove-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  clearPhoto();
+});
+
 // --- Data ---
 async function fetchGoals(uid) {
   const { data, error } = await supabase.from('goals').select('*').eq('user_id', uid);
@@ -58,6 +168,8 @@ async function fetchGoals(uid) {
     saved:     Number(row.saved || 0),
     deadline:  row.deadline || null,
     note:      row.note || '',
+    category:  row.category || 'other',
+    photoUrl:  row.photo_url || null,
     createdAt: new Date(row.created_at).getTime(),
   }));
   renderGoals();
@@ -108,11 +220,13 @@ function renderGoals() {
       }
     }
 
+    const ringPhotoStyle = goal.photoUrl ? ` style="background-image:url('${escapeHtml(goal.photoUrl)}')"` : '';
+
     return `
       <div class="goal-card ${done ? 'goal-card--done' : ''}" data-id="${goal.id}">
         <div class="goal-card-main">
           <!-- Circular ring -->
-          <div class="goal-ring-wrap">
+          <div class="goal-ring-wrap${goal.photoUrl ? ' goal-ring-wrap--photo' : ''}"${ringPhotoStyle}>
             <svg class="goal-ring" viewBox="0 0 84 84" width="84" height="84">
               <circle cx="42" cy="42" r="${R}" fill="none" stroke="#e8e0d4" stroke-width="7"/>
               <circle cx="42" cy="42" r="${R}" fill="none" stroke="${color}" stroke-width="7"
@@ -122,6 +236,7 @@ function renderGoals() {
                 style="transition:stroke-dasharray 0.7s cubic-bezier(0.22,1,0.36,1)"/>
             </svg>
             <span class="goal-ring-pct" style="color:${color}">${pct.toFixed(0)}%</span>
+            <span class="goal-cat-badge" style="background:${color}" title="${(GOAL_CATEGORY_MAP[goal.category] || GOAL_CATEGORY_MAP.other).label}">${categoryIconSvg(goal.category, '2')}</span>
           </div>
 
           <!-- Content -->
@@ -221,6 +336,9 @@ function startEdit(id) {
   document.getElementById('goal-saved').value    = goal.saved;
   document.getElementById('goal-deadline').value = goal.deadline || '';
   document.getElementById('goal-note').value     = goal.note || '';
+  selectCategory(goal.category || 'other');
+  pendingPhotoUrl = goal.photoUrl || null;
+  setPhotoPreview(pendingPhotoUrl);
   document.getElementById('goal-submit-btn').textContent = 'Update Goal';
   document.getElementById('goal-cancel-btn').style.display = 'inline-block';
   document.querySelector('.app-card .card-title').textContent = 'Edit Goal';
@@ -234,6 +352,8 @@ function cancelEdit() {
   document.getElementById('goal-cancel-btn').style.display = 'none';
   document.querySelector('.app-card .card-title').textContent = 'New Goal';
   document.getElementById('goal-error').textContent = '';
+  selectCategory(GOAL_CATEGORIES[0].id);
+  clearPhoto();
 }
 
 document.getElementById('goal-cancel-btn').addEventListener('click', cancelEdit);
@@ -264,15 +384,17 @@ document.getElementById('goal-form').addEventListener('submit', async e => {
   try {
     if (editingId) {
       const { error } = await supabase.from('goals')
-        .update({ name, target, saved, deadline, note })
+        .update({ name, target, saved, deadline, note, category: selectedCategory, photo_url: pendingPhotoUrl })
         .eq('id', editingId);
       if (error) throw error;
       cancelEdit();
     } else {
       const { error } = await supabase.from('goals')
-        .insert({ user_id: currentUser.id, name, target, saved, deadline, note });
+        .insert({ user_id: currentUser.id, name, target, saved, deadline, note, category: selectedCategory, photo_url: pendingPhotoUrl });
       if (error) throw error;
       e.target.reset();
+      selectCategory(GOAL_CATEGORIES[0].id);
+      clearPhoto();
     }
   } catch (err) {
     console.error(err);

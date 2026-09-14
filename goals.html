@@ -105,39 +105,65 @@
       <section class="app-card">
         <h2 class="card-title">New Goal</h2>
         <form id="goal-form" novalidate>
-          <div class="goals-form-grid">
 
-            <div class="goal-field">
-              <label class="goal-label">Goal Name</label>
-              <input type="text" id="goal-name" placeholder="e.g. New car, Emergency fund…" maxlength="60" required />
-            </div>
+          <div class="goal-cat-picker" id="goal-cat-picker"></div>
 
-            <div class="goal-field">
-              <label class="goal-label">Target Amount ($)</label>
-              <div class="goal-input-wrap">
-                <input type="number" id="goal-target" placeholder="e.g. 5000" step="any" min="1" inputmode="decimal" required />
-                <button type="button" class="input-clear-btn" data-target="goal-target" title="Clear">&#x2715;</button>
+          <div class="goal-form-body">
+            <div class="goal-form-fields">
+
+              <div class="goal-field">
+                <label class="goal-label">Goal Name</label>
+                <div class="goal-input-wrap">
+                  <span class="goal-input-icon" id="goal-name-icon"></span>
+                  <input type="text" id="goal-name" placeholder="e.g. New car, Emergency fund…" maxlength="60" required />
+                </div>
+              </div>
+
+              <div class="goals-form-grid">
+
+                <div class="goal-field">
+                  <label class="goal-label">Target Amount ($)</label>
+                  <div class="goal-input-wrap">
+                    <span class="goal-input-dollar">$</span>
+                    <input type="number" id="goal-target" placeholder="e.g. 5000" step="any" min="1" inputmode="decimal" required />
+                    <button type="button" class="input-clear-btn" data-target="goal-target" title="Clear">&#x2715;</button>
+                  </div>
+                </div>
+
+                <div class="goal-field">
+                  <label class="goal-label">Target Date (optional)</label>
+                  <input type="date" id="goal-deadline" />
+                </div>
+
+                <div class="goal-field">
+                  <label class="goal-label">Already Saved ($)</label>
+                  <div class="goal-input-wrap">
+                    <span class="goal-input-dollar">$</span>
+                    <input type="number" id="goal-saved" placeholder="0.00" step="any" min="0" inputmode="decimal" />
+                    <button type="button" class="input-clear-btn" data-target="goal-saved" title="Clear">&#x2715;</button>
+                  </div>
+                </div>
+
+                <div class="goal-field">
+                  <label class="goal-label">Note (optional)</label>
+                  <input type="text" id="goal-note" placeholder="Why this goal matters…" maxlength="120" />
+                </div>
+
               </div>
             </div>
 
-            <div class="goal-field">
-              <label class="goal-label">Already Saved ($)</label>
-              <div class="goal-input-wrap">
-                <input type="number" id="goal-saved" placeholder="0.00" step="any" min="0" inputmode="decimal" />
-                <button type="button" class="input-clear-btn" data-target="goal-saved" title="Clear">&#x2715;</button>
+            <div class="goal-photo-upload" id="goal-photo-upload" role="button" tabindex="0">
+              <input type="file" id="goal-photo-input" accept="image/*" hidden />
+              <button type="button" class="goal-photo-add-btn" id="goal-photo-remove-btn" title="Add a photo" aria-label="Add a photo" style="display:none">&#x2715;</button>
+              <div class="goal-photo-preview" id="goal-photo-preview">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="15" height="13" rx="2"/><circle cx="7" cy="8" r="1.6"/><path d="M4 14l4-4 3 3 3-3.5 3 4.5"/></svg>
+              </div>
+              <div class="goal-photo-text">
+                <span class="goal-photo-label">Add a photo</span>
+                <span class="goal-photo-hint">Make it visual! It keeps you motivated.</span>
+                <p class="goal-photo-error" id="goal-photo-error"></p>
               </div>
             </div>
-
-            <div class="goal-field">
-              <label class="goal-label">Target Date (optional)</label>
-              <input type="date" id="goal-deadline" />
-            </div>
-
-          </div>
-
-          <div class="goal-field" style="margin-top:0.75rem">
-            <label class="goal-label">Note (optional)</label>
-            <input type="text" id="goal-note" placeholder="Why this goal matters…" maxlength="120" />
           </div>
 
           <div class="goals-form-actions">
