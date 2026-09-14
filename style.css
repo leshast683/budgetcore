@@ -4029,7 +4029,7 @@ input[type="date"].filter-date {
 /* Category picker */
 .goal-cat-picker {
   display: flex;
-  gap: 0.9rem;
+  gap: 0.35rem;
   overflow-x: auto;
   padding: 0.1rem 0.1rem 0.35rem;
   margin-bottom: 1.4rem;
@@ -4044,7 +4044,7 @@ input[type="date"].filter-date {
   align-items: center;
   gap: 0.4rem;
   flex-shrink: 0;
-  width: 78px;
+  width: 66px;
   background: none;
   border: none;
   font-family: inherit;
@@ -4086,7 +4086,7 @@ input[type="date"].filter-date {
 .goal-cat-btn.active .goal-cat-label { color: var(--accent); }
 
 @media (max-width: 700px) {
-  .goal-cat-btn { width: 88px; }
+  .goal-cat-btn { width: 76px; }
   .goal-cat-icon { width: 62px; height: 62px; }
   .goal-cat-icon svg { width: 26px; height: 26px; }
   .goal-cat-icon img { width: 34px; height: 34px; }
