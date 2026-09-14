@@ -3189,6 +3189,25 @@ input[type="number"] {
   flex-direction: column;
 }
 
+/* Simple "title + count" row shared by several list/section headers
+   (Goals, Holdings, Analytics panels, Profile challenges) */
+.list-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.list-header .card-title {
+  margin-bottom: 0;
+}
+.list-count {
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .history-header {
   display: flex;
   flex-direction: column;
@@ -3892,6 +3911,135 @@ input[type="date"].filter-date {
   padding: 0.48rem 0.85rem;
   font-size: 0.8rem;
   border-radius: 8px;
+}
+
+/* ===== Goals Page — Hero ===== */
+.accent-word { color: var(--accent); }
+
+.goals-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 2.25rem 2rem;
+  border-radius: 24px;
+  background:
+    radial-gradient(220px circle at 94% 6%, rgba(154,110,58,0.14), transparent 70%),
+    radial-gradient(260px circle at 80% 95%, rgba(154,110,58,0.09), transparent 65%),
+    linear-gradient(135deg, #fdf7ee 0%, #f6e5c9 100%);
+  border: 1px solid rgba(200,180,155,0.4);
+  box-shadow: var(--shadow-sm);
+}
+
+.goals-hero-text { position: relative; z-index: 1; max-width: 520px; }
+
+.goals-hero-eyebrow {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+
+.goals-hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--heading);
+  margin-bottom: 0.65rem;
+}
+
+.goals-hero-sub {
+  font-size: 0.95rem;
+  color: var(--text);
+  max-width: 400px;
+}
+
+.goals-hero-features {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.goals-hero-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.goals-hero-feature-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid rgba(200,180,155,0.5);
+}
+.goals-hero-feature-icon svg { width: 20px; height: 20px; }
+
+.goals-hero-feature-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+@media (max-width: 700px) {
+  .goals-hero { padding: 1.6rem 1.4rem; border-radius: 18px; }
+  .goals-hero-title { font-size: 1.5rem; }
+  .goals-hero-features { grid-template-columns: repeat(2, 1fr); gap: 1.25rem 0.75rem; }
+}
+
+/* ===== Savings / Investment mode toggle ===== */
+.goals-mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 360px;
+  margin: 0 auto;
+  background: var(--bg-alt);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.goals-mode-btn {
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.goals-mode-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.5);
+  color: var(--text);
+}
+
+.goals-mode-btn.active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: 0 2px 8px rgba(100,70,30,0.18), 0 1px 2px rgba(100,70,30,0.10);
+}
+
+.goals-mode-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
 }
 
 /* ===== Goals Page ===== */

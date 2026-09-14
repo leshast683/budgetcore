@@ -291,14 +291,6 @@ document.querySelectorAll('.input-clear-btn').forEach(btn => {
 });
 
 // --- Welcome bar ---
-function setWelcomeBar(user) {
-  document.getElementById('welcome-email').textContent = user.email;
-  document.getElementById('welcome-date').textContent  =
-    new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const greeting = document.querySelector('#welcome-bar .welcome-greeting');
-  if (greeting) greeting.textContent = `Savings Goals`;
-}
-
 // --- Auth state ---
 supabase.auth.onAuthStateChange((event, session) => {
   document.getElementById('auth-loading').style.display = 'none';
@@ -310,7 +302,6 @@ supabase.auth.onAuthStateChange((event, session) => {
   }
 
   currentUser = user;
-  setWelcomeBar(user);
   const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
   document.getElementById('user-email').textContent  = displayName;
   document.getElementById('nav-user').style.display  = 'flex';
@@ -329,3 +320,22 @@ supabase.auth.onAuthStateChange((event, session) => {
 document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 initPageTransitions();
 initNav();
+
+// --- Savings / Investment mode toggle ---
+document.querySelectorAll('.goals-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.classList.contains('active')) return;
+    document.querySelectorAll('.goals-mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const mode = btn.dataset.mode;
+    document.getElementById('mode-savings-panel').style.display    = mode === 'savings'    ? '' : 'none';
+    document.getElementById('mode-investment-panel').style.display = mode === 'investment' ? '' : 'none';
+
+    // The portfolio chart may have been created while its panel was hidden
+    // (0×0 canvas) — nudge Chart.js to recompute its size now that it's visible.
+    if (mode === 'investment') {
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    }
+  });
+});
