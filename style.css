@@ -4130,8 +4130,8 @@ input[type="date"].filter-date {
 
 .goal-cat-more-item-icon {
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -4139,8 +4139,8 @@ input[type="date"].filter-date {
   background: var(--bg);
   color: inherit;
 }
-.goal-cat-more-item-icon svg { width: 16px; height: 16px; }
-.goal-cat-more-item-icon img { width: 19px; height: 19px; object-fit: contain; }
+.goal-cat-more-item-icon svg { width: 18px; height: 18px; }
+.goal-cat-more-item-icon img { width: 24px; height: 24px; object-fit: contain; }
 
 .goal-cat-custom-input-wrap {
   display: none;
