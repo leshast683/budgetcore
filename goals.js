@@ -68,7 +68,7 @@ const GOAL_MAIN_CATEGORIES = [
   { id: 'purchase',  label: 'Big Purchase',
     icon: '<path d="M2 6.3h2.5l1.7 2"/><path d="M6.2 8.3H16.5L14.9 13.2H7.8Z"/><path d="M7 13.6h9"/><circle cx="9" cy="16.3" r="1.3"/><circle cx="13.8" cy="16.3" r="1.3"/><path d="M8.7 7L11 3.5l2.3 3.5"/><path d="M8.7 7h4.6"/><path d="M11 3.5v3.5"/><path d="M8.7 7L11 9.5l2.3-2.5"/>' },
   { id: 'moving',    label: 'Moving',
-    icon: '<path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z"/><path d="M3 6.5l7 3.5 7-3.5M10 10.2V17"/>' },
+    icon: '<path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z"/><path d="M3 6.5l7 3.5 7-3.5M10 10.2V17"/><path d="M6.3 5L13 8.6"/><path d="M12.6 10.5v2.8l-1.5-.8v-2.7z"/>' },
 ];
 
 const GOAL_EXTRA_CATEGORIES = [
