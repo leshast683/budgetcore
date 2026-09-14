@@ -3950,13 +3950,23 @@ input[type="date"].filter-date {
   gap: 0.5rem;
 }
 
+/* The source badge art ships with cream padding around it; scale + crop
+   inside a fixed box so the badge itself fills the container edge-to-edge. */
 .goals-hero-feature-icon {
   width: 56px;
   height: 56px;
   border-radius: 16px;
   display: block;
-  object-fit: cover;
+  overflow: hidden;
   box-shadow: 0 3px 10px rgba(100,70,30,0.22);
+}
+.goals-hero-feature-icon img {
+  display: block;
+  width: 132%;
+  height: 132%;
+  max-width: none;
+  object-fit: cover;
+  transform: translate(-12%, -12%);
 }
 
 .goals-hero-feature-label {
