@@ -4454,7 +4454,7 @@ input[type="date"].filter-date {
 }
 
 .tip-slide--save {
-  background: linear-gradient(135deg, #fcf3e6 0%, #f3e6d0 55%, #f8eee0 100%);
+  background: linear-gradient(135deg, #fcf4e7 0%, #faf1e3 50%, #f8edde 100%);
 }
 
 .tip-slide-main { flex: 1.6; min-width: 0; }
