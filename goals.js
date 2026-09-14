@@ -62,26 +62,18 @@ const GOAL_MAIN_CATEGORIES = [
 ];
 
 const GOAL_EXTRA_CATEGORIES = [
-  { id: 'retirement',    label: 'Early Retirement',
-    icon: '<path d="M10 17V10"/><path d="M10 10C7 9 5 6 6 3c2 1 4 3 4 7z"/><path d="M10 10c3-1 5-4 4-7-2 1-4 3-4 7z"/><path d="M10 10c-2-1.5-4.5-1.3-6 .5 2 1.5 4.5 1.3 6-.5z"/><path d="M10 10c2-1.5 4.5-1.3 6 .5-2 1.5-4.5 1.3-6-.5z"/>' },
-  { id: 'giftsholidays', label: 'Gifts & Holidays',
-    icon: '<rect x="3" y="8" width="14" height="9" rx="1.2"/><path d="M3 11h14"/><path d="M10 8v9"/><path d="M10 8c-1.5-3-4-3.5-5-2.5-1 1 .5 2.7 5 2.5z"/><path d="M10 8c1.5-3 4-3.5 5-2.5 1 1-.5 2.7-5 2.5z"/>' },
-  { id: 'pet',           label: 'Pet',
-    icon: '<circle cx="6.3" cy="6.3" r="1.4" fill="currentColor" stroke="none"/><circle cx="10" cy="5" r="1.4" fill="currentColor" stroke="none"/><circle cx="13.7" cy="6.3" r="1.4" fill="currentColor" stroke="none"/><path d="M10 9c-2.8 0-4.8 1.9-4.8 4 0 1.5 1.3 2.1 2.6 1.6.9-.4 1.4-.5 2.2-.5s1.3.1 2.2.5c1.3.5 2.6-.1 2.6-1.6 0-2.1-2-4-4.8-4z" fill="currentColor" stroke="none"/>' },
-  { id: 'emergency',     label: 'Emergency',
-    icon: '<path d="M10 3.5l8 13.5H2z"/><path d="M10 8.3v3.4"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/>' },
-  { id: 'renovation',    label: 'Home Renovation',
-    icon: '<path d="M13.5 3.5a3.5 3.5 0 00-4.6 4.1L3 13.5 5 15.5l5.9-5.9a3.5 3.5 0 004.1-4.6l-2.4 2.4-1.7-1.7z"/>' },
-  { id: 'newbaby',       label: 'New Baby / Family',
-    icon: '<path d="M8 3h4v3H8z"/><path d="M8.5 6h3l1 2v6.5a1.5 1.5 0 01-1.5 1.5h-2a1.5 1.5 0 01-1.5-1.5V8z"/><path d="M8.3 10h3.4"/>' },
-  { id: 'specialevent',  label: 'Special Event',
-    icon: '<rect x="3" y="4.5" width="14" height="12" rx="2"/><path d="M3 8h14M6.5 2.5V5M13.5 2.5V5"/><path d="M10 10l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L7.1 12.1l2-.3z" fill="currentColor" stroke="none"/>' },
-  { id: 'dreampurchase', label: 'Dream Purchase',
-    icon: '<path d="M10 2l1.8 5.2L17 9l-5.2 1.8L10 16l-1.8-5.2L3 9l5.2-1.8z" fill="currentColor" stroke="none"/>' },
+  { id: 'retirement',    label: 'Early Retirement', img: 'goal-icons/cat-retirement.png' },
+  { id: 'giftsholidays', label: 'Gifts & Holidays', img: 'goal-icons/cat-giftsholidays.png' },
+  { id: 'pet',           label: 'Pet', img: 'goal-icons/cat-pet.png' },
+  { id: 'emergency',     label: 'Emergency', img: 'goal-icons/cat-emergency.png' },
+  { id: 'renovation',    label: 'Home Renovation', img: 'goal-icons/cat-renovation.png' },
+  { id: 'newbaby',       label: 'New Baby / Family', img: 'goal-icons/cat-newbaby.png' },
+  { id: 'specialevent',  label: 'Special Event', img: 'goal-icons/cat-specialevent.png' },
+  { id: 'dreampurchase', label: 'Dream Purchase', img: 'goal-icons/cat-dreampurchase.png' },
 ];
 
 const MORE_ICON_PATH   = '<circle cx="5" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.3" fill="currentColor" stroke="none"/>';
-const CUSTOM_ICON_PATH = '<path d="M13.5 3.5l3 3L6 17H3v-3z"/>';
+const CUSTOM_ICON_IMG = 'goal-icons/cat-custom.png';
 
 const GOAL_CATEGORY_MAP = Object.fromEntries(
   [...GOAL_MAIN_CATEGORIES, ...GOAL_EXTRA_CATEGORIES].map(c => [c.id, c])
@@ -91,8 +83,9 @@ GOAL_CATEGORY_MAP.other = { id: 'other', label: 'Other', icon: MORE_ICON_PATH };
 function categoryIconSvg(catId, strokeWidth = '1.7') {
   const cat = GOAL_CATEGORY_MAP[catId];
   if (cat && cat.img) return `<img src="${cat.img}" alt="" class="goal-cat-img" />`;
-  const path = cat ? cat.icon : (catId === 'other' ? MORE_ICON_PATH : CUSTOM_ICON_PATH);
-  return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+  if (cat) return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg>`;
+  if (catId === 'other') return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${MORE_ICON_PATH}</svg>`;
+  return `<img src="${CUSTOM_ICON_IMG}" alt="" class="goal-cat-img" />`;
 }
 
 function isMainCategory(catId) {
@@ -138,7 +131,7 @@ function renderCategoryPicker() {
       </button>
     `).join('')}
     <button type="button" class="goal-cat-more-item" id="goal-cat-custom-btn">
-      <span class="goal-cat-more-item-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${CUSTOM_ICON_PATH}</svg></span>
+      <span class="goal-cat-more-item-icon"><img src="${CUSTOM_ICON_IMG}" alt="" /></span>
       Custom…
     </button>
     <div class="goal-cat-custom-input-wrap" id="goal-cat-custom-input-wrap">

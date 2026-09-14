@@ -4140,6 +4140,7 @@ input[type="date"].filter-date {
   color: inherit;
 }
 .goal-cat-more-item-icon svg { width: 16px; height: 16px; }
+.goal-cat-more-item-icon img { width: 19px; height: 19px; object-fit: contain; }
 
 .goal-cat-custom-input-wrap {
   display: none;
