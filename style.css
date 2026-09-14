@@ -4139,6 +4139,11 @@ input[type="date"].filter-date {
   margin-bottom: 0.85rem;
 }
 
+@media (min-width: 701px) {
+  .goal-field--name .goal-input-wrap { flex: 1; }
+  .goal-field--name .goal-input-wrap input { width: 100%; }
+}
+
 .goal-form-body {
   display: flex;
   gap: 1.5rem;
