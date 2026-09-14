@@ -4044,6 +4044,7 @@ input[type="date"].filter-date {
   align-items: center;
   gap: 0.4rem;
   flex-shrink: 0;
+  width: 78px;
   background: none;
   border: none;
   font-family: inherit;
@@ -4079,11 +4080,13 @@ input[type="date"].filter-date {
   font-size: 0.76rem;
   font-weight: 600;
   color: var(--muted);
-  white-space: nowrap;
+  text-align: center;
+  line-height: 1.25;
 }
 .goal-cat-btn.active .goal-cat-label { color: var(--accent); }
 
 @media (max-width: 700px) {
+  .goal-cat-btn { width: 88px; }
   .goal-cat-icon { width: 62px; height: 62px; }
   .goal-cat-icon svg { width: 26px; height: 26px; }
   .goal-cat-icon img { width: 34px; height: 34px; }
