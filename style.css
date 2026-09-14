@@ -4082,6 +4082,79 @@ input[type="date"].filter-date {
 }
 .goal-cat-btn.active .goal-cat-label { color: var(--accent); }
 
+/* "More" dropdown — fixed-positioned (coords set in JS) so it escapes the
+   picker row's horizontal scroll clipping instead of being cut off. */
+.goal-cat-more-dropdown {
+  position: fixed;
+  width: 230px;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  padding: 0.5rem;
+  display: none;
+  flex-direction: column;
+  gap: 0.15rem;
+  z-index: 40;
+}
+.goal-cat-more-dropdown.open { display: flex; }
+
+.goal-cat-more-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.6rem;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s var(--ease-out);
+}
+.goal-cat-more-item:hover { background: var(--bg-alt); }
+.goal-cat-more-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+.goal-cat-more-item-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: inherit;
+}
+.goal-cat-more-item-icon svg { width: 16px; height: 16px; }
+
+.goal-cat-custom-input-wrap {
+  display: none;
+  padding: 0.4rem 0.35rem 0.1rem;
+}
+.goal-cat-more-dropdown.show-custom-input .goal-cat-custom-input-wrap { display: block; }
+
+#goal-cat-custom-input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--heading);
+  background: var(--bg);
+}
+#goal-cat-custom-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(160,120,72,0.1);
+}
+
 /* Goal name icon prefix (mirrors .goal-input-dollar, sized for an svg) */
 .goal-input-icon {
   position: absolute;

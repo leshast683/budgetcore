@@ -48,7 +48,7 @@ function goalColor(index) {
 }
 
 // --- Categories ---
-const GOAL_CATEGORIES = [
+const GOAL_MAIN_CATEGORIES = [
   { id: 'travel',    label: 'Travel',
     icon: '<path d="M17 3L3 9.5l5.5 2 2 5.5L17 3z"/><path d="M8.5 11.5L17 3"/>' },
   { id: 'car',       label: 'Car',
@@ -69,39 +69,151 @@ const GOAL_CATEGORIES = [
     icon: '<path d="M6.2 7V5.3a3.8 3.8 0 017.6 0V7"/><rect x="3.3" y="7" width="13.4" height="10.2" rx="2"/>' },
   { id: 'moving',    label: 'Moving',
     icon: '<path d="M10 3l7 3.5v7L10 17l-7-3.5v-7z"/><path d="M3 6.5l7 3.5 7-3.5M10 10.2V17"/>' },
-  { id: 'other',     label: 'More',
-    icon: '<circle cx="5" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.3" fill="currentColor" stroke="none"/>' },
 ];
-const GOAL_CATEGORY_MAP = Object.fromEntries(GOAL_CATEGORIES.map(c => [c.id, c]));
+
+const GOAL_EXTRA_CATEGORIES = [
+  { id: 'retirement',    label: 'Early Retirement',
+    icon: '<path d="M10 17V10"/><path d="M10 10C7 9 5 6 6 3c2 1 4 3 4 7z"/><path d="M10 10c3-1 5-4 4-7-2 1-4 3-4 7z"/><path d="M10 10c-2-1.5-4.5-1.3-6 .5 2 1.5 4.5 1.3 6-.5z"/><path d="M10 10c2-1.5 4.5-1.3 6 .5-2 1.5-4.5 1.3-6-.5z"/>' },
+  { id: 'giftsholidays', label: 'Gifts & Holidays',
+    icon: '<rect x="3" y="8" width="14" height="9" rx="1.2"/><path d="M3 11h14"/><path d="M10 8v9"/><path d="M10 8c-1.5-3-4-3.5-5-2.5-1 1 .5 2.7 5 2.5z"/><path d="M10 8c1.5-3 4-3.5 5-2.5 1 1-.5 2.7-5 2.5z"/>' },
+  { id: 'pet',           label: 'Pet',
+    icon: '<circle cx="6.3" cy="6.3" r="1.4" fill="currentColor" stroke="none"/><circle cx="10" cy="5" r="1.4" fill="currentColor" stroke="none"/><circle cx="13.7" cy="6.3" r="1.4" fill="currentColor" stroke="none"/><path d="M10 9c-2.8 0-4.8 1.9-4.8 4 0 1.5 1.3 2.1 2.6 1.6.9-.4 1.4-.5 2.2-.5s1.3.1 2.2.5c1.3.5 2.6-.1 2.6-1.6 0-2.1-2-4-4.8-4z" fill="currentColor" stroke="none"/>' },
+  { id: 'emergency',     label: 'Emergency',
+    icon: '<path d="M10 3.5l8 13.5H2z"/><path d="M10 8.3v3.4"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/>' },
+  { id: 'renovation',    label: 'Home Renovation',
+    icon: '<path d="M13.5 3.5a3.5 3.5 0 00-4.6 4.1L3 13.5 5 15.5l5.9-5.9a3.5 3.5 0 004.1-4.6l-2.4 2.4-1.7-1.7z"/>' },
+  { id: 'newbaby',       label: 'New Baby / Family',
+    icon: '<path d="M8 3h4v3H8z"/><path d="M8.5 6h3l1 2v6.5a1.5 1.5 0 01-1.5 1.5h-2a1.5 1.5 0 01-1.5-1.5V8z"/><path d="M8.3 10h3.4"/>' },
+  { id: 'specialevent',  label: 'Special Event',
+    icon: '<rect x="3" y="4.5" width="14" height="12" rx="2"/><path d="M3 8h14M6.5 2.5V5M13.5 2.5V5"/><path d="M10 10l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L7.1 12.1l2-.3z" fill="currentColor" stroke="none"/>' },
+  { id: 'dreampurchase', label: 'Dream Purchase',
+    icon: '<path d="M10 2l1.8 5.2L17 9l-5.2 1.8L10 16l-1.8-5.2L3 9l5.2-1.8z" fill="currentColor" stroke="none"/>' },
+];
+
+const MORE_ICON_PATH   = '<circle cx="5" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="1.3" fill="currentColor" stroke="none"/>';
+const CUSTOM_ICON_PATH = '<path d="M13.5 3.5l3 3L6 17H3v-3z"/>';
+
+const GOAL_CATEGORY_MAP = Object.fromEntries(
+  [...GOAL_MAIN_CATEGORIES, ...GOAL_EXTRA_CATEGORIES].map(c => [c.id, c])
+);
+GOAL_CATEGORY_MAP.other = { id: 'other', label: 'Other', icon: MORE_ICON_PATH };
 
 function categoryIconSvg(catId, strokeWidth = '1.7') {
-  const cat = GOAL_CATEGORY_MAP[catId] || GOAL_CATEGORY_MAP.other;
-  return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg>`;
+  const cat  = GOAL_CATEGORY_MAP[catId];
+  const path = cat ? cat.icon : (catId === 'other' ? MORE_ICON_PATH : CUSTOM_ICON_PATH);
+  return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
 }
 
-let selectedCategory  = GOAL_CATEGORIES[0].id;
+function isMainCategory(catId) {
+  return GOAL_MAIN_CATEGORIES.some(c => c.id === catId);
+}
+
+let selectedCategory  = GOAL_MAIN_CATEGORIES[0].id;
 let pendingPhotoUrl   = null;
 
 function renderCategoryPicker() {
-  const picker = document.getElementById('goal-cat-picker');
-  picker.innerHTML = GOAL_CATEGORIES.map(cat => `
+  const picker   = document.getElementById('goal-cat-picker');
+  const dropdown = document.getElementById('goal-cat-more-dropdown');
+
+  const mainButtons = GOAL_MAIN_CATEGORIES.map(cat => `
     <button type="button" class="goal-cat-btn${cat.id === selectedCategory ? ' active' : ''}" data-cat="${cat.id}">
       <span class="goal-cat-icon">${categoryIconSvg(cat.id, '2')}</span>
       <span class="goal-cat-label">${cat.label}</span>
     </button>
   `).join('');
 
-  picker.querySelectorAll('.goal-cat-btn').forEach(btn => {
-    btn.addEventListener('click', () => selectCategory(btn.dataset.cat));
+  const moreActive = !isMainCategory(selectedCategory);
+  const morePreset = GOAL_EXTRA_CATEGORIES.find(c => c.id === selectedCategory);
+  const moreLabel  = moreActive ? (morePreset ? morePreset.label : escapeHtml(selectedCategory)) : 'More';
+  const moreIcon   = moreActive
+    ? categoryIconSvg(selectedCategory, '2')
+    : `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${MORE_ICON_PATH}</svg>`;
+
+  // Dropdown lives outside the card (see goals.html) so its position:fixed
+  // coordinates aren't trapped by .app-card's backdrop-filter containing block.
+  picker.innerHTML = `
+    ${mainButtons}
+    <button type="button" class="goal-cat-btn${moreActive ? ' active' : ''}" id="goal-cat-more-btn">
+      <span class="goal-cat-icon">${moreIcon}</span>
+      <span class="goal-cat-label">${moreLabel}</span>
+    </button>
+  `;
+
+  dropdown.innerHTML = `
+    ${GOAL_EXTRA_CATEGORIES.map(cat => `
+      <button type="button" class="goal-cat-more-item${cat.id === selectedCategory ? ' active' : ''}" data-cat="${cat.id}">
+        <span class="goal-cat-more-item-icon">${categoryIconSvg(cat.id, '1.7')}</span>
+        ${cat.label}
+      </button>
+    `).join('')}
+    <button type="button" class="goal-cat-more-item" id="goal-cat-custom-btn">
+      <span class="goal-cat-more-item-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${CUSTOM_ICON_PATH}</svg></span>
+      Custom…
+    </button>
+    <div class="goal-cat-custom-input-wrap" id="goal-cat-custom-input-wrap">
+      <input type="text" id="goal-cat-custom-input" placeholder="Name your category…" maxlength="30" />
+    </div>
+  `;
+
+  picker.querySelectorAll('.goal-cat-btn[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => { selectCategory(btn.dataset.cat); closeMoreDropdown(); });
+  });
+  dropdown.querySelectorAll('.goal-cat-more-item[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => { selectCategory(btn.dataset.cat); closeMoreDropdown(); });
+  });
+  document.getElementById('goal-cat-more-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    toggleMoreDropdown();
+  });
+  document.getElementById('goal-cat-custom-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.add('show-custom-input');
+    const input = document.getElementById('goal-cat-custom-input');
+    input.value = moreActive && !morePreset ? selectedCategory : '';
+    input.focus();
+  });
+  const customInput = document.getElementById('goal-cat-custom-input');
+  customInput.addEventListener('click', e => e.stopPropagation());
+  customInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const val = customInput.value.trim();
+      if (val) { selectCategory(val); closeMoreDropdown(); }
+    } else if (e.key === 'Escape') {
+      closeMoreDropdown();
+    }
   });
 }
 
+function toggleMoreDropdown() {
+  const dropdown = document.getElementById('goal-cat-more-dropdown');
+  const wasOpen  = dropdown.classList.contains('open');
+  closeMoreDropdown();
+  if (!wasOpen) {
+    const btn  = document.getElementById('goal-cat-more-btn');
+    const rect = btn.getBoundingClientRect();
+    dropdown.style.top  = `${rect.bottom + 6}px`;
+    dropdown.style.left = `${Math.max(8, Math.min(rect.right - 230, window.innerWidth - 238))}px`;
+    dropdown.classList.add('open');
+  }
+}
+
+function closeMoreDropdown() {
+  const dropdown = document.getElementById('goal-cat-more-dropdown');
+  dropdown?.classList.remove('open', 'show-custom-input');
+}
+
+document.addEventListener('click', e => {
+  const dropdown = document.getElementById('goal-cat-more-dropdown');
+  if (dropdown && dropdown.classList.contains('open') && !dropdown.contains(e.target)) {
+    closeMoreDropdown();
+  }
+});
+
 function selectCategory(catId) {
   selectedCategory = catId;
-  document.querySelectorAll('#goal-cat-picker .goal-cat-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.cat === catId);
-  });
   document.getElementById('goal-name-icon').innerHTML = categoryIconSvg(catId);
+  renderCategoryPicker();
 }
 
 // --- Photo upload ---
@@ -360,7 +472,7 @@ function cancelEdit() {
   document.getElementById('goal-cancel-btn').style.display = 'none';
   document.querySelector('.app-card .card-title').textContent = 'New Goal';
   document.getElementById('goal-error').textContent = '';
-  selectCategory(GOAL_CATEGORIES[0].id);
+  selectCategory(GOAL_MAIN_CATEGORIES[0].id);
   clearPhoto();
 }
 
@@ -401,7 +513,7 @@ document.getElementById('goal-form').addEventListener('submit', async e => {
         .insert({ user_id: currentUser.id, name, target, saved, deadline, note, category: selectedCategory, photo_url: pendingPhotoUrl });
       if (error) throw error;
       e.target.reset();
-      selectCategory(GOAL_CATEGORIES[0].id);
+      selectCategory(GOAL_MAIN_CATEGORIES[0].id);
       clearPhoto();
     }
   } catch (err) {
