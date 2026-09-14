@@ -205,6 +205,28 @@ document.getElementById('goal-cat-custom-cancel').addEventListener('click', () =
   document.getElementById('goal-cat-custom-row').style.display = 'none';
 });
 
+// --- Smart Tip carousel ---
+const TIP_SLIDE_COUNT = 3;
+let tipSlideIndex = 0;
+
+function goToTipSlide(i) {
+  tipSlideIndex = (i + TIP_SLIDE_COUNT) % TIP_SLIDE_COUNT;
+  document.getElementById('tip-carousel-track').style.transform = `translateX(-${tipSlideIndex * (100 / TIP_SLIDE_COUNT)}%)`;
+  document.querySelectorAll('#tip-dots .tip-dot').forEach((dot, i2) => {
+    dot.classList.toggle('active', i2 === tipSlideIndex);
+  });
+}
+
+document.getElementById('tip-carousel-track').addEventListener('click', () => {
+  goToTipSlide(tipSlideIndex + 1);
+});
+document.querySelectorAll('#tip-dots .tip-dot').forEach(dot => {
+  dot.addEventListener('click', e => {
+    e.stopPropagation();
+    goToTipSlide(Number(dot.dataset.slide));
+  });
+});
+
 const goalPhotoUpload = document.getElementById('goal-photo-upload');
 const goalPhotoInput  = document.getElementById('goal-photo-input');
 

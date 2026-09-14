@@ -79,17 +79,154 @@
     <!-- ===== SAVINGS MODE ===== -->
     <div class="goals-mode-panel" id="mode-savings-panel">
 
-      <!-- ===== Investing Insight Card ===== -->
-      <section class="investing-tip-card">
-        <div class="itip-icon">💡</div>
-        <div class="itip-body">
-          <p class="itip-headline">Make your savings work for you</p>
-          <p class="itip-text">Once your emergency fund (3–6 months of expenses) is in place, consider putting extra savings in a high-yield savings account or index fund. Even $100/month at 7% annual return grows to <strong>$120K in 30 years</strong>.</p>
+      <!-- ===== Smart Tip Carousel ===== -->
+      <section class="tip-carousel" id="tip-carousel">
+        <div class="tip-carousel-track" id="tip-carousel-track">
+
+          <!-- Slide 1 — Save -->
+          <div class="tip-slide">
+            <div class="tip-slide-main">
+              <div class="tip-badge">
+                <span class="tip-badge-icon">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5c-2.9 0-5.2 2.3-5.2 5.1 0 1.9 1 3.1 1.9 4 .5.5.8 1 .8 1.5v.4h5v-.4c0-.5.3-1 .8-1.5.9-.9 1.9-2.1 1.9-4 0-2.8-2.3-5.1-5.2-5.1z"/><path d="M8.3 16.3h3.4M8.7 17.9h2.6"/></svg>
+                </span>
+                <span class="tip-badge-label">Smart Tip</span>
+              </div>
+              <h3 class="tip-headline">Make your savings<br>work harder for you</h3>
+              <p class="tip-text">Once your emergency fund (3–6 months of expenses) is in place, consider putting extra savings in a high-yield savings account or index fund.</p>
+              <div class="tip-chips">
+                <div class="tip-chip tip-chip--active">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11c0-3.3 3-5.5 6.5-5.5 1 0 1.9.15 2.7.45L14 4.3l1 2.2c1.2.9 1.9 2.2 1.9 3.6v.2c0 .5-.4.9-.9.9H15v1.6c0 .55-.45 1-1 1h-1.2c-.55 0-1-.45-1-1v-.4H8v.4c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1.9C3.8 13.2 3 12.2 3 11z"/><circle cx="12.3" cy="9" r="0.6" fill="currentColor" stroke="none"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">3–6 mo</span><span class="tip-chip-sub">Emergency fund</span></span>
+                </div>
+                <div class="tip-chip">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 3.5v1.6M10 14.9v1.6M16.5 10h-1.6M5.1 10H3.5M14.6 5.4l-1.1 1.1M6.5 13.5l-1.1 1.1M14.6 14.6l-1.1-1.1M6.5 6.5L5.4 5.4"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">Automate</span><span class="tip-chip-sub">Pay yourself first</span></span>
+                </div>
+                <div class="tip-chip">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17V10"/><path d="M10 10C7 9.5 5.5 7 6.5 4c2 .5 3.5 2.5 3.5 6z"/><path d="M10 10c2.5-.5 4-3 3-6-2 .5-3.5 2.5-3.5 6z"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">Start investing</span><span class="tip-chip-sub">Grow long term</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="tip-slide-art tip-slide-art--save" aria-hidden="true">
+              <svg viewBox="0 0 140 140" fill="none">
+                <path d="M18 92c8 4 55 8 100-20" stroke="#a9895c" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+                <path d="M100 78l19-14-2 21" stroke="#a9895c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+                <g fill="#cdb28c">
+                  <rect x="14" y="98" width="28" height="30" rx="4"/>
+                  <rect x="46" y="80" width="28" height="48" rx="4"/>
+                  <rect x="78" y="102" width="28" height="26" rx="4"/>
+                </g>
+                <g fill="#cdb28c" opacity="0.6">
+                  <rect x="14" y="93" width="28" height="6" rx="3"/>
+                  <rect x="46" y="75" width="28" height="6" rx="3"/>
+                  <rect x="78" y="97" width="28" height="6" rx="3"/>
+                </g>
+                <path d="M56 82c-6-16 4-33 18-38-1 18-7 32-18 38z" fill="#7f9a6c"/>
+                <path d="M62 80c2-17 14-28 26-31-4 17-13 28-26 31z" fill="#94ac80"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Slide 2 — Debt -->
+          <div class="tip-slide">
+            <div class="tip-slide-main">
+              <div class="tip-badge">
+                <span class="tip-badge-icon">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5c-2.9 0-5.2 2.3-5.2 5.1 0 1.9 1 3.1 1.9 4 .5.5.8 1 .8 1.5v.4h5v-.4c0-.5.3-1 .8-1.5.9-.9 1.9-2.1 1.9-4 0-2.8-2.3-5.1-5.2-5.1z"/><path d="M8.3 16.3h3.4M8.7 17.9h2.6"/></svg>
+                </span>
+                <span class="tip-badge-label">Smart Tip</span>
+              </div>
+              <h3 class="tip-headline">Crush high-interest<br>debt first</h3>
+              <p class="tip-text">Credit cards often charge 20%+ interest — paying that down first is a guaranteed return no investment can match.</p>
+              <div class="tip-chips">
+                <div class="tip-chip tip-chip--active">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="15" height="10" rx="1.8"/><path d="M2.5 8.5h15"/><path d="M5 12h3"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">24%+</span><span class="tip-chip-sub">Avg card APR</span></span>
+                </div>
+                <div class="tip-chip">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3.8"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">Highest rate</span><span class="tip-chip-sub">Pay first</span></span>
+                </div>
+                <div class="tip-chip">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M6.7 10.2l2.2 2.2 4.4-4.6"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">Debt-free</span><span class="tip-chip-sub">Faster payoff</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="tip-slide-art tip-slide-art--debt" aria-hidden="true">
+              <svg viewBox="0 0 140 140" fill="none">
+                <path d="M18 40c8-4 55-8 100 20" stroke="#b07a5c" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+                <path d="M100 68l19 14-2-21" stroke="#b07a5c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+                <g fill="#d3ac8f">
+                  <rect x="14" y="98" width="28" height="30" rx="4"/>
+                  <rect x="46" y="86" width="28" height="42" rx="4"/>
+                  <rect x="78" y="106" width="28" height="22" rx="4"/>
+                </g>
+                <g fill="#d3ac8f" opacity="0.6">
+                  <rect x="14" y="93" width="28" height="6" rx="3"/>
+                  <rect x="46" y="81" width="28" height="6" rx="3"/>
+                  <rect x="78" y="101" width="28" height="6" rx="3"/>
+                </g>
+                <circle cx="70" cy="45" r="20" fill="#c48a6a" opacity="0.85"/>
+                <path d="M64 45h12M70 39v12" stroke="#fff8ef" stroke-width="2.6" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Slide 3 — Invest -->
+          <div class="tip-slide">
+            <div class="tip-slide-main">
+              <div class="tip-badge">
+                <span class="tip-badge-icon">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5c-2.9 0-5.2 2.3-5.2 5.1 0 1.9 1 3.1 1.9 4 .5.5.8 1 .8 1.5v.4h5v-.4c0-.5.3-1 .8-1.5.9-.9 1.9-2.1 1.9-4 0-2.8-2.3-5.1-5.2-5.1z"/><path d="M8.3 16.3h3.4M8.7 17.9h2.6"/></svg>
+                </span>
+                <span class="tip-badge-label">Smart Tip</span>
+              </div>
+              <h3 class="tip-headline">Put your money<br>to work</h3>
+              <p class="tip-text">Once savings and debt are handled, consistent investing turns small amounts into real wealth. Time in the market beats timing the market.</p>
+              <div class="tip-chips">
+                <div class="tip-chip tip-chip--active">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l4.5-5 3 3L17 5"/><path d="M12.5 5H17v4.5"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">7%</span><span class="tip-chip-sub">Avg market return</span></span>
+                </div>
+                <div class="tip-chip">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8a5 5 0 018-3.8M15 12a5 5 0 01-8 3.8"/><path d="M13 3.5v2.2h-2.2M7 16.5v-2.2h2.2"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">Monthly</span><span class="tip-chip-sub">Dollar-cost avg</span></span>
+                </div>
+                <div class="tip-chip">
+                  <span class="tip-chip-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l6 2.2v4.3c0 4-2.6 6.8-6 7.5-3.4-.7-6-3.5-6-7.5V5.2z"/><path d="M7.3 10l1.8 1.8L13 8"/></svg></span>
+                  <span class="tip-chip-text"><span class="tip-chip-title">Diversify</span><span class="tip-chip-sub">Spread risk</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="tip-slide-art tip-slide-art--invest" aria-hidden="true">
+              <svg viewBox="0 0 140 140" fill="none">
+                <path d="M18 92c8 4 55 8 100-20" stroke="#6f9a6a" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+                <path d="M100 78l19-14-2 21" stroke="#6f9a6a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+                <g fill="#9dbf8e">
+                  <rect x="14" y="98" width="28" height="30" rx="4"/>
+                  <rect x="46" y="80" width="28" height="48" rx="4"/>
+                  <rect x="78" y="102" width="28" height="26" rx="4"/>
+                </g>
+                <g fill="#9dbf8e" opacity="0.6">
+                  <rect x="14" y="93" width="28" height="6" rx="3"/>
+                  <rect x="46" y="75" width="28" height="6" rx="3"/>
+                  <rect x="78" y="97" width="28" height="6" rx="3"/>
+                </g>
+                <path d="M56 82c-6-16 4-33 18-38-1 18-7 32-18 38z" fill="#5e8a52"/>
+                <path d="M62 80c2-17 14-28 26-31-4 17-13 28-26 31z" fill="#79a068"/>
+              </svg>
+            </div>
+          </div>
+
         </div>
-        <div class="itip-stats">
-          <div class="itip-stat"><span class="itip-stat-n">3–6mo</span><span class="itip-stat-l">Emergency fund</span></div>
-          <div class="itip-stat"><span class="itip-stat-n">7%</span><span class="itip-stat-l">Avg index return</span></div>
-          <div class="itip-stat"><span class="itip-stat-n">Automate</span><span class="itip-stat-l">Pay yourself first</span></div>
+
+        <div class="tip-dots" id="tip-dots">
+          <button type="button" class="tip-dot active" data-slide="0" aria-label="Go to tip 1"></button>
+          <button type="button" class="tip-dot" data-slide="1" aria-label="Go to tip 2"></button>
+          <button type="button" class="tip-dot" data-slide="2" aria-label="Go to tip 3"></button>
         </div>
       </section>
 
