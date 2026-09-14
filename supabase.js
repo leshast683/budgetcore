@@ -18,4 +18,16 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Explicit (matches the client's own defaults, spelled out so a future edit
+// can't silently drop them): keep the session in localStorage and silently
+// refresh the access token in the background, so a signed-in user stays
+// signed in on this device/browser across visits instead of hitting the
+// login screen every time.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+  },
+});
