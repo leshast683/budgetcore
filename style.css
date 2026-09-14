@@ -6496,7 +6496,7 @@ input[type="date"].filter-date {
 .health-gauge-wrap::after {
   content: '';
   position: absolute;
-  inset: 12px;
+  inset: 4px;
   border-radius: 50%;
   background: var(--surface);
   box-shadow: 0 2px 14px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
