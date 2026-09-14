@@ -44,6 +44,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -52,6 +53,8 @@ body {
   color: var(--text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* === Scroll offset for sticky nav === */
@@ -4463,6 +4466,7 @@ input[type="date"].filter-date {
   flex-shrink: 0;
 }
 .tip-badge-icon svg { width: 18px; height: 18px; }
+.tip-badge-icon img { width: 26px; height: 26px; object-fit: contain; }
 .tip-badge-label {
   font-size: 0.72rem;
   font-weight: 800;
@@ -4537,6 +4541,7 @@ input[type="date"].filter-date {
   justify-content: center;
 }
 .tip-slide-art svg { width: 100%; height: 100%; }
+.tip-slide-art img { width: 100%; height: 100%; object-fit: contain; }
 
 .tip-dots {
   display: flex;
