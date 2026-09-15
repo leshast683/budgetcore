@@ -217,15 +217,27 @@ function goToTipSlide(i) {
   });
 }
 
+let tipAutoTimer = null;
+function startTipAutoAdvance() {
+  clearInterval(tipAutoTimer);
+  tipAutoTimer = setInterval(() => {
+    goToTipSlide(tipSlideIndex + 1);
+  }, 10000);
+}
+
 document.getElementById('tip-carousel-track').addEventListener('click', () => {
   goToTipSlide(tipSlideIndex + 1);
+  startTipAutoAdvance();
 });
 document.querySelectorAll('#tip-dots .tip-dot').forEach(dot => {
   dot.addEventListener('click', e => {
     e.stopPropagation();
     goToTipSlide(Number(dot.dataset.slide));
+    startTipAutoAdvance();
   });
 });
+
+startTipAutoAdvance();
 
 const goalPhotoUpload = document.getElementById('goal-photo-upload');
 const goalPhotoInput  = document.getElementById('goal-photo-input');
