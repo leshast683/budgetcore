@@ -4633,7 +4633,7 @@ input[type="date"].filter-date {
   .tip-slide--automate .tip-slide-art { width: calc(100% + 1.1rem); margin-right: -1.1rem; aspect-ratio: 0.72; align-self: start; }
   .tip-slide--automate .tip-slide-art img { object-fit: cover; }
   .tip-slide--invest {
-    grid-template-columns: 1fr 165px;
+    grid-template-columns: 1fr 160px;
     grid-template-areas:
       "badge    art"
       "headline art"
