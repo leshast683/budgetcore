@@ -3050,6 +3050,15 @@ select {
   appearance: none;
   -webkit-appearance: none;
   line-height: 1.4;
+  box-sizing: border-box;
+  height: 44px;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: var(--accent);
 }
 
 input[type="text"]:hover,
