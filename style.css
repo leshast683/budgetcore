@@ -3061,6 +3061,32 @@ input[type="date"]::-webkit-datetime-edit-year-field {
   color: var(--accent);
 }
 
+/* While empty, hide the browser's own mm/dd/yyyy segment placeholder
+   (where one is shown) so it can't double up with .goal-date-placeholder */
+input[type="date"].goal-date-empty::-webkit-datetime-edit-text,
+input[type="date"].goal-date-empty::-webkit-datetime-edit-month-field,
+input[type="date"].goal-date-empty::-webkit-datetime-edit-day-field,
+input[type="date"].goal-date-empty::-webkit-datetime-edit-year-field {
+  color: transparent;
+}
+
+/* Custom overlay placeholder — mobile Safari doesn't reliably show a
+   native mm/dd/yyyy hint on an empty date input, so fake one with JS
+   toggling this span's visibility based on the input's value. */
+.goal-date-wrap {
+  position: relative;
+  width: 100%;
+}
+.goal-date-placeholder {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
 input[type="text"]:hover,
 input[type="number"]:hover,
 input[type="date"]:hover,

@@ -250,6 +250,19 @@ document.querySelectorAll('#tip-dots .tip-dot').forEach(dot => {
 
 startTipAutoAdvance();
 
+// --- Target Date custom placeholder (mobile Safari doesn't show a
+// native mm/dd/yyyy hint on an empty date input) ---
+const goalDeadlineInput       = document.getElementById('goal-deadline');
+const goalDeadlinePlaceholder = document.getElementById('goal-deadline-placeholder');
+function syncGoalDeadlinePlaceholder() {
+  const isEmpty = !goalDeadlineInput.value;
+  goalDeadlinePlaceholder.style.display = isEmpty ? '' : 'none';
+  goalDeadlineInput.classList.toggle('goal-date-empty', isEmpty);
+}
+goalDeadlineInput.addEventListener('input', syncGoalDeadlinePlaceholder);
+goalDeadlineInput.addEventListener('change', syncGoalDeadlinePlaceholder);
+syncGoalDeadlinePlaceholder();
+
 const goalPhotoUpload = document.getElementById('goal-photo-upload');
 const goalPhotoInput  = document.getElementById('goal-photo-input');
 
@@ -455,6 +468,7 @@ function startEdit(id) {
   document.getElementById('goal-target').value   = goal.target;
   document.getElementById('goal-saved').value    = goal.saved;
   document.getElementById('goal-deadline').value = goal.deadline || '';
+  syncGoalDeadlinePlaceholder();
   document.getElementById('goal-note').value     = goal.note || '';
   selectCategory(goal.category || 'other');
   pendingPhotoUrl = goal.photoUrl || null;
@@ -468,6 +482,7 @@ function startEdit(id) {
 function cancelEdit() {
   editingId = null;
   document.getElementById('goal-form').reset();
+  syncGoalDeadlinePlaceholder();
   document.getElementById('goal-submit-btn').textContent  = 'Add Goal';
   document.getElementById('goal-cancel-btn').style.display = 'none';
   document.querySelector('.app-card .card-title').textContent = 'New Goal';
