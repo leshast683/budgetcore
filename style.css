@@ -3117,6 +3117,13 @@ input::placeholder {
   font-size: 0.88rem;
 }
 
+#goal-name::placeholder,
+#goal-target::placeholder,
+#goal-saved::placeholder,
+#goal-note::placeholder {
+  color: var(--accent);
+}
+
 /* Hide number spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
