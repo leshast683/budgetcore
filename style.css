@@ -4598,7 +4598,7 @@ input[type="date"].filter-date {
   .tip-slide--save .tip-text { font-size: 0.9rem; line-height: 1.42; }
   .tip-slide .tip-text .mobile-break { display: block; }
   .tip-slide--save {
-    grid-template-columns: 1fr 118px;
+    grid-template-columns: 1fr 160px;
     grid-template-areas:
       "badge    art"
       "headline art"
