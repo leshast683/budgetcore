@@ -4251,7 +4251,7 @@ input[type="date"].filter-date {
 }
 
 #goal-form .goals-form-actions { justify-content: center; }
-#goal-form #goal-submit-btn { min-width: 240px; text-align: center; }
+#goal-form #goal-submit-btn { min-width: 320px; text-align: center; }
 
 /* Goal cards */
 .goal-card {
