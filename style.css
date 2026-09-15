@@ -4618,7 +4618,7 @@ input[type="date"].filter-date {
   .tip-slide--save .tip-slide-art img { object-fit: cover; }
   .tip-slide-art { grid-area: art; display: flex; width: 100%; max-width: none; aspect-ratio: 1; margin: 0; align-self: center; }
   .tip-slide--automate {
-    grid-template-columns: 1fr 160px;
+    grid-template-columns: 1fr 165px;
     grid-template-areas:
       "badge    art"
       "headline art"
