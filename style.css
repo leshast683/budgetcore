@@ -3124,6 +3124,11 @@ input::placeholder {
   color: var(--accent);
 }
 
+#goal-target-dollar,
+#goal-saved-dollar {
+  color: var(--accent);
+}
+
 /* Hide number spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
