@@ -4852,6 +4852,7 @@ input[type="date"].filter-date {
   flex-direction: column;
   gap: 0.1rem;
 }
+.goal-kebab-menu[hidden] { display: none; }
 
 .goal-kebab-item {
   background: none;
