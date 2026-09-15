@@ -3981,7 +3981,9 @@ input[type="date"].filter-date {
 
 @media (max-width: 700px) {
   .goals-hero-sub { padding: 1.25rem 1.4rem 0; font-size: 0.88rem; }
-  .goals-hero-features { grid-template-columns: repeat(2, 1fr); gap: 1.25rem 0.75rem; padding: 1.25rem 1.4rem 1.6rem; }
+  .goals-hero-features { grid-template-columns: repeat(4, 1fr); gap: 0.4rem; padding: 1.25rem 0.8rem 1.5rem; }
+  .goals-hero-feature-icon { width: 44px; height: 44px; border-radius: 12px; }
+  .goals-hero-feature-label { font-size: 0.66rem; }
 }
 
 /* ===== Savings / Investment mode toggle ===== */

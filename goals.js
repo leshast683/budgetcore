@@ -444,6 +444,7 @@ document.getElementById('contrib-save-btn').addEventListener('click', async () =
   const { error } = await supabase.from('goals').update({ saved: newSaved }).eq('id', goal.id);
   if (error) { errorEl.textContent = 'Failed to save. Please try again.'; return; }
   closeContrib();
+  await fetchGoals(currentUser.id);
 });
 
 // --- Edit ---
@@ -481,7 +482,9 @@ document.getElementById('goal-cancel-btn').addEventListener('click', cancelEdit)
 // --- Delete ---
 async function deleteGoal(id) {
   if (!currentUser) return;
-  await supabase.from('goals').delete().eq('id', id);
+  const { error } = await supabase.from('goals').delete().eq('id', id);
+  if (error) { console.error('Delete failed:', error); return; }
+  await fetchGoals(currentUser.id);
 }
 
 // --- Form submit ---
@@ -516,6 +519,7 @@ document.getElementById('goal-form').addEventListener('submit', async e => {
       selectCategory(GOAL_MAIN_CATEGORIES[0].id);
       clearPhoto();
     }
+    await fetchGoals(currentUser.id);
   } catch (err) {
     console.error(err);
     errorEl.textContent = 'Failed to save. Please try again.';
