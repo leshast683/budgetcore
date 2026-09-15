@@ -4939,9 +4939,10 @@ input[type="date"].filter-date {
 
 /* Contribution modal */
 .contrib-card.contrib-card {
-  max-width: min(380px, calc(100vw - 3rem));
+  max-width: min(440px, calc(100vw - 3rem));
   width: 100%;
   box-sizing: border-box;
+  padding: 2rem 2.2rem;
 }
 
 .contrib-title {
