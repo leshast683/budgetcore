@@ -4598,7 +4598,7 @@ input[type="date"].filter-date {
   .tip-slide--save .tip-headline { font-size: 1.24rem; }
   .tip-headline br { display: inline; }
   .tip-headline br::before { content: " "; }
-  .tip-slide .tip-text { grid-area: text; margin-bottom: 0; font-size: 0.82rem; line-height: 1.45; }
+  .tip-slide .tip-text { grid-area: text; margin-bottom: 0; font-size: 0.82rem; line-height: 1.45; min-height: 78px; }
   .tip-slide--save .tip-text { font-size: 0.9rem; line-height: 1.42; }
   .tip-slide .tip-text .mobile-break { display: block; }
   .tip-slide--save {
