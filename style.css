@@ -4621,6 +4621,11 @@ input[type="date"].filter-date {
   .tip-chip-text { min-width: 0; }
   .tip-chip-title { font-size: 0.72rem; white-space: normal; line-height: 1.15; }
   .tip-chip-sub { font-size: 0.58rem; white-space: normal; line-height: 1.2; }
+
+  .tip-slide--save .tip-chip { justify-content: center; }
+  .tip-slide--save .tip-chip-text { display: none; }
+  .tip-slide--save .tip-chip-icon { width: 40px; height: 40px; }
+  .tip-slide--save .tip-chip-icon img { width: 30px; height: 30px; }
 }
 
 /* Separate backdrop element (injected by JS on mobile) */
