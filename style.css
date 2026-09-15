@@ -4622,10 +4622,11 @@ input[type="date"].filter-date {
   .tip-chip-title { font-size: 0.72rem; white-space: normal; line-height: 1.15; }
   .tip-chip-sub { font-size: 0.58rem; white-space: normal; line-height: 1.2; }
 
-  .tip-slide--save .tip-chip { justify-content: center; min-height: 0; padding: 0.12rem; }
-  .tip-slide--save .tip-chip-text { display: none; }
-  .tip-slide--save .tip-chip-icon { width: 48px; height: 48px; background: transparent; }
-  .tip-slide--save .tip-chip-icon img { width: 38px; height: 38px; }
+  .tip-chip { justify-content: center; min-height: 0; padding: 0.12rem; }
+  .tip-chip-text { display: none; }
+  .tip-chip-icon { width: 48px; height: 48px; background: transparent; }
+  .tip-chip-icon img { width: 38px; height: 38px; }
+  .tip-chip-icon svg { width: 26px; height: 26px; }
 }
 
 /* Separate backdrop element (injected by JS on mobile) */
