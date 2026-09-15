@@ -4000,6 +4000,11 @@ input[type="date"].filter-date {
   gap: 0.5rem;
 }
 
+@keyframes heroIconPop {
+  from { opacity: 0; transform: scale(0.8) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 /* The source badge art ships with cream padding around it; scale + crop
    inside a fixed box so the badge itself fills the container edge-to-edge. */
 .goals-hero-feature-icon {
@@ -4009,7 +4014,12 @@ input[type="date"].filter-date {
   display: block;
   overflow: hidden;
   box-shadow: 0 3px 10px rgba(100,70,30,0.22);
+  animation: heroIconPop 0.5s var(--ease-spring) both;
 }
+.goals-hero-feature:nth-child(1) .goals-hero-feature-icon { animation-delay: 0.05s; }
+.goals-hero-feature:nth-child(2) .goals-hero-feature-icon { animation-delay: 0.15s; }
+.goals-hero-feature:nth-child(3) .goals-hero-feature-icon { animation-delay: 0.25s; }
+.goals-hero-feature:nth-child(4) .goals-hero-feature-icon { animation-delay: 0.35s; }
 .goals-hero-feature-icon img {
   display: block;
   width: 132%;
