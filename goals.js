@@ -327,9 +327,8 @@ function renderGoals() {
       }
     }
 
-    const thumbStyle = goal.photoUrl
-      ? ` style="background-image:url('${escapeHtml(goal.photoUrl)}')"`
-      : ` style="background:${color}"`;
+    const thumbUrl = goal.photoUrl || 'goal-icons/goal-default-thumb.png';
+    const thumbStyle = ` style="background-image:url('${escapeHtml(thumbUrl)}')"`;
     const shortDate = formatShortDate(goal.deadline);
     const catLabel  = (GOAL_CATEGORY_MAP[goal.category] || GOAL_CATEGORY_MAP.other).label;
 

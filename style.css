@@ -4938,9 +4938,10 @@ input[type="date"].filter-date {
 }
 
 /* Contribution modal */
-.contrib-card {
-  max-width: 380px;
+.contrib-card.contrib-card {
+  max-width: min(380px, calc(100vw - 3rem));
   width: 100%;
+  box-sizing: border-box;
 }
 
 .contrib-title {
@@ -4948,7 +4949,13 @@ input[type="date"].filter-date {
   font-weight: 700;
   color: var(--heading);
   margin-bottom: 0.3rem;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
+
+.contrib-card { min-width: 0; }
 
 .contrib-sub {
   font-size: 0.82rem;
