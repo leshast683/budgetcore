@@ -38,6 +38,17 @@ function formatDeadline(dateStr) {
   return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function formatWhole(v) {
+  return '$' + Math.round(Math.abs(v)).toLocaleString('en-US');
+}
+
+function formatShortDate(dateStr) {
+  if (!dateStr) return null;
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+const CALENDAR_ICON_SVG = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="13" rx="2"/><path d="M2.5 8h15M6.5 2.5v3M13.5 2.5v3"/></svg>';
+
 const GOAL_COLORS = [
   '#a07848', '#5c8a5c', '#5c6e8a', '#8a5c5c',
   '#7a6e2c', '#4c7a8a', '#8a4c7a', '#6e7a4c',
@@ -316,68 +327,81 @@ function renderGoals() {
       }
     }
 
-    const ringPhotoStyle = goal.photoUrl ? ` style="background-image:url('${escapeHtml(goal.photoUrl)}')"` : '';
+    const thumbStyle = goal.photoUrl
+      ? ` style="background-image:url('${escapeHtml(goal.photoUrl)}')"`
+      : ` style="background:${color}"`;
+    const shortDate = formatShortDate(goal.deadline);
+    const catLabel  = (GOAL_CATEGORY_MAP[goal.category] || GOAL_CATEGORY_MAP.other).label;
 
     return `
       <div class="goal-card ${done ? 'goal-card--done' : ''}" data-id="${goal.id}">
-        <div class="goal-card-main">
-          <!-- Circular ring -->
-          <div class="goal-ring-wrap${goal.photoUrl ? ' goal-ring-wrap--photo' : ''}"${ringPhotoStyle}>
-            <svg class="goal-ring" viewBox="0 0 84 84" width="84" height="84">
-              <circle cx="42" cy="42" r="${R}" fill="none" stroke="#e8e0d4" stroke-width="7"/>
-              <circle cx="42" cy="42" r="${R}" fill="none" stroke="${color}" stroke-width="7"
-                stroke-dasharray="${dash} ${circ.toFixed(2)}"
-                stroke-dashoffset="${(circ / 4).toFixed(2)}"
-                stroke-linecap="round"
-                style="transition:stroke-dasharray 0.7s cubic-bezier(0.22,1,0.36,1)"/>
-            </svg>
-            <span class="goal-ring-pct" style="color:${color}">${pct.toFixed(0)}%</span>
-            <span class="goal-cat-badge" style="background:${color}" title="${(GOAL_CATEGORY_MAP[goal.category] || GOAL_CATEGORY_MAP.other).label}">${categoryIconSvg(goal.category, '2')}</span>
+        <div class="goal-card-toprow">
+          <div class="goal-thumb"${thumbStyle}>
+            <span class="goal-thumb-badge" style="background:${color}" title="${catLabel}">${categoryIconSvg(goal.category, '2')}</span>
           </div>
-
-          <!-- Content -->
-          <div class="goal-card-body">
-            <div class="goal-card-top">
-              <div>
-                <span class="goal-card-name">${escapeHtml(goal.name)}</span>
-                ${goal.note ? `<span class="goal-card-note">${escapeHtml(goal.note)}</span>` : ''}
+          <div class="goal-card-info">
+            <div class="goal-card-headline">
+              <span class="goal-card-name">${escapeHtml(goal.name)}</span>
+              <div class="goal-kebab-wrap">
+                <button type="button" class="goal-kebab-btn" data-id="${goal.id}" aria-label="More options" aria-haspopup="true" aria-expanded="false">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="4" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="10" cy="16" r="1.6"/></svg>
+                </button>
+                <div class="goal-kebab-menu" data-id="${goal.id}" hidden>
+                  <button type="button" class="goal-kebab-item goal-contrib-btn" data-id="${goal.id}">Add contribution</button>
+                  <button type="button" class="goal-kebab-item goal-edit-btn" data-id="${goal.id}">Edit</button>
+                  <button type="button" class="goal-kebab-item goal-kebab-item--danger goal-delete-btn" data-id="${goal.id}">Delete</button>
+                </div>
               </div>
-              <div class="goal-card-actions">
-                <button class="goal-contrib-btn" data-id="${goal.id}" title="Add contribution">+ Add</button>
-                <button class="goal-edit-btn"    data-id="${goal.id}" title="Edit">✎</button>
-                <button class="goal-delete-btn"  data-id="${goal.id}" title="Delete">✕</button>
-              </div>
             </div>
-
-            <div class="goal-amounts">
-              <span class="goal-saved-lbl">Saved</span>
-              <span class="goal-saved-val" style="color:${color}">${formatCurrency(goal.saved)}</span>
-              <span class="goal-of"> / </span>
-              <span class="goal-target-val">${formatCurrency(goal.target)}</span>
-            </div>
-
-            <div class="goal-track">
-              <div class="goal-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div>
-            </div>
-
-            ${metaHtml}
+            ${goal.note ? `<span class="goal-card-note">${escapeHtml(goal.note)}</span>` : ''}
+            <div class="goal-amounts-simple">${formatWhole(goal.saved)} of ${formatWhole(goal.target)}</div>
           </div>
         </div>
+
+        <div class="goal-progress-row-simple">
+          <div class="goal-track"><div class="goal-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div>
+          <span class="goal-pct-simple">${pct.toFixed(0)}%</span>
+        </div>
+
+        ${shortDate ? `<div class="goal-date-row">${CALENDAR_ICON_SVG}<span>${shortDate}</span></div>` : ''}
+        ${done ? `<span class="goal-meta goal-meta--done">🎉 Goal reached!</span>` : ''}
       </div>
     `;
   }).join('');
 
+  // Close any open kebab menus, then attach fresh handlers
+  closeAllGoalKebabMenus();
+  list.querySelectorAll('.goal-kebab-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const menu = list.querySelector(`.goal-kebab-menu[data-id="${btn.dataset.id}"]`);
+      const isOpen = !menu.hidden;
+      closeAllGoalKebabMenus();
+      if (!isOpen) {
+        menu.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
   // Attach button handlers
   list.querySelectorAll('.goal-contrib-btn').forEach(btn =>
-    btn.addEventListener('click', () => openContrib(btn.dataset.id))
+    btn.addEventListener('click', e => { e.stopPropagation(); closeAllGoalKebabMenus(); openContrib(btn.dataset.id); })
   );
   list.querySelectorAll('.goal-edit-btn').forEach(btn =>
-    btn.addEventListener('click', () => startEdit(btn.dataset.id))
+    btn.addEventListener('click', e => { e.stopPropagation(); closeAllGoalKebabMenus(); startEdit(btn.dataset.id); })
   );
   list.querySelectorAll('.goal-delete-btn').forEach(btn =>
-    btn.addEventListener('click', () => deleteGoal(btn.dataset.id))
+    btn.addEventListener('click', e => { e.stopPropagation(); closeAllGoalKebabMenus(); deleteGoal(btn.dataset.id); })
   );
 }
+
+function closeAllGoalKebabMenus() {
+  document.querySelectorAll('.goal-kebab-menu').forEach(menu => { menu.hidden = true; });
+  document.querySelectorAll('.goal-kebab-btn').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+}
+
+document.addEventListener('click', closeAllGoalKebabMenus);
 
 // --- Contribution modal ---
 function openContrib(id) {
