@@ -40,7 +40,7 @@ function renderOverview() {
 
   const subEl = document.getElementById('inv-portfolio-sub');
   if (!investments.length) {
-    subEl.textContent = 'Start investing and watch your money grow.';
+    subEl.innerHTML = 'Start investing and watch<br class="mobile-break"> your money grow.';
     subEl.className = 'inv-portfolio-sub';
   } else {
     const holdingsWord = `${investments.length} holding${investments.length !== 1 ? 's' : ''}`;
