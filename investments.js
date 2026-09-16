@@ -1,14 +1,20 @@
 import Chart from 'chart.js/auto';
 import { supabase } from './supabase.js';
 
-let investments   = [];
-let currentUser   = null;
-let editingId     = null;
-let invPieChart   = null;
-let channel       = null;
+let investments      = [];
+let currentUser       = null;
+let editingId         = null;
+let invPieChart       = null;
+let growthChart       = null;
+let channel           = null;
+let invListExpanded   = false;
 
-const TYPE_ICONS  = { crypto: '₿', stock: '📊', etf: '📦', other: '💼' };
-const TYPE_COLORS = { crypto: '#f7931a', stock: '#2d7a3a', etf: '#1a6ea8', other: '#9a6e3a' };
+const LIST_PREVIEW_COUNT = 4;
+
+const TYPE_ICONS  = { stock: '📊', etf: '📦', crypto: '₿', bond: '📜', cash: '💵' };
+const TYPE_COLORS = { stock: '#2d7a3a', etf: '#d8b979', crypto: '#6b3f1f', bond: '#b98d55', cash: '#ece0c8' };
+const TYPE_LABELS = { stock: 'Stocks', etf: 'ETFs', crypto: 'Crypto', bond: 'Bonds', cash: 'Cash' };
+const TYPE_ORDER  = ['stock', 'etf', 'crypto', 'bond', 'cash'];
 
 function formatCurrency(n) {
   const abs = Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -23,57 +29,65 @@ function escapeHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ---- Render: Overview Cards ----
+// ---- Render: Portfolio Overview ----
 function renderOverview() {
   const totalValue  = investments.reduce((s, inv) => s + (inv.currentPrice * inv.shares), 0);
   const totalCost   = investments.reduce((s, inv) => s + (inv.purchasePrice * inv.shares), 0);
   const totalGain   = totalValue - totalCost;
   const gainPct     = totalCost > 0 ? (totalGain / totalCost) * 100 : 0;
 
-  document.getElementById('inv-total-val').textContent  = formatCurrency(totalValue);
-  document.getElementById('inv-total-sub').textContent  = `${investments.length} holding${investments.length !== 1 ? 's' : ''}`;
-  document.getElementById('inv-gain-val').textContent   = formatCurrency(totalGain);
-  document.getElementById('inv-gain-pct').textContent   = formatPct(gainPct);
-  document.getElementById('inv-cost-val').textContent   = formatCurrency(totalCost);
+  document.getElementById('inv-total-val').textContent = formatCurrency(totalValue);
 
-  const gainEl   = document.getElementById('inv-gain-val');
-  gainEl.className = 'stat-value ' + (totalGain >= 0 ? 'positive' : 'negative');
+  const subEl = document.getElementById('inv-portfolio-sub');
+  if (!investments.length) {
+    subEl.textContent = 'Start investing and watch your money grow.';
+    subEl.className = 'inv-portfolio-sub';
+  } else {
+    const holdingsWord = `${investments.length} holding${investments.length !== 1 ? 's' : ''}`;
+    subEl.innerHTML = `${holdingsWord} · <span class="${totalGain >= 0 ? 'positive' : 'negative'}">${formatPct(gainPct)} all time</span>`;
+    subEl.className = 'inv-portfolio-sub inv-portfolio-sub--data';
+  }
 }
 
-// ---- Render: Pie Chart ----
+// ---- Render: Allocation Donut + Legend ----
 function renderInvChart() {
-  const card   = document.getElementById('inv-chart-card');
   const canvas = document.getElementById('inv-pie-chart');
   const legend = document.getElementById('inv-legend');
 
-  if (!investments.length) {
-    card.style.display = 'none';
-    if (invPieChart) { invPieChart.destroy(); invPieChart = null; }
-    return;
-  }
-  card.style.display = '';
+  const totalsByType = {};
+  TYPE_ORDER.forEach(t => { totalsByType[t] = 0; });
+  investments.forEach(inv => {
+    const t = TYPE_ORDER.includes(inv.type) ? inv.type : 'stock';
+    totalsByType[t] += inv.currentPrice * inv.shares;
+  });
+  const total   = Object.values(totalsByType).reduce((s, v) => s + v, 0);
+  const isEmpty = total <= 0;
 
-  const labels = investments.map(i => i.name);
-  const data   = investments.map(i => parseFloat((i.currentPrice * i.shares).toFixed(2)));
-  const colors = investments.map(i => TYPE_COLORS[i.type] || '#9a6e3a');
-  const total  = data.reduce((s, v) => s + v, 0);
+  const chartLabels = isEmpty ? [''] : TYPE_ORDER.map(t => TYPE_LABELS[t]);
+  const chartColors = isEmpty ? ['#e8e0d0'] : TYPE_ORDER.map(t => TYPE_COLORS[t]);
+  const chartData   = isEmpty ? [1] : TYPE_ORDER.map(t => parseFloat(totalsByType[t].toFixed(2)));
 
   if (invPieChart) {
-    invPieChart.data.labels = labels;
-    invPieChart.data.datasets[0].data = data;
-    invPieChart.data.datasets[0].backgroundColor = colors;
+    invPieChart.data.labels = chartLabels;
+    invPieChart.data.datasets[0].data = chartData;
+    invPieChart.data.datasets[0].backgroundColor = chartColors;
+    invPieChart.data.datasets[0].hoverOffset = isEmpty ? 0 : 8;
+    invPieChart.options.plugins.tooltip.enabled = !isEmpty;
+    invPieChart.isEmpty = isEmpty;
+    invPieChart.portfolioTotal = total;
     invPieChart.update();
   } else {
     invPieChart = new Chart(canvas.getContext('2d'), {
       type: 'doughnut',
-      data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: '#fffdf9', borderWidth: 3, borderRadius: 4, hoverOffset: 8 }] },
+      data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: chartColors, borderColor: '#fffdf9', borderWidth: 3, borderRadius: 4, hoverOffset: isEmpty ? 0 : 8 }] },
       options: {
         responsive: true,
         maintainAspectRatio: true,
-        cutout: '68%',
+        cutout: '72%',
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: !isEmpty,
             backgroundColor: 'rgba(26,14,6,0.9)', padding: 10, cornerRadius: 10,
             callbacks: { label: ctx => `  ${ctx.label}: ${formatCurrency(ctx.parsed)}` },
           },
@@ -88,50 +102,61 @@ function renderInvChart() {
           const { x, y } = meta.data[0];
           ctx.save();
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.font = '700 15px Inter, sans-serif'; ctx.fillStyle = '#1a0e06';
-          ctx.fillText(formatCurrency(total), x, y - 8);
-          ctx.font = '500 10px Inter, sans-serif'; ctx.fillStyle = '#957560';
-          ctx.fillText('portfolio', x, y + 9);
+          if (chart.isEmpty) {
+            ctx.font = '600 12px Inter, sans-serif'; ctx.fillStyle = '#957560';
+            ctx.fillText('Your', x, y - 10);
+            ctx.fillText('Allocation', x, y + 4);
+            ctx.font = '700 15px Inter, sans-serif'; ctx.fillStyle = '#c0a888';
+            ctx.fillText('—', x, y + 23);
+          } else {
+            ctx.font = '700 15px Inter, sans-serif'; ctx.fillStyle = '#1a0e06';
+            ctx.fillText(formatCurrency(chart.portfolioTotal), x, y - 8);
+            ctx.font = '500 10px Inter, sans-serif'; ctx.fillStyle = '#957560';
+            ctx.fillText('portfolio', x, y + 9);
+          }
           ctx.restore();
         },
       }],
     });
+    invPieChart.isEmpty = isEmpty;
+    invPieChart.portfolioTotal = total;
   }
 
-  legend.innerHTML = investments.map((inv, i) => {
-    const value   = inv.currentPrice * inv.shares;
-    const cost    = inv.purchasePrice * inv.shares;
-    const gain    = value - cost;
-    const gainPct = cost > 0 ? (gain / cost) * 100 : 0;
-    const pct     = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+  legend.innerHTML = TYPE_ORDER.map(t => {
+    const value = totalsByType[t];
+    const pct   = total > 0 && value > 0 ? ((value / total) * 100).toFixed(1) : null;
     return `
       <div class="inv-legend-item">
-        <span class="inv-legend-dot" style="background:${colors[i]}"></span>
+        <span class="inv-legend-dot" style="background:${TYPE_COLORS[t]}"></span>
         <div class="inv-legend-info">
-          <span class="inv-legend-name">${escapeHtml(inv.name)}</span>
-          <span class="inv-legend-val">${formatCurrency(value)} <span class="inv-legend-pct">${pct}%</span></span>
+          <span class="inv-legend-name">${TYPE_LABELS[t]}</span>
+          ${pct !== null ? `<span class="inv-legend-val">${formatCurrency(value)} <span class="inv-legend-pct">${pct}%</span></span>` : ''}
         </div>
-        <span class="inv-gain-badge ${gain >= 0 ? 'inv-gain-badge--up' : 'inv-gain-badge--down'}">${formatPct(gainPct)}</span>
       </div>`;
   }).join('');
 }
 
 // ---- Render: Holdings List ----
 function renderList() {
-  const list    = document.getElementById('inv-list');
-  const empty   = document.getElementById('inv-empty');
-  const counter = document.getElementById('inv-count');
-
-  counter.textContent = `${investments.length} holding${investments.length !== 1 ? 's' : ''}`;
+  const list        = document.getElementById('inv-list');
+  const empty       = document.getElementById('inv-empty');
+  const viewAllLink = document.getElementById('inv-view-all');
 
   if (!investments.length) {
     list.innerHTML = '';
     empty.style.display = '';
+    viewAllLink.style.display = 'none';
     return;
   }
   empty.style.display = 'none';
 
-  list.innerHTML = investments.map(inv => {
+  const showAll     = invListExpanded || investments.length <= LIST_PREVIEW_COUNT;
+  const itemsToShow = showAll ? investments : investments.slice(0, LIST_PREVIEW_COUNT);
+
+  viewAllLink.style.display = investments.length > LIST_PREVIEW_COUNT ? '' : 'none';
+  viewAllLink.innerHTML     = showAll ? 'Show less &lsaquo;' : 'View all &rsaquo;';
+
+  list.innerHTML = itemsToShow.map(inv => {
     const value   = inv.currentPrice * inv.shares;
     const cost    = inv.purchasePrice * inv.shares;
     const gain    = value - cost;
@@ -244,6 +269,173 @@ document.getElementById('inv-list').addEventListener('click', async e => {
   }
 });
 
+document.getElementById('inv-view-all').addEventListener('click', e => {
+  e.preventDefault();
+  invListExpanded = !invListExpanded;
+  renderList();
+});
+
+// ---- "Add Investment" CTAs: scroll to form & focus ----
+function scrollToInvForm() {
+  document.getElementById('inv-form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => document.getElementById('inv-name').focus(), 400);
+}
+document.getElementById('inv-add-cta-1').addEventListener('click', scrollToInvForm);
+document.getElementById('inv-add-cta-2').addEventListener('click', scrollToInvForm);
+
+// ---- "Learn to Invest" carousel ----
+const LEARN_SLIDE_COUNT = 3;
+let learnSlideIndex = 0;
+let learnAutoTimer = null;
+
+function goToLearnSlide(i) {
+  learnSlideIndex = (i + LEARN_SLIDE_COUNT) % LEARN_SLIDE_COUNT;
+  document.getElementById('learn-carousel-track').style.transform = `translateX(-${learnSlideIndex * (100 / LEARN_SLIDE_COUNT)}%)`;
+  document.querySelectorAll('#learn-dots .learn-dot').forEach((dot, i2) => {
+    dot.classList.toggle('active', i2 === learnSlideIndex);
+  });
+}
+
+function startLearnAutoAdvance() {
+  clearInterval(learnAutoTimer);
+  learnAutoTimer = setInterval(() => goToLearnSlide(learnSlideIndex + 1), 10000);
+}
+
+function initLearnCarousel() {
+  document.getElementById('learn-carousel-track').addEventListener('click', () => {
+    goToLearnSlide(learnSlideIndex + 1);
+    startLearnAutoAdvance();
+  });
+  document.querySelectorAll('#learn-dots .learn-dot').forEach(dot => {
+    dot.addEventListener('click', e => {
+      e.stopPropagation();
+      goToLearnSlide(Number(dot.dataset.slide));
+      startLearnAutoAdvance();
+    });
+  });
+  document.getElementById('learn-see-all').addEventListener('click', e => {
+    e.preventDefault();
+    goToLearnSlide(0);
+    startLearnAutoAdvance();
+  });
+  startLearnAutoAdvance();
+}
+
+// ---- "See How Money Can Grow" calculator ----
+function computeGrowthSeries(monthly, years, annualRatePct = 7) {
+  const months      = years * 12;
+  const monthlyRate = annualRatePct / 100 / 12;
+  const contributionsSeries = [];
+  const valueSeries = [];
+  let balance = 0;
+  for (let m = 0; m <= months; m++) {
+    if (m > 0) balance = balance * (1 + monthlyRate) + monthly;
+    contributionsSeries.push(monthly * m);
+    valueSeries.push(balance);
+  }
+  return { contributionsSeries, valueSeries };
+}
+
+function drawEndPill(ctx, cx, cy, text, bg, fg, borderColor, maxX) {
+  ctx.save();
+  ctx.font = '700 11px Inter, sans-serif';
+  const paddingX = 8, h = 22;
+  const w = ctx.measureText(text).width + paddingX * 2;
+  const x = Math.min(cx - w / 2, maxX - w - 2);
+  const y = cy - h / 2;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, h / 2); else ctx.rect(x, y, w, h);
+  ctx.fillStyle = bg;
+  ctx.fill();
+  if (borderColor) { ctx.lineWidth = 1.5; ctx.strokeStyle = borderColor; ctx.stroke(); }
+  ctx.fillStyle = fg;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, x + w / 2, y + h / 2 + 0.5);
+  ctx.restore();
+}
+
+function renderGrowthCalc() {
+  const monthly = parseFloat(document.getElementById('growth-monthly').value);
+  const years   = parseInt(document.getElementById('growth-years').value, 10);
+  const { contributionsSeries, valueSeries } = computeGrowthSeries(monthly, years);
+
+  const totalContrib = contributionsSeries[contributionsSeries.length - 1];
+  const totalValue   = valueSeries[valueSeries.length - 1];
+
+  document.getElementById('growth-contrib-val').textContent  = formatCurrency(totalContrib);
+  document.getElementById('growth-estimate-val').textContent = formatCurrency(totalValue);
+
+  const labels = valueSeries.map((_, i) => i);
+  const ctx    = document.getElementById('growth-chart').getContext('2d');
+
+  if (growthChart) {
+    growthChart.data.labels = labels;
+    growthChart.data.datasets[0].data = valueSeries;
+    growthChart.data.datasets[1].data = contributionsSeries;
+    growthChart.options.plugins.endLabels.valueLabel   = formatCurrency(totalValue);
+    growthChart.options.plugins.endLabels.contribLabel = formatCurrency(totalContrib);
+    growthChart.update();
+    return;
+  }
+
+  growthChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Estimated value', data: valueSeries,
+          borderColor: '#2d7a3a', backgroundColor: 'rgba(45,122,58,0.12)',
+          fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2.5,
+        },
+        {
+          label: 'Contributions', data: contributionsSeries,
+          borderColor: '#c9a86a', backgroundColor: 'transparent',
+          fill: false, tension: 0, pointRadius: 0, borderWidth: 2, borderDash: [5, 4],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 28, right: 8, bottom: 8, left: 2 } },
+      interaction: { intersect: false, mode: 'index' },
+      scales: { x: { display: false }, y: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(26,14,6,0.9)', padding: 10, cornerRadius: 10,
+          callbacks: {
+            title: () => '',
+            label: c => `${c.dataset.label}: ${formatCurrency(c.parsed.y)}`,
+          },
+        },
+        endLabels: { valueLabel: formatCurrency(totalValue), contribLabel: formatCurrency(totalContrib) },
+      },
+    },
+    plugins: [{
+      id: 'endLabels',
+      afterDatasetsDraw(chart, args, opts) {
+        const { ctx } = chart;
+        const valueMeta   = chart.getDatasetMeta(0);
+        const contribMeta = chart.getDatasetMeta(1);
+        const lastValuePt   = valueMeta.data[valueMeta.data.length - 1];
+        const lastContribPt = contribMeta.data[contribMeta.data.length - 1];
+        if (!lastValuePt || !lastContribPt) return;
+        const maxX = chart.chartArea.right + 40;
+        drawEndPill(ctx, lastValuePt.x, lastValuePt.y - 20, opts.valueLabel, '#2d7a3a', '#fff', null, maxX);
+        drawEndPill(ctx, lastContribPt.x, lastContribPt.y + 20, opts.contribLabel, '#fff', '#7a5228', '#d8b979', maxX);
+      },
+    }],
+  });
+}
+
+function initGrowthCalc() {
+  document.getElementById('growth-monthly').addEventListener('change', renderGrowthCalc);
+  document.getElementById('growth-years').addEventListener('change', renderGrowthCalc);
+  renderGrowthCalc();
+}
+
 // ---- Data ----
 async function fetchInvestments(uid) {
   const { data, error } = await supabase.from('investments').select('*').eq('user_id', uid);
@@ -261,6 +453,8 @@ async function fetchInvestments(uid) {
 }
 
 // ---- Auth & Init ----
+let staticSectionsInited = false;
+
 supabase.auth.onAuthStateChange((event, session) => {
   const user = session?.user;
   if (!user) return;
@@ -268,6 +462,12 @@ supabase.auth.onAuthStateChange((event, session) => {
   currentUser = user;
   document.getElementById('app-content').style.display = '';
   document.getElementById('inv-date').value = new Date().toISOString().split('T')[0];
+
+  if (!staticSectionsInited) {
+    staticSectionsInited = true;
+    initLearnCarousel();
+    initGrowthCalc();
+  }
 
   if (channel) { supabase.removeChannel(channel); channel = null; }
   channel = supabase

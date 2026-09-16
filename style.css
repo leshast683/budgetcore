@@ -6666,6 +6666,171 @@ input[type="date"].filter-date {
 .inv-item-value { font-size: 0.92rem; font-weight: 700; color: var(--heading); }
 .inv-item-gain  { font-size: 0.78rem; font-weight: 600; }
 
+/* ---- Portfolio overview card ---- */
+.inv-portfolio-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.inv-portfolio-left {
+  flex: 1 1 260px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.inv-portfolio-value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--heading);
+  line-height: 1.1;
+}
+.inv-portfolio-sub {
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  max-width: 32ch;
+}
+.inv-portfolio-sub--data { color: var(--text); }
+.inv-portfolio-sub .positive { color: #1a5010; font-weight: 700; }
+.inv-portfolio-sub .negative { color: #8c2c1c; font-weight: 700; }
+.inv-add-cta { display: inline-flex; align-items: center; gap: 0.4rem; }
+
+.inv-portfolio-right {
+  flex: 1 1 300px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.inv-allocation-wrap { display: flex; justify-content: center; }
+
+/* ---- Learn to Invest ---- */
+.list-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.list-link:hover { color: var(--accent-hover); text-decoration: underline; }
+.learn-invest-intro { font-size: 0.88rem; color: var(--muted); margin-top: -0.75rem; margin-bottom: 1.25rem; }
+
+.learn-carousel { overflow: hidden; }
+.learn-carousel-track {
+  display: flex;
+  transition: transform 0.45s var(--ease-out);
+}
+.learn-slide {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--accent-light);
+  border-radius: 18px;
+  padding: 1.1rem 1.25rem;
+  cursor: pointer;
+}
+.learn-slide-num {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--accent-strong);
+  background: rgba(255,255,255,0.65);
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  align-self: flex-start;
+}
+.learn-slide-body { flex: 1; min-width: 0; }
+.learn-slide-title { font-size: 1rem; font-weight: 700; color: var(--heading); margin-bottom: 0.25rem; }
+.learn-slide-text { font-size: 0.85rem; color: var(--text); line-height: 1.4; }
+.learn-slide-art { width: 56px; height: 56px; object-fit: contain; flex-shrink: 0; }
+.learn-slide-arrow {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--accent-strong);
+}
+.learn-dots { display: flex; justify-content: center; gap: 0.4rem; margin-top: 1rem; }
+.learn-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border);
+  cursor: pointer;
+  padding: 0;
+}
+.learn-dot.active { background: var(--accent); width: 18px; border-radius: 4px; }
+
+/* ---- Growth calculator ---- */
+.growth-calc-intro { font-size: 0.88rem; color: var(--muted); margin-top: -1rem; margin-bottom: 1.25rem; }
+.growth-calc-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.growth-calc-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.growth-calc-stat { display: flex; flex-direction: column; gap: 0.2rem; }
+.growth-calc-stat-label { font-size: 0.78rem; color: var(--muted); }
+.growth-calc-stat-val { font-size: 1.15rem; font-weight: 700; color: var(--heading); }
+.growth-calc-stat-val--pos { color: #1a5010; }
+.growth-chart-wrap { position: relative; height: 220px; margin-bottom: 0.75rem; }
+.growth-footnote {
+  font-size: 0.76rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ---- Holdings empty state ---- */
+.inv-empty-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.inv-empty-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+.inv-empty-text { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 0.15rem; }
+.inv-empty-title { font-size: 0.92rem; font-weight: 600; color: var(--heading); }
+.inv-empty-sub { font-size: 0.82rem; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .inv-portfolio-card { flex-direction: column; align-items: stretch; }
+  .inv-portfolio-left { align-items: stretch; text-align: left; }
+  .inv-portfolio-right { justify-content: center; }
+  .growth-calc-controls { grid-template-columns: 1fr; }
+  .inv-empty-row { justify-content: center; text-align: center; }
+}
+
 /* ================================================================
    ANALYTICS PAGE
    ================================================================ */

@@ -302,46 +302,130 @@
     <div class="goals-mode-panel" id="mode-investment-panel" style="display:none">
 
       <!-- ===== Portfolio Overview ===== -->
-      <div class="dashboard" id="inv-dashboard">
-        <div class="stat-card stat-card--balance" id="inv-total-card">
-          <div class="stat-card-top">
-            <span class="stat-label">Portfolio Value</span>
-            <span class="stat-icon" style="color:#2d7a3a">📈</span>
-          </div>
-          <span class="stat-value" id="inv-total-val">$0.00</span>
-          <span class="stat-sub" id="inv-total-sub">0 holdings</span>
+      <section class="app-card inv-portfolio-card">
+        <div class="inv-portfolio-left">
+          <h2 class="card-title" style="margin-bottom:0.35rem">Your Portfolio</h2>
+          <span class="inv-portfolio-value" id="inv-total-val">$0.00</span>
+          <p class="inv-portfolio-sub" id="inv-portfolio-sub">Start investing and watch your money grow.</p>
+          <button type="button" class="btn inv-add-cta" id="inv-add-cta-1">Add Investment <span aria-hidden="true">→</span></button>
         </div>
-        <div class="stat-card stat-card--income" id="inv-gain-card">
-          <div class="stat-card-top">
-            <span class="stat-label">Total Gain / Loss</span>
-            <span class="stat-icon" style="color:#1a5010">💰</span>
-          </div>
-          <span class="stat-value" id="inv-gain-val">$0.00</span>
-          <span class="stat-sub" id="inv-gain-pct">0.00%</span>
-        </div>
-        <div class="stat-card stat-card--expenses" id="inv-cost-card">
-          <div class="stat-card-top">
-            <span class="stat-label">Total Cost Basis</span>
-            <span class="stat-icon" style="color:#8c2c1c">💳</span>
-          </div>
-          <span class="stat-value" id="inv-cost-val">$0.00</span>
-          <span class="stat-sub">amount invested</span>
-        </div>
-      </div>
-
-      <!-- ===== Portfolio Chart ===== -->
-      <section class="app-card" id="inv-chart-card" style="display:none">
-        <h2 class="card-title">Portfolio Breakdown</h2>
-        <div class="inv-chart-wrap">
-          <div style="position:relative;width:220px;height:220px;flex-shrink:0">
-            <canvas id="inv-pie-chart"></canvas>
+        <div class="inv-portfolio-right">
+          <div class="inv-allocation-wrap">
+            <div style="position:relative;width:170px;height:170px;flex-shrink:0">
+              <canvas id="inv-pie-chart"></canvas>
+            </div>
           </div>
           <div id="inv-legend" class="inv-legend"></div>
         </div>
       </section>
 
+      <!-- ===== Learn to Invest ===== -->
+      <section class="app-card learn-invest-section">
+        <div class="list-header">
+          <h2 class="card-title" style="margin-bottom:0">Learn to Invest</h2>
+          <a href="#" class="list-link" id="learn-see-all">See all &rsaquo;</a>
+        </div>
+        <p class="learn-invest-intro">Quick, simple lessons to build your confidence.</p>
+        <div class="learn-carousel" id="learn-carousel">
+          <div class="learn-carousel-track" id="learn-carousel-track">
+            <div class="learn-slide">
+              <span class="learn-slide-num">01</span>
+              <div class="learn-slide-body">
+                <h3 class="learn-slide-title">Investing Basics</h3>
+                <p class="learn-slide-text">What actually happens when you invest $100?</p>
+              </div>
+              <img src="goal-icons/chip-plant.png" alt="" class="learn-slide-art" />
+              <span class="learn-slide-arrow" aria-hidden="true">›</span>
+            </div>
+            <div class="learn-slide">
+              <span class="learn-slide-num">02</span>
+              <div class="learn-slide-body">
+                <h3 class="learn-slide-title">How Compounding Works</h3>
+                <p class="learn-slide-text">Why small, consistent contributions add up faster than you think.</p>
+              </div>
+              <img src="goal-icons/chip-gear.png" alt="" class="learn-slide-art" />
+              <span class="learn-slide-arrow" aria-hidden="true">›</span>
+            </div>
+            <div class="learn-slide">
+              <span class="learn-slide-num">03</span>
+              <div class="learn-slide-body">
+                <h3 class="learn-slide-title">Risk &amp; Diversification</h3>
+                <p class="learn-slide-text">Why spreading your money across stocks, ETFs, and cash matters.</p>
+              </div>
+              <img src="goal-icons/chip-piggy.png" alt="" class="learn-slide-art" />
+              <span class="learn-slide-arrow" aria-hidden="true">›</span>
+            </div>
+          </div>
+          <div class="learn-dots" id="learn-dots">
+            <button type="button" class="learn-dot active" data-slide="0" aria-label="Go to lesson 1"></button>
+            <button type="button" class="learn-dot" data-slide="1" aria-label="Go to lesson 2"></button>
+            <button type="button" class="learn-dot" data-slide="2" aria-label="Go to lesson 3"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Growth Calculator ===== -->
+      <section class="app-card growth-calc-section">
+        <h2 class="card-title">See How Money Can Grow</h2>
+        <p class="growth-calc-intro">Explore how consistent investing can add up over time.</p>
+        <div class="growth-calc-controls">
+          <div class="goal-field">
+            <label class="goal-label">Monthly contribution</label>
+            <select id="growth-monthly" class="auth-input" style="padding:0.6rem 0.85rem">
+              <option value="50">$50/month</option>
+              <option value="100" selected>$100/month</option>
+              <option value="250">$250/month</option>
+              <option value="500">$500/month</option>
+              <option value="1000">$1,000/month</option>
+            </select>
+          </div>
+          <div class="goal-field">
+            <label class="goal-label">Time horizon</label>
+            <select id="growth-years" class="auth-input" style="padding:0.6rem 0.85rem">
+              <option value="1">for 1 year</option>
+              <option value="5">for 5 years</option>
+              <option value="10" selected>for 10 years</option>
+              <option value="15">for 15 years</option>
+              <option value="20">for 20 years</option>
+              <option value="30">for 30 years</option>
+            </select>
+          </div>
+        </div>
+        <div class="growth-calc-stats">
+          <div class="growth-calc-stat">
+            <span class="growth-calc-stat-label">Contributions</span>
+            <span class="growth-calc-stat-val" id="growth-contrib-val">$12,000</span>
+          </div>
+          <div class="growth-calc-stat">
+            <span class="growth-calc-stat-label">Estimated value</span>
+            <span class="growth-calc-stat-val growth-calc-stat-val--pos" id="growth-estimate-val">$16,470</span>
+          </div>
+        </div>
+        <div class="growth-chart-wrap">
+          <canvas id="growth-chart" height="220"></canvas>
+        </div>
+        <p class="growth-footnote"><span aria-hidden="true">ⓘ</span> Illustrative example (7% average annual return). Not a guarantee.</p>
+      </section>
+
+      <!-- ===== Holdings List ===== -->
+      <section class="app-card" id="inv-list-section">
+        <div class="list-header">
+          <h2 class="card-title" style="margin-bottom:0">Your Investments</h2>
+          <a href="#" class="list-link" id="inv-view-all" style="display:none">View all &rsaquo;</a>
+        </div>
+        <div id="inv-list"></div>
+        <div class="inv-empty-row" id="inv-empty" style="display:none">
+          <span class="inv-empty-icon">📊</span>
+          <div class="inv-empty-text">
+            <span class="inv-empty-title">No investments added yet.</span>
+            <span class="inv-empty-sub">Add your first investment to get started.</span>
+          </div>
+          <button type="button" class="btn btn-sm inv-add-cta" id="inv-add-cta-2">+ Add Investment</button>
+        </div>
+      </section>
+
       <!-- ===== Add Investment Form ===== -->
-      <section class="app-card">
+      <section class="app-card" id="inv-form-section">
         <h2 class="card-title" id="inv-form-title">Add Investment</h2>
         <form id="inv-form" novalidate>
           <div class="goals-form-grid">
@@ -352,10 +436,11 @@
             <div class="goal-field">
               <label class="goal-label">Type</label>
               <select id="inv-type" class="auth-input" style="padding:0.6rem 0.85rem">
-                <option value="crypto">Crypto</option>
                 <option value="stock">Stock</option>
                 <option value="etf">ETF</option>
-                <option value="other">Other</option>
+                <option value="crypto">Crypto</option>
+                <option value="bond">Bond</option>
+                <option value="cash">Cash</option>
               </select>
             </div>
             <div class="goal-field">
@@ -381,16 +466,6 @@
             <button type="button" class="btn-ghost btn-sm" id="inv-cancel-btn" style="display:none">Cancel Edit</button>
           </div>
         </form>
-      </section>
-
-      <!-- ===== Holdings List ===== -->
-      <section class="app-card" id="inv-list-section">
-        <div class="list-header">
-          <h2 class="card-title">Your Holdings</h2>
-          <span class="list-count" id="inv-count">0 holdings</span>
-        </div>
-        <div id="inv-list"></div>
-        <p class="empty-state" id="inv-empty" style="display:none">No investments yet — add one above to track your portfolio!</p>
       </section>
 
     </div>
