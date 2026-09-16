@@ -6696,15 +6696,16 @@ input[type="date"].filter-date {
 .inv-portfolio-sub .positive { color: #1a5010; font-weight: 700; }
 .inv-portfolio-sub .negative { color: #8c2c1c; font-weight: 700; }
 .inv-portfolio-sub .mobile-break { display: none; }
-.inv-add-cta { display: inline-flex; align-items: center; gap: 0.35rem; }
-.btn.inv-add-cta { padding: 0.45rem 0.65rem; }
+.inv-add-cta { display: inline-flex; align-items: center; gap: 0.3rem; }
+.btn.inv-add-cta { padding: 0.4rem 0.5rem; font-size: 0.76rem; }
 
 /* ---- Portfolio growth illustration ---- */
 .inv-portfolio-illustration {
   flex-shrink: 0;
   width: 300px;
+  height: 380px;
 }
-.inv-growth-img { width: 100%; height: auto; display: block; border-radius: 16px; }
+.inv-growth-img { width: 100%; height: 100%; display: block; border-radius: 16px; object-fit: cover; object-position: center; }
 
 /* ---- Allocation card ---- */
 .inv-allocation-header {
@@ -6873,7 +6874,7 @@ input[type="date"].filter-date {
   .inv-portfolio-card { flex-wrap: nowrap; align-items: center; gap: 1rem; }
   .inv-portfolio-left { align-items: stretch; text-align: left; min-width: 0; flex: 1 1 auto; }
   .inv-portfolio-value { font-size: 2rem; }
-  .inv-portfolio-illustration { width: 130px; }
+  .inv-portfolio-illustration { width: 130px; height: 165px; }
   .inv-portfolio-sub .mobile-break { display: block; }
   .inv-allocation-header { flex-direction: column; }
   .inv-allocation-body { flex-direction: column; }
