@@ -6724,10 +6724,12 @@ input[type="date"].filter-date {
 .learn-carousel { overflow: hidden; }
 .learn-carousel-track {
   display: flex;
+  width: 300%;
   transition: transform 0.45s var(--ease-out);
 }
 .learn-slide {
-  flex: 0 0 100%;
+  width: calc(100% / 3);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 1rem;
