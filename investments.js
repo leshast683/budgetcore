@@ -12,7 +12,7 @@ let invListExpanded   = false;
 const LIST_PREVIEW_COUNT = 4;
 
 const TYPE_ICONS  = { stock: '📊', etf: '📦', crypto: '₿', bond: '📜', cash: '💵' };
-const TYPE_COLORS = { stock: '#2d7a3a', etf: '#d8b979', crypto: '#6b3f1f', bond: '#b98d55', cash: '#ece0c8' };
+const TYPE_COLORS = { stock: '#3f6b52', etf: '#a9c2ac', crypto: '#a9723f', bond: '#d3b585', cash: '#f1e9dc' };
 const TYPE_LABELS = { stock: 'Stocks', etf: 'ETFs', crypto: 'Crypto', bond: 'Bonds', cash: 'Cash' };
 const TYPE_ORDER  = ['stock', 'etf', 'crypto', 'bond', 'cash'];
 
@@ -63,8 +63,13 @@ function renderInvChart() {
   const total   = Object.values(totalsByType).reduce((s, v) => s + v, 0);
   const isEmpty = total <= 0;
 
+  const allocSubEl = document.getElementById('inv-allocation-sub');
+  allocSubEl.textContent = isEmpty
+    ? 'Start building your portfolio to see your allocation here.'
+    : `Here's how your ${investments.length} holding${investments.length !== 1 ? 's' : ''} break down by asset class.`;
+
   const chartLabels = isEmpty ? [''] : TYPE_ORDER.map(t => TYPE_LABELS[t]);
-  const chartColors = isEmpty ? ['#e8e0d0'] : TYPE_ORDER.map(t => TYPE_COLORS[t]);
+  const chartColors = isEmpty ? ['#e7e0d3'] : TYPE_ORDER.map(t => TYPE_COLORS[t]);
   const chartData   = isEmpty ? [1] : TYPE_ORDER.map(t => parseFloat(totalsByType[t].toFixed(2)));
 
   if (invPieChart) {
@@ -103,11 +108,13 @@ function renderInvChart() {
           ctx.save();
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           if (chart.isEmpty) {
-            ctx.font = '600 12px Inter, sans-serif'; ctx.fillStyle = '#957560';
-            ctx.fillText('Your', x, y - 10);
-            ctx.fillText('Allocation', x, y + 4);
-            ctx.font = '700 15px Inter, sans-serif'; ctx.fillStyle = '#c0a888';
-            ctx.fillText('—', x, y + 23);
+            ctx.font = '700 14px Inter, sans-serif'; ctx.fillStyle = '#4a3a28';
+            ctx.fillText('No investments', x, y - 22);
+            ctx.fillText('yet', x, y - 6);
+            ctx.font = '500 10.5px Inter, sans-serif'; ctx.fillStyle = '#957560';
+            ctx.fillText('Add your first', x, y + 14);
+            ctx.fillText('investment to get', x, y + 28);
+            ctx.fillText('started.', x, y + 42);
           } else {
             ctx.font = '700 15px Inter, sans-serif'; ctx.fillStyle = '#1a0e06';
             ctx.fillText(formatCurrency(chart.portfolioTotal), x, y - 8);
@@ -124,14 +131,12 @@ function renderInvChart() {
 
   legend.innerHTML = TYPE_ORDER.map(t => {
     const value = totalsByType[t];
-    const pct   = total > 0 && value > 0 ? ((value / total) * 100).toFixed(1) : null;
+    const pct   = total > 0 ? Math.round((value / total) * 100) : 0;
     return `
       <div class="inv-legend-item">
         <span class="inv-legend-dot" style="background:${TYPE_COLORS[t]}"></span>
-        <div class="inv-legend-info">
-          <span class="inv-legend-name">${TYPE_LABELS[t]}</span>
-          ${pct !== null ? `<span class="inv-legend-val">${formatCurrency(value)} <span class="inv-legend-pct">${pct}%</span></span>` : ''}
-        </div>
+        <span class="inv-legend-name">${TYPE_LABELS[t]}</span>
+        <span class="inv-legend-pct-val">${pct}%</span>
       </div>`;
   }).join('');
 }

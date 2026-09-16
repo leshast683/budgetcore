@@ -6618,37 +6618,24 @@ input[type="date"].filter-date {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
   min-width: 180px;
 }
 .inv-legend-item {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
 }
+.inv-legend-item:last-child { border-bottom: none; }
 .inv-legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.inv-legend-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-.inv-legend-name { font-size: 0.82rem; font-weight: 600; color: var(--heading); }
-.inv-legend-val  { font-size: 0.78rem; color: var(--text); }
-.inv-legend-pct  { color: var(--muted); }
-.inv-gain-badge {
-  font-size: 0.73rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 20px;
-}
-.inv-gain-badge--up   { background: #d4eccc; color: #1a5010; }
-.inv-gain-badge--down { background: #fde8cc; color: #7a1010; }
+.inv-legend-name { flex: 1; font-size: 0.92rem; font-weight: 600; color: var(--heading); }
+.inv-legend-pct-val { font-size: 0.92rem; color: var(--text); font-weight: 500; }
 
 .inv-item {
   display: flex;
@@ -6681,15 +6668,24 @@ input[type="date"].filter-date {
   flex-direction: column;
   align-items: flex-start;
 }
+.inv-portfolio-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
 .inv-portfolio-value {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--heading);
   line-height: 1.1;
 }
 .inv-portfolio-sub {
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
   margin-bottom: 1.25rem;
   font-size: 0.9rem;
   color: var(--muted);
@@ -6700,15 +6696,81 @@ input[type="date"].filter-date {
 .inv-portfolio-sub .negative { color: #8c2c1c; font-weight: 700; }
 .inv-add-cta { display: inline-flex; align-items: center; gap: 0.4rem; }
 
-.inv-portfolio-right {
-  flex: 1 1 300px;
+/* ---- Portfolio growth illustration ---- */
+.inv-portfolio-illustration {
+  position: relative;
+  width: 220px;
+  height: 180px;
+  flex-shrink: 0;
+  margin: 0 auto;
+}
+.inv-growth-svg { width: 100%; height: 100%; display: block; }
+.inv-future-badge {
+  position: absolute;
+  top: 0;
+  left: -4px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  background: #fff;
+  border-radius: 14px;
+  padding: 0.55rem 0.8rem;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--heading);
+  max-width: 140px;
+  line-height: 1.25;
+}
+.inv-future-badge-icon { color: #3f6b52; font-size: 0.65rem; margin-top: 0.2rem; }
+
+/* ---- Allocation card ---- */
+.inv-allocation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.inv-allocation-sub { font-size: 0.88rem; color: var(--muted); max-width: 34ch; }
+.inv-account-filter {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--heading);
+  cursor: pointer;
+  font-family: inherit;
+}
+.inv-allocation-body {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
   flex-wrap: wrap;
-  justify-content: center;
 }
 .inv-allocation-wrap { display: flex; justify-content: center; }
+.inv-allocation-right {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.inv-tip-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #e9f2ea;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2c4d38;
+}
+.inv-tip-icon { font-size: 1.1rem; }
 
 /* ---- Learn to Invest ---- */
 .list-link {
@@ -6828,7 +6890,9 @@ input[type="date"].filter-date {
 @media (max-width: 640px) {
   .inv-portfolio-card { flex-direction: column; align-items: stretch; }
   .inv-portfolio-left { align-items: stretch; text-align: left; }
-  .inv-portfolio-right { justify-content: center; }
+  .inv-allocation-header { flex-direction: column; }
+  .inv-allocation-body { flex-direction: column; }
+  .inv-allocation-wrap { width: 100%; }
   .growth-calc-controls { grid-template-columns: 1fr; }
   .inv-empty-row { justify-content: center; text-align: center; }
 }
