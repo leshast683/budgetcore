@@ -6697,7 +6697,7 @@ input[type="date"].filter-date {
 .inv-portfolio-sub .negative { color: #8c2c1c; font-weight: 700; }
 .inv-portfolio-sub .mobile-break { display: none; }
 .inv-add-cta { display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem; }
-.btn.inv-add-cta { width: 270px; padding: 0.65rem 0.4rem; font-size: 0.76rem; }
+.btn.inv-add-cta { width: 200px; padding: 0.65rem 0.4rem; font-size: 0.76rem; }
 
 /* ---- Portfolio growth illustration ---- */
 .inv-portfolio-illustration {
@@ -6877,7 +6877,7 @@ input[type="date"].filter-date {
   .inv-portfolio-left { align-items: stretch; text-align: left; min-width: 0; flex: 1 1 auto; }
   .inv-portfolio-value { font-size: 2rem; }
   .inv-portfolio-illustration { width: 140px; height: 165px; }
-  .btn.inv-add-cta { width: 250px; }
+  .btn.inv-add-cta { width: 170px; }
   .inv-portfolio-sub .mobile-break { display: block; }
   .inv-allocation-header { flex-direction: column; }
   .inv-allocation-body { flex-wrap: nowrap; gap: 1rem; align-items: center; justify-content: flex-start; }
