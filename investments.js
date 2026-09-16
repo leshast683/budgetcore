@@ -105,21 +105,24 @@ function renderInvChart() {
           const meta = chart.getDatasetMeta(0);
           if (!meta.data.length) return;
           const { x, y } = meta.data[0];
+          const scale = chart.width / 210;
           ctx.save();
           ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           if (chart.isEmpty) {
-            ctx.font = '700 14px Inter, sans-serif'; ctx.fillStyle = '#4a3a28';
-            ctx.fillText('No investments', x, y - 22);
-            ctx.fillText('yet', x, y - 6);
-            ctx.font = '500 10.5px Inter, sans-serif'; ctx.fillStyle = '#957560';
-            ctx.fillText('Add your first', x, y + 14);
-            ctx.fillText('investment to get', x, y + 28);
-            ctx.fillText('started.', x, y + 42);
+            ctx.font = `700 ${(14 * scale).toFixed(1)}px Inter, sans-serif`; ctx.fillStyle = '#4a3a28';
+            ctx.fillText('No investments', x, y - 22 * scale);
+            ctx.fillText('yet', x, y - 6 * scale);
+            if (scale >= 0.75) {
+              ctx.font = `500 ${(10.5 * scale).toFixed(1)}px Inter, sans-serif`; ctx.fillStyle = '#957560';
+              ctx.fillText('Add your first', x, y + 14 * scale);
+              ctx.fillText('investment to get', x, y + 28 * scale);
+              ctx.fillText('started.', x, y + 42 * scale);
+            }
           } else {
-            ctx.font = '700 15px Inter, sans-serif'; ctx.fillStyle = '#1a0e06';
-            ctx.fillText(formatCurrency(chart.portfolioTotal), x, y - 8);
-            ctx.font = '500 10px Inter, sans-serif'; ctx.fillStyle = '#957560';
-            ctx.fillText('portfolio', x, y + 9);
+            ctx.font = `700 ${(15 * scale).toFixed(1)}px Inter, sans-serif`; ctx.fillStyle = '#1a0e06';
+            ctx.fillText(formatCurrency(chart.portfolioTotal), x, y - 8 * scale);
+            ctx.font = `500 ${(10 * scale).toFixed(1)}px Inter, sans-serif`; ctx.fillStyle = '#957560';
+            ctx.fillText('portfolio', x, y + 9 * scale);
           }
           ctx.restore();
         },
