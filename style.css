@@ -6875,7 +6875,7 @@ input[type="date"].filter-date {
   .inv-portfolio-sub .mobile-break { display: block; }
   .inv-allocation-header { flex-direction: column; }
   .inv-allocation-body { flex-wrap: nowrap; gap: 1rem; align-items: center; justify-content: space-between; }
-  .inv-donut-box { width: 145px; height: 145px; }
+  .inv-donut-box { width: 165px; height: 165px; }
   .inv-legend { min-width: 0; }
   .inv-legend-name { font-size: 0.82rem; }
   .inv-legend-pct-val { font-size: 0.82rem; }
