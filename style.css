@@ -6731,13 +6731,14 @@ input[type="date"].filter-date {
 .inv-allocation-body {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 2rem;
   flex-wrap: wrap;
 }
 .inv-allocation-wrap { display: flex; justify-content: center; }
 .inv-donut-box { position: relative; width: 210px; height: 210px; flex-shrink: 0; }
 .inv-allocation-right {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 220px;
   display: flex;
   flex-direction: column;
@@ -6879,7 +6880,7 @@ input[type="date"].filter-date {
   .btn.inv-add-cta { width: 250px; }
   .inv-portfolio-sub .mobile-break { display: block; }
   .inv-allocation-header { flex-direction: column; }
-  .inv-allocation-body { flex-wrap: nowrap; gap: 1rem; align-items: center; }
+  .inv-allocation-body { flex-wrap: nowrap; gap: 1rem; align-items: center; justify-content: flex-start; }
   .inv-donut-box { width: 130px; height: 130px; }
   .inv-allocation-right { min-width: 0; gap: 0.85rem; }
   .inv-legend-name { font-size: 0.82rem; }
