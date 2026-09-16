@@ -6736,7 +6736,7 @@ input[type="date"].filter-date {
   flex-wrap: wrap;
 }
 .inv-allocation-wrap { display: flex; justify-content: center; }
-.inv-donut-box { position: relative; width: 210px; height: 210px; flex-shrink: 0; }
+.inv-donut-box { position: relative; width: 230px; height: 230px; flex-shrink: 0; }
 .inv-tip-box {
   display: flex;
   align-items: center;
@@ -6875,7 +6875,7 @@ input[type="date"].filter-date {
   .inv-portfolio-sub .mobile-break { display: block; }
   .inv-allocation-header { flex-direction: column; }
   .inv-allocation-body { flex-wrap: nowrap; gap: 1rem; align-items: center; justify-content: space-between; }
-  .inv-donut-box { width: 130px; height: 130px; }
+  .inv-donut-box { width: 145px; height: 145px; }
   .inv-legend { min-width: 0; }
   .inv-legend-name { font-size: 0.82rem; }
   .inv-legend-pct-val { font-size: 0.82rem; }
