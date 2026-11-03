@@ -6393,7 +6393,8 @@ input[type="date"].filter-date {
   color: var(--muted); margin-bottom: 0.5rem;
 }
 .avatar-save-btn {
-  margin-top: 0.75rem;
+  display: block;
+  margin: 0.75rem auto 0;
   width: 100%;
   max-width: 200px;
 }
