@@ -244,13 +244,6 @@ function escapeHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function setWelcomeBar(user) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now = new Date();
-  document.getElementById('welcome-date').textContent = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
-  document.getElementById('welcome-email').textContent = user.email;
-}
-
 async function fetchTransactions(uid) {
   const { data, error } = await supabase.from('transactions').select('*').eq('user_id', uid);
   if (error) { console.error('transactions fetch error:', error); return; }
@@ -277,7 +270,6 @@ supabase.auth.onAuthStateChange((event, session) => {
   document.getElementById('app-content').style.display = '';
   document.getElementById('nav-user').style.display = 'flex';
   document.getElementById('user-email').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
-  setWelcomeBar(user);
 
   document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 
