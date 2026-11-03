@@ -2468,9 +2468,6 @@ function init() {
   // Auth form submit
   document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
 
-  // Sign out
-  document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
-
   // Auth state observer — drives loading screen, auth gate, and app visibility.
   // Fires once immediately on page load with the persisted session (if any),
   // then again whenever the user signs in or out.

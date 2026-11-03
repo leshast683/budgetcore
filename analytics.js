@@ -314,8 +314,6 @@ supabase.auth.onAuthStateChange((event, session) => {
   document.getElementById('nav-user').style.display = 'flex';
   document.getElementById('user-email').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
 
-  document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
-
   if (channel) { supabase.removeChannel(channel); channel = null; }
   channel = supabase
     .channel(`analytics-transactions-${user.id}`)

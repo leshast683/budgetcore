@@ -577,7 +577,6 @@ supabase.auth.onAuthStateChange((event, session) => {
   fetchGoals(user.id);
 });
 
-document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 initPageTransitions();
 initNav();
 
