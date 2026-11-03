@@ -430,7 +430,7 @@ function renderGrowthCalc() {
         const lastValuePt   = valueMeta.data[valueMeta.data.length - 1];
         const lastContribPt = contribMeta.data[contribMeta.data.length - 1];
         if (!lastValuePt || !lastContribPt) return;
-        const maxX = chart.chartArea.right + 40;
+        const maxX = chart.width - 4;
         drawEndPill(ctx, lastValuePt.x, lastValuePt.y - 20, opts.valueLabel, '#2d7a3a', '#fff', null, maxX);
         drawEndPill(ctx, lastContribPt.x, lastContribPt.y + 20, opts.contribLabel, '#fff', '#7a5228', '#d8b979', maxX);
       },
