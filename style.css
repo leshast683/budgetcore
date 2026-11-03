@@ -2992,7 +2992,7 @@ footer {
   overflow: hidden;
   border-radius: 24px;
   padding: 1.6rem 1.7rem;
-  background: linear-gradient(120deg, #2b1d10 0%, #5a3c1e 55%, #9a6e3a 100%);
+  background: url('networth-hero-wave.png') center/cover no-repeat;
   color: #fff;
   box-shadow: var(--shadow-md);
   display: flex;
@@ -3040,14 +3040,6 @@ footer {
   color: #c9f0b8;
 }
 .nw-hero-change.is-negative { background: rgba(224,70,70,0.28); color: #ffc8c2; }
-.nw-hero-chart-wrap {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-.nw-hero-chart-wrap canvas { width: 100% !important; height: 100% !important; }
-
 /* ================================================================
    NET WORTH TREND CHART
    ================================================================ */

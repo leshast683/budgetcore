@@ -29,7 +29,6 @@ let items       = [];
 let editingId   = null;
 let channel     = null;
 let currentUser = null;
-let heroChart   = null;
 let trendChart  = null;
 let activePeriod = '1M';
 const PERIOD_DAYS = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365, 'All': null };
@@ -135,7 +134,7 @@ function renderAll() {
   document.getElementById('nw-empty').style.display = items.length === 0 ? '' : 'none';
 }
 
-// --- Render: Hero card (big value + change badge + sparkline) ---
+// --- Render: Hero card (big value + change badge) ---
 function renderHero(netWorth) {
   document.getElementById('nw-hero-value').textContent = fmt(netWorth);
 
@@ -153,44 +152,6 @@ function renderHero(netWorth) {
   const sign = delta >= 0 ? '+' : '−';
   changeTextEl.textContent = `${sign} ${fmt(Math.abs(delta))} (${Math.abs(pct).toFixed(0)}%)`;
   changeEl.classList.toggle('is-negative', delta < 0);
-
-  const sparkData = history.length >= 2 ? history.map(p => p.value) : [0, netWorth || 0];
-  const canvas = document.getElementById('nw-hero-chart');
-  const ctx = canvas.getContext('2d');
-
-  if (heroChart) {
-    heroChart.data.labels = sparkData.map((_, i) => i);
-    heroChart.data.datasets[0].data = sparkData;
-    heroChart.update();
-    return;
-  }
-
-  heroChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: sparkData.map((_, i) => i),
-      datasets: [{
-        data: sparkData,
-        borderColor: 'rgba(255,230,180,0.9)',
-        backgroundColor: 'rgba(255,230,180,0.18)',
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2.5,
-        pointRadius: ctx => ctx.dataIndex === sparkData.length - 1 ? 5 : 0,
-        pointBackgroundColor: '#f0c068',
-        pointBorderColor: 'rgba(255,255,255,0.9)',
-        pointBorderWidth: 1.5,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: { padding: { top: 10, right: 10, bottom: 10, left: 0 } },
-      scales: { x: { display: false }, y: { display: false } },
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      animation: { duration: 500 },
-    },
-  });
 }
 
 // --- Render: Net Worth Over Time chart ---
