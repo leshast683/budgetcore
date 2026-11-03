@@ -174,24 +174,24 @@
   <header id="navbar">
     <nav>
       <a href="index.html" class="logo"><img src="budgetly.png" alt="BudgetCore" class="logo-img" /></a>
-      <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-      <ul class="nav-links" id="nav-links">
-        <li id="home-nav-signin"><a href="#" class="btn btn-small" data-show-auth="signin">Sign In</a></li>
-        <li id="home-nav-app" style="display:none"><a href="app.html">Finance Hub</a></li>
-        <li id="home-nav-goals" style="display:none"><a href="goals.html">Goals</a></li>
-        <li id="home-nav-analytics" style="display:none"><a href="analytics.html">Analytics</a></li>
-        <li id="home-nav-user" class="nav-user" style="display:none">
-          <a href="profile.html" class="account-btn" id="home-account-btn" aria-label="My Account">
-            <div class="account-avatar-ring" id="home-avatar-ring">
-              <svg class="account-person-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <circle cx="16" cy="11" r="5"/>
-                <path d="M5 28c0-6.075 4.925-11 11-11s11 4.925 11 11"/>
-              </svg>
-            </div>
-            <span class="account-btn-name" id="home-user-email"></span>
-          </a>
-        </li>
-      </ul>
+      <a href="#" class="btn btn-small" id="home-nav-signin" data-show-auth="signin">Sign In</a>
+      <div class="nav-user" id="home-nav-user" style="display:none">
+        <a href="profile.html" class="account-btn" id="home-account-btn" aria-label="My Account">
+          <div class="account-avatar-ring" id="home-avatar-ring">
+            <svg class="account-person-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="16" cy="11" r="5"/>
+              <path d="M5 28c0-6.075 4.925-11 11-11s11 4.925 11 11"/>
+            </svg>
+          </div>
+          <span class="account-btn-name" id="home-user-email"></span>
+        </a>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="app.html">Finance Hub</a></li>
+          <li><a href="goals.html">Goals</a></li>
+          <li><a href="analytics.html">Analytics</a></li>
+        </ul>
+      </div>
     </nav>
   </header>
 
