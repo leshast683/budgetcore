@@ -4312,6 +4312,9 @@ input[type="date"].filter-date {
 #goal-form .goals-form-actions { justify-content: center; }
 #goal-form #goal-submit-btn { min-width: 320px; text-align: center; }
 
+#inv-form .goals-form-actions { justify-content: center; }
+#inv-form #inv-submit-btn { min-width: 320px; text-align: center; }
+
 /* Goal cards grid */
 #goals-list {
   display: grid;

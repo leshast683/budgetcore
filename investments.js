@@ -272,7 +272,10 @@ document.getElementById('inv-list').addEventListener('click', async e => {
   }
   if (deleteBtn) {
     if (!confirm('Delete this investment?')) return;
-    try { await supabase.from('investments').delete().eq('id', deleteBtn.dataset.id); }
+    const id = deleteBtn.dataset.id;
+    investments = investments.filter(i => i.id !== id);
+    renderAll();
+    try { await supabase.from('investments').delete().eq('id', id); }
     catch {}
   }
 });
