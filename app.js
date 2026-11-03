@@ -449,50 +449,6 @@ function renderDashboard() {
 
 }
 
-// --- Render: 50/30/20 Rule ---
-const NEEDS_CATS  = new Set(['housing','mortgage','utilities','groceries','transport','gascharging','carpayment','carinsurance','healthins','medical','phone','internet','childcare','creditcards','gas','bills','health']);
-const WANTS_CATS  = new Set(['dining','fooddelivery','entertainment','subscriptions','shopping','onlineshopping','clothing','personalcare','education']);
-
-function render503020() {
-  const section = document.getElementById('rule503020-section');
-  const income  = getTotalIncome();
-  if (income <= 0) { section.style.display = 'none'; return; }
-
-  section.style.display = '';
-  document.getElementById('rule503020-month').textContent = monthLabel(currentMonth);
-
-  const monthTx = getMonthTransactions().filter(tx => tx.type === 'expense');
-  let needs = 0, wants = 0;
-  for (const tx of monthTx) {
-    if (NEEDS_CATS.has(tx.category))       needs += tx.amount;
-    else if (WANTS_CATS.has(tx.category))  wants += tx.amount;
-  }
-  const savings = Math.max(0, income - needs - wants);
-
-  const rows = [
-    { label: 'Needs',   actual: needs,   target: income * 0.50, color: '#e07b54', targetPct: 50 },
-    { label: 'Wants',   actual: wants,   target: income * 0.30, color: '#7b9fe0', targetPct: 30 },
-    { label: 'Savings', actual: savings, target: income * 0.20, color: '#5cba7d', targetPct: 20 },
-  ];
-
-  document.getElementById('rule503020-bars').innerHTML = rows.map(r => {
-    const pct    = Math.min((r.actual / income) * 100, 100);
-    const status = r.actual <= r.target ? 'ok' : 'over';
-    return `
-      <div class="rule-row">
-        <div class="rule-label-row">
-          <span class="rule-label">${r.label}</span>
-          <span class="rule-amounts">${formatCurrency(r.actual)} <span class="rule-target">/ ${r.targetPct}% target (${formatCurrency(r.target)})</span></span>
-        </div>
-        <div class="rule-track">
-          <div class="rule-fill rule-fill--${status}" style="width:${pct.toFixed(1)}%;background:${r.color}"></div>
-          <div class="rule-target-mark" style="left:${r.targetPct}%"></div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
 // --- Render: Budget Progress Card ---
 function renderBudgetCard() {
   const card = document.getElementById('budget-card');
@@ -1552,7 +1508,6 @@ function renderAll() {
   renderDashboard();
   renderHealthScore();
   renderBudgetCard();
-  render503020();
   renderBillAlerts();
   renderSpendingPredictions();
   renderPieChart();
