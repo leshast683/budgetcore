@@ -2984,6 +2984,123 @@ footer {
   box-shadow: var(--shadow-xs);
 }
 
+/* ================================================================
+   NET WORTH HERO CARD
+   ================================================================ */
+.nw-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 1.6rem 1.7rem;
+  background: linear-gradient(120deg, #2b1d10 0%, #5a3c1e 55%, #9a6e3a 100%);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 170px;
+}
+.nw-hero-info { position: relative; z-index: 1; min-width: 0; }
+.nw-hero-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 0.6rem;
+}
+.nw-hero-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  font-size: 0.7rem;
+  cursor: help;
+}
+.nw-hero-value {
+  font-size: clamp(2rem, 6vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.7rem;
+}
+.nw-hero-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  background: rgba(140,200,120,0.28);
+  color: #c9f0b8;
+}
+.nw-hero-change.is-negative { background: rgba(224,70,70,0.28); color: #ffc8c2; }
+.nw-hero-chart-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.nw-hero-chart-wrap canvas { width: 100% !important; height: 100% !important; }
+
+/* ================================================================
+   NET WORTH TREND CHART
+   ================================================================ */
+.nw-period-row { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.nw-period-btn {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nw-period-btn:hover { border-color: var(--accent); }
+.nw-period-btn.active { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+.nw-trend-chart-wrap { position: relative; height: 240px; margin-top: 0.75rem; }
+.nw-trend-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  padding: 0 2rem;
+  pointer-events: none;
+}
+.nw-trend-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nw-trend-empty p { font-size: 0.88rem; color: var(--muted); font-weight: 500; }
+
+.goal-input-percent {
+  position: absolute;
+  right: 2.15rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+.goal-input-wrap input.has-percent { padding-right: 3.3rem; padding-left: 1rem; }
+
 .app-card:hover {
   box-shadow: var(--shadow-md);
 }
@@ -4328,6 +4445,9 @@ input[type="date"].filter-date {
 
 #inv-form .goals-form-actions { justify-content: center; }
 #inv-form #inv-submit-btn { min-width: 320px; text-align: center; }
+
+#nw-form .goals-form-actions { flex-direction: column; }
+#nw-form #nw-submit-btn { width: 100%; text-align: center; border-radius: 16px; padding: 0.9rem; }
 
 /* Goal cards grid */
 #goals-list {
@@ -6904,19 +7024,6 @@ input[type="date"].filter-date {
 /* ================================================================
    ANALYTICS PAGE
    ================================================================ */
-.expense-map {
-  height: 380px;
-  border-radius: 14px;
-  overflow: hidden;
-  margin-top: 0.75rem;
-  border: 1.5px solid var(--border);
-}
-.map-hint {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-top: 0.6rem;
-  text-align: center;
-}
 
 .top-cat-bars { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; }
 .top-cat-row {

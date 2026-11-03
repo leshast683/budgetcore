@@ -1,19 +1,9 @@
 import { initNav } from './nav.js';
 import Chart from 'chart.js/auto';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { supabase } from './supabase.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 
 let channel = null;
-
-// Fix Leaflet default marker icons broken by bundlers
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
 
 const CATEGORY_LABELS = {
   paycheck:'Paycheck',salary:'Salary',freelance:'Freelance',bonuses:'Bonuses',
@@ -51,9 +41,7 @@ const CATEGORY_COLORS = {
 };
 
 let transactions = [];
-let map = null;
 let trendChartInstance = null;
-const geocodeCache = {};
 
 function formatCurrency(n) {
   const abs = Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -175,71 +163,6 @@ function renderTrendChart() {
   });
 }
 
-// ---- Expense Map ----
-function initMap() {
-  if (map) return;
-  map = L.map('expense-map').setView([39.5, -98.35], 4);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 18,
-  }).addTo(map);
-}
-
-async function geocode(locationStr) {
-  const key = locationStr.toLowerCase().trim();
-  if (geocodeCache[key]) return geocodeCache[key];
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationStr)}&format=json&limit=1`;
-    const res = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'BudgetCore/1.0' } });
-    const data = await res.json();
-    if (data[0]) {
-      const result = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-      geocodeCache[key] = result;
-      return result;
-    }
-  } catch {}
-  geocodeCache[key] = null;
-  return null;
-}
-
-async function renderMap() {
-  initMap();
-  // Clear existing markers
-  map.eachLayer(layer => { if (layer instanceof L.CircleMarker || layer instanceof L.Marker) map.removeLayer(layer); });
-
-  const withLocation = transactions.filter(tx => tx.type === 'expense' && tx.location);
-  document.getElementById('map-pin-count').textContent = `${withLocation.length} location${withLocation.length !== 1 ? 's' : ''}`;
-
-  if (!withLocation.length) return;
-
-  // Process sequentially to respect Nominatim rate limit (1 req/sec)
-  const bounds = [];
-  for (const tx of withLocation) {
-    const coords = await geocode(tx.location);
-    if (!coords) continue;
-    bounds.push([coords.lat, coords.lng]);
-    const radius = Math.max(8, Math.min(30, Math.log10(tx.amount + 1) * 10));
-    const icon  = CATEGORY_ICONS[tx.category] || '📌';
-    const label = CATEGORY_LABELS[tx.category] || tx.category;
-    L.circleMarker([coords.lat, coords.lng], {
-      radius,
-      fillColor:   '#c8943a',
-      color:       '#9a6e3a',
-      weight:      2,
-      fillOpacity: 0.7,
-    }).addTo(map).bindPopup(`
-      <div style="font-family:Inter,sans-serif;min-width:160px">
-        <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">${icon} ${escapeHtml(tx.description)}</div>
-        <div style="color:#c8943a;font-weight:600;font-size:1rem">${tx.type==='income'?'+':'−'}${formatCurrency(tx.amount)}</div>
-        <div style="color:#777;font-size:0.8rem;margin-top:4px">${label} · ${tx.date}</div>
-        <div style="color:#555;font-size:0.8rem;margin-top:2px">📍 ${escapeHtml(tx.location)}</div>
-      </div>`);
-    await new Promise(r => setTimeout(r, 1100)); // respect Nominatim 1 req/sec limit
-  }
-
-  if (bounds.length) map.fitBounds(bounds, { padding: [40, 40] });
-}
-
 function escapeHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -258,7 +181,6 @@ async function fetchTransactions(uid) {
   }));
   renderTopCategories();
   renderTrendChart();
-  renderMap();
 }
 
 // ---- Auth & Init ----

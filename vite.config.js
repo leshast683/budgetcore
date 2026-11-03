@@ -22,7 +22,6 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules/@supabase')) return 'supabase';
           if (id.includes('node_modules/chart.js') || id.includes('node_modules/chartjs')) return 'chartjs';
-          if (id.includes('node_modules/leaflet')) return 'leaflet';
         },
       },
     },

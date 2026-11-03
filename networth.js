@@ -4,6 +4,7 @@
 // ============================================================
 
 import { supabase } from './supabase.js';
+import Chart from 'chart.js/auto';
 
 const ASSET_TYPES = {
   cash:         { label: 'Cash / Checking',     icon: '💵', isLiability: false },
@@ -28,6 +29,10 @@ let items       = [];
 let editingId   = null;
 let channel     = null;
 let currentUser = null;
+let heroChart   = null;
+let trendChart  = null;
+let activePeriod = '1M';
+const PERIOD_DAYS = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365, 'All': null };
 
 // --- Auth ---
 supabase.auth.onAuthStateChange((event, session) => {
@@ -59,8 +64,45 @@ async function fetchItems(uid) {
     value:          Number(row.value),
     interestRate:   Number(row.interest_rate || 0),
     monthlyPayment: Number(row.monthly_payment || 0),
+    createdAt:      row.created_at,
   }));
   renderAll();
+}
+
+// --- Net worth history (reconstructed from item creation dates) ---
+function buildHistory() {
+  if (!items.length) return [];
+  const sorted = [...items]
+    .filter(i => i.createdAt)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  if (!sorted.length) return [];
+
+  const points = [{ date: new Date(sorted[0].createdAt), value: 0 }];
+  let running = 0;
+  sorted.forEach(i => {
+    running += ASSET_TYPES[i.type]?.isLiability ? -i.value : i.value;
+    points.push({ date: new Date(i.createdAt), value: running });
+  });
+  const today = new Date();
+  if (points[points.length - 1].date < today) points.push({ date: today, value: running });
+  return points;
+}
+
+function filterHistory(points, periodDays) {
+  if (periodDays === null || !points.length) return points;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - periodDays);
+  let valueAtCutoff = points[0].value;
+  const within = [];
+  for (const p of points) {
+    if (p.date <= cutoff) valueAtCutoff = p.value;
+    else within.push(p);
+  }
+  return [{ date: cutoff, value: valueAtCutoff }, ...within];
+}
+
+function dateLabel(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 // --- Render ---
@@ -87,9 +129,140 @@ function renderAll() {
   renderList('nw-assets-section', 'nw-assets-list', 'nw-assets-count', assets, false);
   renderList('nw-liab-section', 'nw-liab-list', 'nw-liab-count', liabilities, true);
   renderDebtPlanner(liabilities);
+  renderHero(netWorth);
+  renderTrendChart();
 
   document.getElementById('nw-empty').style.display = items.length === 0 ? '' : 'none';
 }
+
+// --- Render: Hero card (big value + change badge + sparkline) ---
+function renderHero(netWorth) {
+  document.getElementById('nw-hero-value').textContent = fmt(netWorth);
+
+  const history = buildHistory();
+  const changeEl = document.getElementById('nw-hero-change');
+  const changeTextEl = document.getElementById('nw-hero-change-text');
+
+  let delta = 0, pct = 0;
+  if (history.length) {
+    const monthAgo = filterHistory(history, 30);
+    const startVal = monthAgo[0]?.value ?? 0;
+    delta = netWorth - startVal;
+    pct = startVal !== 0 ? (delta / Math.abs(startVal)) * 100 : (delta !== 0 ? 100 : 0);
+  }
+  const sign = delta >= 0 ? '+' : '−';
+  changeTextEl.textContent = `${sign} ${fmt(Math.abs(delta))} (${Math.abs(pct).toFixed(0)}%)`;
+  changeEl.classList.toggle('is-negative', delta < 0);
+
+  const sparkData = history.length >= 2 ? history.map(p => p.value) : [0, netWorth || 0];
+  const canvas = document.getElementById('nw-hero-chart');
+  const ctx = canvas.getContext('2d');
+
+  if (heroChart) {
+    heroChart.data.labels = sparkData.map((_, i) => i);
+    heroChart.data.datasets[0].data = sparkData;
+    heroChart.update();
+    return;
+  }
+
+  heroChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sparkData.map((_, i) => i),
+      datasets: [{
+        data: sparkData,
+        borderColor: 'rgba(255,230,180,0.9)',
+        backgroundColor: 'rgba(255,230,180,0.18)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: ctx => ctx.dataIndex === sparkData.length - 1 ? 5 : 0,
+        pointBackgroundColor: '#f0c068',
+        pointBorderColor: 'rgba(255,255,255,0.9)',
+        pointBorderWidth: 1.5,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 10, right: 10, bottom: 10, left: 0 } },
+      scales: { x: { display: false }, y: { display: false } },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      animation: { duration: 500 },
+    },
+  });
+}
+
+// --- Render: Net Worth Over Time chart ---
+function renderTrendChart() {
+  const empty = document.getElementById('nw-trend-empty');
+  const canvas = document.getElementById('nw-trend-chart');
+  const ctx = canvas.getContext('2d');
+
+  const fullHistory = buildHistory();
+  const hasData = fullHistory.length > 0;
+  empty.style.display = hasData ? 'none' : '';
+
+  const periodDays = PERIOD_DAYS[activePeriod];
+  const points = hasData ? filterHistory(fullHistory, periodDays) : [];
+
+  const labels = hasData ? points.map(p => dateLabel(p.date)) : ['', '', '', '', ''];
+  const data   = hasData ? points.map(p => p.value) : [0, 0, 0, 0, 0];
+
+  const yOpts = hasData
+    ? { beginAtZero: false, ticks: { font: { size: 11 }, color: '#9a7a5a', callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(200,148,58,0.08)' } }
+    : { min: -1000, max: 1000, ticks: { stepSize: 500, font: { size: 11 }, color: '#9a7a5a', callback: v => (v > 0 ? '$' + v.toLocaleString() : (v < 0 ? '-$' + Math.abs(v).toLocaleString() : '$0')) }, grid: { color: 'rgba(200,148,58,0.08)' } };
+
+  if (trendChart) {
+    trendChart.data.labels = labels;
+    trendChart.data.datasets[0].data = data;
+    trendChart.data.datasets[0].borderColor = hasData ? '#9a6e3a' : 'rgba(0,0,0,0)';
+    trendChart.data.datasets[0].backgroundColor = hasData ? 'rgba(154,110,58,0.12)' : 'rgba(0,0,0,0)';
+    trendChart.options.scales.y = yOpts;
+    trendChart.update();
+    return;
+  }
+
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: hasData ? '#9a6e3a' : 'rgba(0,0,0,0)',
+        backgroundColor: hasData ? 'rgba(154,110,58,0.12)' : 'rgba(0,0,0,0)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: hasData ? 2 : 0,
+        pointBackgroundColor: '#9a6e3a',
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(26,14,6,0.9)', padding: 10, cornerRadius: 10,
+          callbacks: { label: c => `  ${fmt(c.parsed.y)}` },
+        },
+      },
+      scales: {
+        x: { ticks: { font: { size: 11 }, color: '#9a7a5a' }, grid: { display: false } },
+        y: yOpts,
+      },
+    },
+  });
+}
+
+document.getElementById('nw-period-row').addEventListener('click', e => {
+  const btn = e.target.closest('.nw-period-btn');
+  if (!btn) return;
+  activePeriod = btn.dataset.period;
+  document.querySelectorAll('.nw-period-btn').forEach(b => b.classList.toggle('active', b === btn));
+  renderTrendChart();
+});
 
 function renderList(sectionId, listId, countId, list, isLiab) {
   const section = document.getElementById(sectionId);

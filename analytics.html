@@ -68,17 +68,22 @@
       </div>
     </section>
 
-    <!-- ===== Expense Map ===== -->
-    <section class="app-card" id="expense-map-card">
-      <div class="list-header">
-        <h2 class="card-title">Where You Spend</h2>
-        <span class="list-count" id="map-pin-count">0 locations</span>
-      </div>
-      <div id="expense-map" class="expense-map"></div>
-      <p class="map-hint">Add a location when logging expenses on the Finance Hub to see them here.</p>
-    </section>
-
     <div class="section-divider">Net Worth</div>
+
+    <!-- ===== Net Worth Hero ===== -->
+    <section class="nw-hero" id="nw-hero">
+      <div class="nw-hero-info">
+        <div class="nw-hero-label">Net Worth <span class="nw-hero-info-icon" title="Total assets minus total liabilities">i</span></div>
+        <div class="nw-hero-value" id="nw-hero-value">$0.00</div>
+        <span class="nw-hero-change" id="nw-hero-change">
+          <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15V5M5 9l5-5 5 5"/></svg>
+          <span id="nw-hero-change-text">+ $0.00 (0%)</span>
+        </span>
+      </div>
+      <div class="nw-hero-chart-wrap">
+        <canvas id="nw-hero-chart"></canvas>
+      </div>
+    </section>
 
     <!-- ===== Net Worth Summary ===== -->
     <section class="dashboard" id="nw-summary">
@@ -86,7 +91,7 @@
         <div class="stat-card-top">
           <span class="stat-label">Total Assets</span>
           <span class="stat-icon stat-icon--income">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14V4M6 8l4-4 4 4"/><path d="M3 16h14"/></svg>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5" rx="6" ry="2.3"/><path d="M4 5v4c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V5"/><path d="M4 9v4c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V9"/></svg>
           </span>
         </div>
         <span class="stat-value" id="nw-assets-val">$0.00</span>
@@ -96,7 +101,7 @@
         <div class="stat-card-top">
           <span class="stat-label">Total Liabilities</span>
           <span class="stat-icon stat-icon--expenses">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 6v10M6 12l4 4 4-4"/><path d="M3 4h14"/></svg>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="15" height="10" rx="1.8"/><path d="M2.5 8.3h15"/></svg>
           </span>
         </div>
         <span class="stat-value" id="nw-liab-val">$0.00</span>
@@ -106,7 +111,7 @@
         <div class="stat-card-top">
           <span class="stat-label">Net Worth</span>
           <span class="stat-icon stat-icon--balance">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l2.5 2.5"/></svg>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V11M9 16V7M14 16V4"/></svg>
           </span>
         </div>
         <span class="stat-value" id="nw-total-val">$0.00</span>
@@ -114,69 +119,120 @@
       </div>
     </section>
 
+    <!-- ===== Net Worth Trend ===== -->
+    <section class="app-card" id="nw-trend-section">
+      <div class="list-header">
+        <h2 class="card-title">Net Worth Over Time</h2>
+        <div class="nw-period-row" id="nw-period-row">
+          <button type="button" class="nw-period-btn active" data-period="1M">1M</button>
+          <button type="button" class="nw-period-btn" data-period="3M">3M</button>
+          <button type="button" class="nw-period-btn" data-period="6M">6M</button>
+          <button type="button" class="nw-period-btn" data-period="1Y">1Y</button>
+          <button type="button" class="nw-period-btn" data-period="All">All</button>
+        </div>
+      </div>
+      <div class="nw-trend-chart-wrap">
+        <canvas id="nw-trend-chart"></canvas>
+        <div class="nw-trend-empty" id="nw-trend-empty">
+          <span class="nw-trend-empty-icon">
+            <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V11M9 16V7M14 16V4"/></svg>
+          </span>
+          <p>Add your first item to see your net worth trend</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== Add Asset / Liability ===== -->
     <section class="app-card">
       <h2 class="card-title" id="nw-form-title">Add Item</h2>
       <form id="nw-form" novalidate>
-        <div class="goals-form-grid">
+        <div class="goals-grid">
 
           <div class="goal-field">
-            <label class="goal-label">Name</label>
-            <input type="text" id="nw-name" placeholder="e.g. Savings Account, Car Loan…" maxlength="60" required />
+            <span class="goal-icon-badge goal-icon-badge--budget" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l7-2.5L17 5v2.5L10 10 3 7.5V5z"/><path d="M3 10l7 2.5 7-2.5"/><path d="M3 14.5l7 2.5 7-2.5"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="nw-name">Name</label>
+              <input type="text" id="nw-name" placeholder="e.g. Savings Account, Car Loan…" maxlength="60" required />
+            </div>
           </div>
 
           <div class="goal-field">
-            <label class="goal-label">Type</label>
-            <select id="nw-type" class="filter-select" style="width:100%">
-              <optgroup label="Assets">
-                <option value="cash">Cash / Checking</option>
-                <option value="savings">Savings Account</option>
-                <option value="investment">Investment / Brokerage</option>
-                <option value="realestate">Real Estate</option>
-                <option value="vehicle">Vehicle</option>
-                <option value="crypto">Crypto</option>
-                <option value="other_asset">Other Asset</option>
-              </optgroup>
-              <optgroup label="Liabilities">
-                <option value="creditcard_debt">Credit Card Debt</option>
-                <option value="student_loan">Student Loan</option>
-                <option value="car_loan">Car Loan</option>
-                <option value="mortgage_debt">Mortgage</option>
-                <option value="personal_loan">Personal Loan</option>
-                <option value="medical_debt">Medical Debt</option>
-                <option value="other_liability">Other Liability</option>
-              </optgroup>
-            </select>
+            <span class="goal-icon-badge goal-icon-badge--budget" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3H4a1 1 0 0 0-1 1v7l8.5 8.5a1 1 0 0 0 1.4 0l6.6-6.6a1 1 0 0 0 0-1.4L11 3z"/><circle cx="7.3" cy="7.3" r="1.1" fill="currentColor" stroke="none"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="nw-type">Type</label>
+              <select id="nw-type" class="filter-select" style="width:100%">
+                <optgroup label="Assets">
+                  <option value="cash">Cash / Checking</option>
+                  <option value="savings">Savings Account</option>
+                  <option value="investment">Investment / Brokerage</option>
+                  <option value="realestate">Real Estate</option>
+                  <option value="vehicle">Vehicle</option>
+                  <option value="crypto">Crypto</option>
+                  <option value="other_asset">Other Asset</option>
+                </optgroup>
+                <optgroup label="Liabilities">
+                  <option value="creditcard_debt">Credit Card Debt</option>
+                  <option value="student_loan">Student Loan</option>
+                  <option value="car_loan">Car Loan</option>
+                  <option value="mortgage_debt">Mortgage</option>
+                  <option value="personal_loan">Personal Loan</option>
+                  <option value="medical_debt">Medical Debt</option>
+                  <option value="other_liability">Other Liability</option>
+                </optgroup>
+              </select>
+            </div>
           </div>
 
           <div class="goal-field">
-            <label class="goal-label">Value ($)</label>
-            <div class="goal-input-wrap">
-              <input type="number" id="nw-value" placeholder="0.00" step="any" min="0" inputmode="decimal" required />
-              <button type="button" class="input-clear-btn" data-target="nw-value" title="Clear">&#x2715;</button>
+            <span class="goal-icon-badge goal-icon-badge--budget" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2.5" width="14" height="15" rx="1.8"/><path d="M6 6h8"/><circle cx="6.3" cy="10" r="0.9" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="0.9" fill="currentColor" stroke="none"/><circle cx="13.7" cy="10" r="0.9" fill="currentColor" stroke="none"/><circle cx="6.3" cy="13.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="10" cy="13.3" r="0.9" fill="currentColor" stroke="none"/><circle cx="13.7" cy="13.3" r="0.9" fill="currentColor" stroke="none"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="nw-value">Value ($)</label>
+              <div class="goal-input-wrap">
+                <span class="goal-input-dollar">$</span>
+                <input type="number" id="nw-value" placeholder="0.00" step="any" min="0" inputmode="decimal" required />
+                <button type="button" class="input-clear-btn" data-target="nw-value" title="Clear">&#x2715;</button>
+              </div>
             </div>
           </div>
 
           <div class="goal-field" id="nw-interest-group">
-            <label class="goal-label">Interest Rate % (optional)</label>
-            <div class="goal-input-wrap">
-              <input type="number" id="nw-interest" placeholder="e.g. 5.5" step="any" min="0" max="100" inputmode="decimal" />
-              <button type="button" class="input-clear-btn" data-target="nw-interest" title="Clear">&#x2715;</button>
+            <span class="goal-icon-badge goal-icon-badge--budget" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.3"/><circle cx="14" cy="14" r="2.3"/><path d="M15 5L5 15"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="nw-interest">Interest Rate % (optional)</label>
+              <div class="goal-input-wrap">
+                <input type="number" id="nw-interest" class="has-percent" placeholder="e.g. 5.5" step="any" min="0" max="100" inputmode="decimal" />
+                <span class="goal-input-percent">%</span>
+                <button type="button" class="input-clear-btn" data-target="nw-interest" title="Clear">&#x2715;</button>
+              </div>
             </div>
           </div>
 
           <div class="goal-field" id="nw-payment-group">
-            <label class="goal-label">Monthly Payment ($, optional)</label>
-            <div class="goal-input-wrap">
-              <input type="number" id="nw-payment" placeholder="e.g. 350" step="any" min="0" inputmode="decimal" />
-              <button type="button" class="input-clear-btn" data-target="nw-payment" title="Clear">&#x2715;</button>
+            <span class="goal-icon-badge goal-icon-badge--budget" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3.5" width="14" height="13.5" rx="1.8"/><path d="M3 7.5h14"/><path d="M6.5 2v3M13.5 2v3"/></svg>
+            </span>
+            <div class="goal-body">
+              <label class="goal-label" for="nw-payment">Monthly Payment ($, optional)</label>
+              <div class="goal-input-wrap">
+                <span class="goal-input-dollar">$</span>
+                <input type="number" id="nw-payment" placeholder="e.g. 350" step="any" min="0" inputmode="decimal" />
+                <button type="button" class="input-clear-btn" data-target="nw-payment" title="Clear">&#x2715;</button>
+              </div>
             </div>
           </div>
 
         </div>
 
         <div class="goals-form-actions">
-          <button type="submit" class="btn" id="nw-submit-btn">Add Item</button>
+          <button type="submit" class="btn" id="nw-submit-btn">+ Add Item</button>
           <button type="button" class="btn-ghost btn-sm" id="nw-cancel-btn" style="display:none">Cancel Edit</button>
         </div>
         <p class="profile-error" id="nw-error"></p>
