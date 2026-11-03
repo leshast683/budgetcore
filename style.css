@@ -3011,17 +3011,6 @@ footer {
   color: rgba(255,255,255,0.92);
   margin-bottom: 0.6rem;
 }
-.nw-hero-info-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.5);
-  font-size: 0.7rem;
-  cursor: help;
-}
 .nw-hero-value {
   font-size: clamp(2rem, 6vw, 2.6rem);
   font-weight: 800;
