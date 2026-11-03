@@ -42,11 +42,76 @@ const CATEGORY_COLORS = {
 
 let transactions = [];
 let trendChartInstance = null;
+let trendPeriodMonths = 'all';
 
 function formatCurrency(n) {
   const abs = Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return (n < 0 ? '-$' : '$') + abs;
 }
+
+function formatCurrencyShort(n) {
+  const abs = Math.round(Math.abs(n)).toLocaleString('en-US');
+  return (n < 0 ? '-$' : '$') + abs;
+}
+
+// Draws a rounded callout bubble with a pointer tail above a chart point
+function drawTrendCallout(ctx, x, y, text) {
+  ctx.save();
+  ctx.font = '700 14px Inter, sans-serif';
+  const paddingX = 13, bubbleH = 32, tailH = 6, gap = 14;
+  const textWidth = ctx.measureText(text).width;
+  const bubbleW = textWidth + paddingX * 2;
+  const bubbleBottom = y - gap;
+  const bubbleTop = bubbleBottom - bubbleH;
+  const bubbleX = x - bubbleW / 2;
+  const r = bubbleH / 2;
+
+  ctx.shadowColor = 'rgba(122,82,40,0.22)';
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = '#fdf4e4';
+
+  ctx.beginPath();
+  ctx.moveTo(bubbleX + r, bubbleTop);
+  ctx.arcTo(bubbleX + bubbleW, bubbleTop, bubbleX + bubbleW, bubbleTop + bubbleH, r);
+  ctx.arcTo(bubbleX + bubbleW, bubbleTop + bubbleH, bubbleX, bubbleTop + bubbleH, r);
+  ctx.arcTo(bubbleX, bubbleTop + bubbleH, bubbleX, bubbleTop, r);
+  ctx.arcTo(bubbleX, bubbleTop, bubbleX + bubbleW, bubbleTop, r);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(x - tailH, bubbleBottom - 1);
+  ctx.lineTo(x + tailH, bubbleBottom - 1);
+  ctx.lineTo(x, bubbleBottom + tailH);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = '#3a2410';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, bubbleTop + bubbleH / 2);
+  ctx.restore();
+}
+
+const trendCalloutPlugin = {
+  id: 'trendCallouts',
+  afterDatasetsDraw(chart) {
+    const data = chart.data.datasets[0]?.data;
+    if (!data || !data.length) return;
+    const meta = chart.getDatasetMeta(0);
+    let maxIdx = 0;
+    data.forEach((v, i) => { if (v > data[maxIdx]) maxIdx = i; });
+    const lastIdx = data.length - 1;
+    const idxs = maxIdx === lastIdx ? [maxIdx] : [maxIdx, lastIdx];
+    idxs.forEach(i => {
+      const point = meta.data[i];
+      if (!point) return;
+      drawTrendCallout(chart.ctx, point.x, point.y, formatCurrencyShort(data[i]));
+    });
+  },
+};
 
 function monthLabel(ym) {
   const [y, m] = ym.split('-');
@@ -112,39 +177,71 @@ function renderTrendChart() {
     monthMap[m] = (monthMap[m] || 0) + tx.amount;
   });
 
-  const months = Object.keys(monthMap).sort();
+  let months = Object.keys(monthMap).sort();
   if (months.length < 2) {
     canvas.closest('.app-card').style.display = 'none';
     return;
   }
   canvas.closest('.app-card').style.display = '';
 
+  if (trendPeriodMonths !== 'all') {
+    months = months.slice(-trendPeriodMonths);
+  }
+
   const labels = months.map(monthLabel);
   const data   = months.map(m => parseFloat(monthMap[m].toFixed(2)));
 
+  const trendGradient = (context) => {
+    const { ctx, chartArea } = context.chart;
+    if (!chartArea) return 'rgba(224,154,58,0.3)';
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, 'rgba(224,154,58,0.55)');
+    gradient.addColorStop(1, 'rgba(224,154,58,0.02)');
+    return gradient;
+  };
+
+  const highlightIdxs = () => {
+    let maxIdx = 0;
+    data.forEach((v, i) => { if (v > data[maxIdx]) maxIdx = i; });
+    const lastIdx = data.length - 1;
+    return new Set(maxIdx === lastIdx ? [maxIdx] : [maxIdx, lastIdx]);
+  };
+
   if (trendChartInstance) {
+    const idxs = highlightIdxs();
     trendChartInstance.data.labels = labels;
     trendChartInstance.data.datasets[0].data = data;
+    trendChartInstance.data.datasets[0].pointRadius = data.map((_, i) => idxs.has(i) ? 6 : 0);
+    trendChartInstance.data.datasets[0].pointHoverRadius = data.map((_, i) => idxs.has(i) ? 6 : 4);
     trendChartInstance.update();
     return;
   }
 
+  const idxs = highlightIdxs();
+
   trendChartInstance = new Chart(canvas.getContext('2d'), {
-    type: 'bar',
+    type: 'line',
     data: {
       labels,
       datasets: [{
         label: 'Monthly Expenses',
         data,
-        backgroundColor: 'rgba(200,148,58,0.75)',
+        fill: true,
+        tension: 0.4,
         borderColor: '#c8943a',
-        borderWidth: 2,
-        borderRadius: 6,
+        borderWidth: 3,
+        backgroundColor: trendGradient,
+        pointRadius: data.map((_, i) => idxs.has(i) ? 6 : 0),
+        pointHoverRadius: data.map((_, i) => idxs.has(i) ? 6 : 4),
+        pointBackgroundColor: '#e0a030',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 3,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { top: 46, bottom: 4 } },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -155,13 +252,37 @@ function renderTrendChart() {
         },
       },
       scales: {
-        x: { ticks: { font: { size: 11 }, color: '#9a7a5a' }, grid: { display: false } },
+        x: { ticks: { font: { size: 12, weight: '600' }, color: '#5c4328' }, grid: { display: false } },
         y: { ticks: { font: { size: 11 }, color: '#9a7a5a', callback: v => '$'+v }, beginAtZero: true,
-             grid: { color: 'rgba(200,148,58,0.08)' } },
+             grid: { color: 'rgba(200,148,58,0.1)' } },
       },
     },
+    plugins: [trendCalloutPlugin],
   });
 }
+
+function setTrendPeriod(value, label) {
+  trendPeriodMonths = value === 'all' ? 'all' : parseInt(value, 10);
+  document.getElementById('trend-period-label').textContent = label;
+  document.querySelectorAll('.trend-period-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.months === value);
+  });
+  renderTrendChart();
+}
+
+document.getElementById('trend-period-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('trend-period-menu').classList.toggle('open');
+});
+document.getElementById('trend-period-dropdown').addEventListener('click', e => {
+  const item = e.target.closest('.trend-period-item');
+  if (!item) return;
+  document.getElementById('trend-period-menu').classList.remove('open');
+  setTrendPeriod(item.dataset.months, item.textContent);
+});
+document.addEventListener('click', () => {
+  document.getElementById('trend-period-menu')?.classList.remove('open');
+});
 
 function escapeHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');

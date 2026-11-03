@@ -3091,6 +3091,91 @@ footer {
 
 .card-title::before { display: none; }
 
+/* ================================================================
+   MONTHLY SPENDING TREND CARD
+   ================================================================ */
+.trend-card {
+  background: linear-gradient(165deg, #fffaf1 0%, #fdecd8 100%);
+}
+.trend-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+.trend-card-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0;
+}
+.trend-period-menu { position: relative; }
+.trend-period-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--heading);
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.95rem;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(154,110,58,0.12);
+  transition: border-color 0.15s var(--ease-in-out), box-shadow 0.15s var(--ease-in-out);
+}
+.trend-period-btn svg:first-child { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
+.trend-period-chevron { width: 14px; height: 14px; color: var(--muted); transition: transform 0.2s var(--ease-out); flex-shrink: 0; }
+.trend-period-btn:hover { border-color: var(--accent); }
+.trend-period-menu.open .trend-period-btn { border-color: var(--accent); box-shadow: 0 4px 14px rgba(154,110,58,0.2); }
+.trend-period-menu.open .trend-period-chevron { transform: rotate(180deg); }
+
+.trend-period-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px) scale(0.97);
+  transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), visibility 0.15s;
+  z-index: 20;
+}
+.trend-period-menu.open .trend-period-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.trend-period-item {
+  font-family: inherit;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s var(--ease-in-out);
+}
+.trend-period-item:hover { background: var(--bg-alt); }
+.trend-period-item.active { color: var(--accent-strong); font-weight: 700; }
+
+.trend-chart-wrap { position: relative; height: 260px; margin-top: 1.1rem; }
+
 /* Form layout */
 .form-section form {
   display: flex;

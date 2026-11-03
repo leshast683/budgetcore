@@ -61,9 +61,24 @@
     </section>
 
     <!-- ===== Spending Breakdown ===== -->
-    <section class="app-card" id="spending-breakdown-card">
-      <h2 class="card-title">Monthly Spending Trend</h2>
-      <div style="position:relative;height:240px;margin-top:0.75rem">
+    <section class="app-card trend-card" id="spending-breakdown-card">
+      <div class="trend-card-header">
+        <h2 class="card-title trend-card-title">Monthly Spending Trend</h2>
+        <div class="trend-period-menu" id="trend-period-menu">
+          <button type="button" class="trend-period-btn" id="trend-period-btn" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="14" height="12" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></svg>
+            <span id="trend-period-label">All Time</span>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="trend-period-chevron"><path d="M5 7.5l5 5 5-5"/></svg>
+          </button>
+          <div class="trend-period-dropdown" id="trend-period-dropdown">
+            <button type="button" class="trend-period-item" data-months="2">Last 2 Months</button>
+            <button type="button" class="trend-period-item" data-months="6">Last 6 Months</button>
+            <button type="button" class="trend-period-item" data-months="12">Last 12 Months</button>
+            <button type="button" class="trend-period-item active" data-months="all">All Time</button>
+          </div>
+        </div>
+      </div>
+      <div class="trend-chart-wrap">
         <canvas id="trend-chart"></canvas>
       </div>
     </section>
