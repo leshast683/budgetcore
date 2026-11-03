@@ -214,8 +214,25 @@ function renderTrendChart() {
         y: yOpts,
       },
     },
+    plugins: [alignEmptyStatePlugin],
   });
 }
+
+// Keeps the "Add your first item..." overlay centered on the chart's plot
+// area (inside the Y-axis labels), not the full canvas — otherwise it reads
+// off-center/cramped against the axis labels on narrow mobile widths.
+const alignEmptyStatePlugin = {
+  id: 'alignEmptyState',
+  afterLayout(chart) {
+    const empty = document.getElementById('nw-trend-empty');
+    if (!empty) return;
+    const area = chart.chartArea;
+    empty.style.left   = area.left + 'px';
+    empty.style.right  = (chart.width - area.right) + 'px';
+    empty.style.top    = area.top + 'px';
+    empty.style.bottom = (chart.height - area.bottom) + 'px';
+  },
+};
 
 document.getElementById('nw-period-row').addEventListener('click', e => {
   const btn = e.target.closest('.nw-period-btn');
