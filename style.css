@@ -2299,6 +2299,11 @@ footer {
     radial-gradient(400px circle at 88% 90%, rgba(245,232,213,0.55), transparent 60%);
 }
 
+/* Home page reuses .app-page only for the hamburger nav behavior —
+   it keeps its own marketing-page background instead of the dashboard blobs */
+.app-page.home-page { background: none; }
+.app-page.home-page::before { display: none; }
+
 /* ===== App Layout — single centred column ===== */
 .app-layout {
   position: relative;
@@ -5945,6 +5950,9 @@ input[type="date"].filter-date {
   .hero-text {
     align-items: center;
   }
+  .hero-actions {
+    justify-content: center;
+  }
   .hero-subtext { max-width: 520px; }
   .hero-visual {
     justify-content: center;
@@ -6388,6 +6396,25 @@ input[type="date"].filter-date {
   margin-top: 0.75rem;
   width: 100%;
   max-width: 200px;
+}
+.prof-signout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 220px;
+  margin: 0.25rem auto 0;
+  padding-top: 1.25rem;
+  border: none;
+  border-top: 1px solid #e8dcc8;
+  border-radius: 0;
+  color: #c44a3a;
+}
+.prof-signout-btn:hover {
+  background: #fde8e5;
+  border-color: #e8dcc8;
+  color: #c44a3a;
 }
 .prof-avatar-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 .avatar-opt {

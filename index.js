@@ -6,6 +6,7 @@
 import { supabase } from './supabase.js';
 import { initPageTransitions } from './transitions.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
+import { initNav } from './nav.js';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 const stayOnHome = new URLSearchParams(window.location.search).has('home');
@@ -46,8 +47,11 @@ window.addEventListener('pageshow', e => {
 
 function showLoggedInState(user) {
   hideAuth();
-  document.getElementById('home-nav-user').style.display  = 'flex';
-  document.getElementById('home-nav-signin').style.display = 'none';
+  document.getElementById('home-nav-user').style.display       = 'flex';
+  document.getElementById('home-nav-app').style.display        = '';
+  document.getElementById('home-nav-goals').style.display      = '';
+  document.getElementById('home-nav-analytics').style.display  = '';
+  document.getElementById('home-nav-signin').style.display     = 'none';
   const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
   document.getElementById('home-user-email').textContent = name;
   document.getElementById('hero-dashboard-btn').style.display = '';
@@ -56,13 +60,16 @@ function showLoggedInState(user) {
 }
 
 function showSignedOutState() {
-  document.getElementById('home-nav-user').style.display   = 'none';
-  document.getElementById('home-nav-signin').style.display = '';
+  document.getElementById('home-nav-user').style.display       = 'none';
+  document.getElementById('home-nav-app').style.display        = 'none';
+  document.getElementById('home-nav-goals').style.display      = 'none';
+  document.getElementById('home-nav-analytics').style.display  = 'none';
+  document.getElementById('home-nav-signin').style.display     = '';
   document.getElementById('hero-dashboard-btn').style.display = 'none';
   document.getElementById('hero-signin-btn').style.display    = '';
 }
 
-document.getElementById('home-signout-btn').addEventListener('click', () => supabase.auth.signOut());
+initNav();
 
 // ── Sliding panel logic ───────────────────────────────────────────────────────
 const container      = document.getElementById('container');

@@ -418,7 +418,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
   if (!user) { window.location.replace('./index.html'); return; }
 
   currentUser = user;
-  document.getElementById('nav-signout-li').style.display = '';
+  document.getElementById('signout-btn').style.display = '';
   document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
 
   // Load data in parallel
