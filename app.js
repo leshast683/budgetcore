@@ -2122,11 +2122,12 @@ function setWelcomeBar(user) {
   if (user) {
     const displayName = user.user_metadata?.full_name || user.email.split('@')[0];
     document.getElementById('welcome-greeting').textContent = `Welcome, ${displayName}`;
-    document.getElementById('welcome-email').textContent    = user.email;
+    document.getElementById('welcome-email').style.display  = 'none';
     document.getElementById('welcome-bar').className        = 'welcome-bar welcome-bar--user';
   } else {
     document.getElementById('welcome-greeting').textContent = 'Browsing as guest';
     document.getElementById('welcome-email').textContent    = 'Sign in to save your data';
+    document.getElementById('welcome-email').style.display  = '';
     document.getElementById('welcome-bar').className        = 'welcome-bar welcome-bar--guest';
   }
 }
