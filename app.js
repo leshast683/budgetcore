@@ -1110,7 +1110,9 @@ function renderMonthPicker() {
   const hasPrevious = months.some(m => m !== todayMonth());
   picker.style.display = hasPrevious ? 'flex' : 'none';
 
-  label.textContent = monthLabel(currentMonth);
+  const [labelYear, labelMonthNum] = currentMonth.split('-');
+  label.textContent = new Date(+labelYear, +labelMonthNum - 1, 1)
+    .toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
   const idx = months.indexOf(currentMonth);
   prevBtn.disabled = idx >= months.length - 1;   // oldest = no more prev
