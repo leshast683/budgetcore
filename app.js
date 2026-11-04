@@ -752,15 +752,7 @@ function renderDailySpendingChart() {
       interaction: { mode: 'index', intersect: false },
       animation: { duration: 600, easing: 'easeOutQuart' },
       plugins: {
-        legend: {
-          labels: {
-            font: { family: 'Inter, sans-serif', size: 11 },
-            color: '#9a7a5a',
-            usePointStyle: true,
-            pointStyleWidth: 10,
-            boxHeight: 6,
-          },
-        },
+        legend: { display: false },
         tooltip: {
           backgroundColor: 'rgba(22,12,4,0.92)',
           titleColor: '#e0b870',
@@ -1817,7 +1809,6 @@ function handleEdit(id) {
   document.getElementById('tx-description').value = tx.description;
   document.getElementById('tx-amount').value       = tx.amount;
   document.getElementById('tx-date').value         = tx.date;
-  document.getElementById('tx-location').value     = '';
   selectCategory(tx.category);
 
   document.querySelector('.form-section .card-title').textContent = 'Edit Transaction';
@@ -1859,8 +1850,6 @@ function handleTypeToggle(selectedType, animate = true) {
     const showReminder = selectedType === 'income';
     document.getElementById('paycheck-reminder').style.display = showReminder ? 'block' : 'none';
     if (showReminder) renderPaycheckReminder();
-    const locationGroup = document.getElementById('tx-location-group');
-    if (locationGroup) locationGroup.style.display = (selectedType === 'expense' && editingId === null) ? '' : 'none';
   }
 
   if (!animate || prevType === selectedType) {
@@ -1897,7 +1886,6 @@ async function handleFormSubmit(e) {
     ? customCatRaw.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, ' ')
     : catHidden;
   const isRecurring = document.getElementById('tx-recurring').checked;
-  const location    = (document.getElementById('tx-location')?.value.trim()) || null;
 
   if (!desc || isNaN(amount) || amount <= 0 || !date || !cat) {
     if (!desc)                        markError('tx-description');
@@ -1928,7 +1916,6 @@ async function handleFormSubmit(e) {
   try {
     if (editingId !== null) {
       const updateData = { type, description: desc, amount, category: cat, date, is_recurring: isRecurring };
-      if (location) updateData.location = location;
       const { error } = await supabase.from('transactions').update(updateData).eq('id', editingId);
       if (error) throw error;
       // Optimistic update for edit
@@ -1940,7 +1927,6 @@ async function handleFormSubmit(e) {
       renderAll();
     } else {
       const newTxData = { user_id: uid, type, description: desc, amount, category: cat, date, is_recurring: isRecurring };
-      if (location) newTxData.location = location;
       const { data: inserted, error } = await supabase.from('transactions').insert(newTxData).select().single();
       if (error) throw error;
       // Optimistic update: add to local array if the realtime event hasn't fired yet
