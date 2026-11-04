@@ -7031,7 +7031,7 @@ input[type="date"].filter-date {
    ================================================================ */
 .recurring-lane {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.6rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
   scroll-snap-type: x mandatory;
@@ -7043,38 +7043,38 @@ input[type="date"].filter-date {
 .rec-card {
   flex: 0 0 auto;
   scroll-snap-align: start;
-  min-width: 160px;
-  max-width: 190px;
+  min-width: 136px;
+  max-width: 160px;
   background: var(--rec-bg, #f0e4cc);
-  border-radius: 14px;
-  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.3rem;
   border: 1.5px solid rgba(0,0,0,0.05);
 }
-.rec-icon { font-size: 1.4rem; line-height: 1; }
-.rec-info { display: flex; flex-direction: column; gap: 0.15rem; }
+.rec-icon { font-size: 1.2rem; line-height: 1; }
+.rec-info { display: flex; flex-direction: column; gap: 0.12rem; }
 .rec-desc {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--rec-color, #5a3010);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 118px;
 }
-.rec-amount { font-size: 0.88rem; font-weight: 700; color: var(--rec-color, #5a3010); }
+.rec-amount { font-size: 0.82rem; font-weight: 700; color: var(--rec-color, #5a3010); }
 .rec-days {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.2rem 0.55rem;
+  padding: 0.18rem 0.5rem;
   border-radius: 20px;
   background: rgba(0,0,0,0.08);
   color: var(--rec-color, #5a3010);
   width: fit-content;
-  margin-top: 0.1rem;
+  margin-top: 0.05rem;
 }
 .rec-days--today { background: #2d7a3a; color: white; }
 .rec-days--overdue { background: #b02020; color: white; }
