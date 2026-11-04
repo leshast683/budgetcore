@@ -2350,6 +2350,11 @@ function init() {
       if (!wasOpen) {
         menu.classList.add('open');
         menuBtn.setAttribute('aria-expanded', 'true');
+        // Flip the dropdown upward if there isn't enough room below the
+        // button to fit both menu items before the viewport edge.
+        const btnRect = menuBtn.getBoundingClientRect();
+        const estDropdownHeight = 100;
+        menu.classList.toggle('tx-menu--flip-up', window.innerHeight - btnRect.bottom < estDropdownHeight);
       }
       return;
     }
