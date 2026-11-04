@@ -190,9 +190,16 @@ let dailyChartInstance = null;
 // Stores the fingerprint of the last analyzed dataset and its result so we
 // can skip the API call when nothing has changed since the last analysis.
 const insightCache = {
-  key:     null,   // stable string fingerprint of the last payload sent
-  insight: null,   // the text returned by the API for that payload
+  key:  null,   // stable string fingerprint of the last payload sent
+  data: null,   // the structured { keyInsight, expenseTip, incomeTip } returned for that payload
 };
+
+// Expense categories treated as discretionary (vs. fixed costs like housing/
+// utilities) when estimating a realistic "potential savings" figure.
+const DISCRETIONARY_CATEGORIES = [
+  'dining', 'fooddelivery', 'subscriptions', 'entertainment',
+  'shopping', 'onlineshopping', 'clothing', 'personalcare',
+];
 
 // Monthly view
 let currentMonth     = todayISO().substring(0, 7);   // YYYY-MM
@@ -1530,12 +1537,95 @@ function buildInsightCacheKey(income, expenses, balance, incomeByCategory, expen
   });
 }
 
+const AI_REC_ICONS = {
+  calendar: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="13" rx="1.8"/><path d="M2.5 8h15M6 2.5v3M14 2.5v3"/><path d="M7 12.5l2 2 4-4"/></svg>',
+  coins:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5" rx="6" ry="2.3"/><path d="M4 5v4c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V5"/><path d="M4 9v4c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V9"/></svg>',
+  target:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/></svg>',
+};
+
+// Rough, deterministic "how much could you realistically trim" estimate —
+// never AI-generated, so the dollar figure is always traceable to real data.
+function estimatePotentialSavings(expensesByCategoryRaw) {
+  const discretionaryLabels = new Set(DISCRETIONARY_CATEGORIES.map(c => CATEGORY_LABELS[c]).filter(Boolean));
+  const discretionarySpend = Object.entries(expensesByCategoryRaw)
+    .filter(([label]) => discretionaryLabels.has(label))
+    .reduce((s, [, amt]) => s + amt, 0);
+  if (discretionarySpend <= 0) return 0;
+  return Math.max(5, Math.round(discretionarySpend * 0.15));
+}
+
+function buildRecommendations({ expenseTip, incomeTip, balance, potentialSavings }) {
+  const isDeficit = balance < 0;
+  const gap = isDeficit ? Math.abs(balance) : 0;
+  const wholeDollars = n => `$${Math.round(n).toLocaleString('en-US')}`;
+
+  return [
+    {
+      icon: AI_REC_ICONS.calendar,
+      iconClass: 'ai-rec-icon--budget',
+      title: expenseTip.title,
+      description: expenseTip.description,
+      badge: potentialSavings > 0 ? { label: 'Save up to', value: `${wholeDollars(potentialSavings)}/mo` } : null,
+    },
+    {
+      icon: AI_REC_ICONS.coins,
+      iconClass: 'ai-rec-icon--income',
+      title: incomeTip.title,
+      description: incomeTip.description,
+      badge: gap > 0 ? { label: 'Close the gap', value: `${wholeDollars(gap)}/mo` } : null,
+    },
+    {
+      icon: AI_REC_ICONS.target,
+      iconClass: 'ai-rec-icon--goal',
+      title: 'Set a short-term goal',
+      description: isDeficit
+        ? 'Build a plan to reach a positive balance next month.'
+        : "Build a plan to put this month's surplus toward something specific.",
+      cta: { label: 'Create Goal', href: 'goals.html' },
+    },
+  ];
+}
+
+function renderInsightResult({ keyInsight, expenseTip, incomeTip, balance, expenses, potentialSavings, cacheLabelText }) {
+  const isDeficit = balance < 0;
+
+  document.getElementById('ai-month-chip').textContent = monthLabel(currentMonth);
+
+  const statusBadge = document.getElementById('ai-status-badge');
+  statusBadge.innerHTML = isDeficit ? '&#8595; Off Track' : '&#8593; On Track';
+  statusBadge.classList.toggle('ai-status-badge--off', isDeficit);
+  statusBadge.classList.toggle('ai-status-badge--on', !isDeficit);
+
+  const balanceEl = document.getElementById('ai-stat-balance');
+  balanceEl.textContent = formatCurrency(balance);
+  balanceEl.classList.toggle('is-negative', isDeficit);
+  document.getElementById('ai-stat-expenses').textContent = formatCurrency(expenses);
+
+  document.getElementById('ai-key-insight-text').textContent = keyInsight;
+
+  const recs = buildRecommendations({ expenseTip, incomeTip, balance, potentialSavings });
+  document.getElementById('ai-rec-list').innerHTML = recs.map(rec => `
+    <div class="ai-rec-item">
+      <span class="ai-rec-icon ${rec.iconClass}" aria-hidden="true">${rec.icon}</span>
+      <div class="ai-rec-body">
+        <h4 class="ai-rec-title">${escapeHtml(rec.title)}</h4>
+        <p class="ai-rec-desc">${escapeHtml(rec.description)}</p>
+      </div>
+      ${rec.badge
+        ? `<span class="ai-rec-badge"><span class="ai-rec-badge-label">${escapeHtml(rec.badge.label)}</span><span class="ai-rec-badge-value">${escapeHtml(rec.badge.value)}</span></span>`
+        : rec.cta
+          ? `<a href="${rec.cta.href}" class="ai-rec-cta">${escapeHtml(rec.cta.label)} &#8594;</a>`
+          : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('ai-insights-cache-label').textContent = cacheLabelText;
+}
+
 async function analyzeBudget() {
   const btn        = document.getElementById('analyze-btn');
   const resultEl   = document.getElementById('ai-insights-result');
-  const textEl     = document.getElementById('ai-insights-text');
   const errorEl    = document.getElementById('ai-insights-error');
-  const cacheLabel = document.getElementById('ai-insights-cache-label');
 
   // Show an error message and hide the result box
   function showError(msg) {
@@ -1579,9 +1669,13 @@ async function analyzeBudget() {
 
   // If the data fingerprint matches the last run, skip the API entirely
   const cacheKey = buildInsightCacheKey(income, expenses, balance, incomeByCategory, expensesByCategory);
+  const potentialSavings = estimatePotentialSavings(expensesByCategory);
   if (insightCache.key === cacheKey) {
-    textEl.textContent     = insightCache.insight;
-    cacheLabel.textContent = 'Loaded from cache';
+    renderInsightResult({
+      ...insightCache.data,
+      balance, expenses, potentialSavings,
+      cacheLabelText: 'Loaded from cache',
+    });
     errorEl.style.display  = 'none';
     resultEl.style.display = '';
     return;
@@ -1629,17 +1723,20 @@ async function analyzeBudget() {
 
     const data = await res.json();
 
-    // Guard against the API returning a blank or missing insight field
-    if (!data.insight || !data.insight.trim()) {
-      throw new Error('The server returned an empty response. Please try again.');
+    // Guard against the API returning incomplete structured data
+    if (!data.keyInsight || !data.expenseTip?.title || !data.incomeTip?.title) {
+      throw new Error('The server returned an incomplete response. Please try again.');
     }
 
     // Store in cache so the next identical click skips the API call
-    insightCache.key     = cacheKey;
-    insightCache.insight = data.insight;
+    insightCache.key  = cacheKey;
+    insightCache.data = { keyInsight: data.keyInsight, expenseTip: data.expenseTip, incomeTip: data.incomeTip };
 
-    textEl.textContent     = data.insight;
-    cacheLabel.textContent = 'Fresh analysis';
+    renderInsightResult({
+      ...insightCache.data,
+      balance, expenses, potentialSavings,
+      cacheLabelText: 'Fresh analysis',
+    });
     resultEl.style.display = '';
 
   } catch (err) {

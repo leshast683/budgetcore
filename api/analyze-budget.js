@@ -26,15 +26,23 @@ export default async function handler(req, res) {
       .map(([cat, amt]) => `  • ${cat}: $${Number(amt).toFixed(2)}`)
       .join('\n') || '  (none)';
 
-  const prompt = `Analyze the budget data below for ${month || 'this month'} and write 2–4 sentences. Base your response only on the numbers provided — do not introduce assumptions or outside context.
+  const isDeficit = Number(balance) < 0;
 
-Requirements:
-- Cite specific dollar amounts and category names from the data.
-- If expenses exceed income, identify the single largest cost driver by name and amount.
-- If the balance is positive, state whether the savings rate (balance ÷ income) is strong, moderate, or thin, and why.
-- Close with one concrete, data-grounded observation — something the user can act on given these exact figures.
-- Write plain prose only. No bullet points, no headers, no markdown.
-- Do not use filler phrases like "Great job!", "Consider saving more", or "It's important to budget".
+  const prompt = `Analyze the budget data below for ${month || 'this month'}. Base everything only on the numbers provided — do not introduce assumptions, outside context, or invent any dollar amounts.
+
+Respond with ONLY a single JSON object, no markdown code fences, no prose before or after. Shape exactly:
+{
+  "keyInsight": "one sentence, cites a specific category and either a dollar amount or percentage of spending from the data",
+  "expenseTip": { "title": "3-5 word title", "description": "one sentence, a concrete way to reduce spending grounded in the actual top expense category/categories" },
+  "incomeTip": { "title": "3-5 word title", "description": "one sentence${isDeficit
+    ? ', a concrete way to add or increase income so it covers the fixed costs shown'
+    : ', a concrete way to put the surplus to work (saving, investing, or paying down debt)'}" }
+}
+
+Rules:
+- "keyInsight" must name the actual category driving the result (the largest expense category if in deficit, or explain the savings rate if positive) with its real dollar amount or percentage.
+- Titles are short noun phrases (e.g. "Lower monthly expenses"), not full sentences.
+- No filler like "Great job!" or "It's important to budget". No markdown, no bullet points inside the JSON strings.
 
 Income: $${Number(income).toFixed(2)} | Expenses: $${Number(expenses).toFixed(2)} | Balance: $${Number(balance).toFixed(2)}
 
@@ -54,7 +62,7 @@ ${formatCats(incomeByCategory || {})}`;
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 220,
+        max_tokens: 400,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -66,7 +74,26 @@ ${formatCats(incomeByCategory || {})}`;
     }
 
     const data = await response.json();
-    res.status(200).json({ insight: data.content[0].text });
+    const raw = data.content[0].text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (parseErr) {
+      console.error('Failed to parse AI JSON response:', raw);
+      return res.status(502).json({ error: 'The AI response was malformed. Please try again.' });
+    }
+
+    if (!parsed.keyInsight || !parsed.expenseTip?.title || !parsed.incomeTip?.title) {
+      console.error('AI JSON response missing required fields:', parsed);
+      return res.status(502).json({ error: 'The AI response was incomplete. Please try again.' });
+    }
+
+    res.status(200).json({
+      keyInsight: parsed.keyInsight,
+      expenseTip: parsed.expenseTip,
+      incomeTip:  parsed.incomeTip,
+    });
   } catch (err) {
     console.error('Fetch error:', err);
     res.status(500).json({ error: err?.message || 'Request failed' });

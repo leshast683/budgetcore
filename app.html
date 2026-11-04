@@ -489,7 +489,45 @@
       </div>
       <div class="ai-insights-body">
         <div id="ai-insights-result" class="ai-insights-result" style="display:none">
-          <p id="ai-insights-text" class="ai-insights-text"></p>
+
+          <div class="ai-status-row">
+            <span class="ai-month-chip" id="ai-month-chip"></span>
+            <span class="ai-status-badge" id="ai-status-badge"></span>
+          </div>
+
+          <div class="ai-stats-row">
+            <div class="ai-stat">
+              <span class="ai-stat-icon ai-stat-icon--balance" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="15" height="10" rx="1.8"/><path d="M2.5 8.3h15"/><circle cx="13.5" cy="12.5" r="0.6" fill="currentColor" stroke="none"/></svg>
+              </span>
+              <span class="ai-stat-label">Balance</span>
+              <span class="ai-stat-value" id="ai-stat-balance">—</span>
+            </div>
+            <div class="ai-stat-divider" aria-hidden="true"></div>
+            <div class="ai-stat">
+              <span class="ai-stat-icon ai-stat-icon--expenses" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l7-4 7 4-7 4-7-4z"/><path d="M3 11l7 4 7-4M3 7v8M17 7v8"/></svg>
+              </span>
+              <span class="ai-stat-label">Expenses</span>
+              <span class="ai-stat-value" id="ai-stat-expenses">—</span>
+            </div>
+          </div>
+
+          <div class="ai-key-insight">
+            <span class="ai-key-insight-icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2a5.5 5.5 0 00-3 10.1V14a1 1 0 001 1h4a1 1 0 001-1v-1.9A5.5 5.5 0 0010 2z"/><path d="M8 17.5h4M8.6 15.5h2.8"/></svg>
+            </span>
+            <div class="ai-key-insight-body">
+              <span class="ai-key-insight-label">Key Insight</span>
+              <p class="ai-key-insight-text" id="ai-key-insight-text"></p>
+            </div>
+          </div>
+
+          <div class="ai-recs">
+            <h3 class="ai-recs-title">AI Recommendations</h3>
+            <div class="ai-rec-list" id="ai-rec-list"></div>
+          </div>
+
           <span id="ai-insights-cache-label" class="ai-insights-cache-label"></span>
         </div>
         <p id="ai-insights-error" class="form-error" style="display:none"></p>
