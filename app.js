@@ -2329,6 +2329,7 @@ function init() {
     }
 
     const btn = document.getElementById('profile-save-btn');
+    const btnOriginalHTML = btn.innerHTML;
     btn.disabled    = true;
     btn.textContent = 'Saving…';
 
@@ -2352,8 +2353,8 @@ function init() {
       console.error('Error saving goals:', err);
       errorEl.textContent = 'Failed to save. Please try again.';
     } finally {
-      btn.disabled    = false;
-      btn.textContent = 'Save Goals';
+      btn.disabled  = false;
+      btn.innerHTML = btnOriginalHTML;
     }
   });
 
