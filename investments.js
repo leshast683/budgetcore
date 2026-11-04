@@ -334,9 +334,6 @@ const INVESTING_TIPS = [
 
 const LEARN_ART_POOL = [
   'goal-icons/learn-invest-art-1.png', 'goal-icons/learn-invest-art-2.png', 'goal-icons/learn-invest-art-3.png',
-  'goal-icons/chip-plant.png', 'goal-icons/chip-gear.png', 'goal-icons/chip-piggy.png',
-  'goal-icons/invest-growth.png', 'goal-icons/tip-art-automate.png', 'goal-icons/tip-art-invest.png',
-  'goal-icons/tip-art-save.png', 'goal-icons/tip-badge-bulb-v2.png',
 ];
 
 const LEARN_SLIDE_COUNT = 3;
@@ -364,7 +361,7 @@ function renderLearnSlides() {
         <h3 class="learn-slide-title">${escapeHtml(tip.title)}</h3>
         <p class="learn-slide-text">${escapeHtml(tip.text)}</p>
       </div>
-      <img src="${LEARN_ART_POOL[Math.floor(Math.random() * LEARN_ART_POOL.length)]}" alt="" class="learn-slide-art" />
+      <img src="${LEARN_ART_POOL[i % LEARN_ART_POOL.length]}" alt="" class="learn-slide-art" />
       <span class="learn-slide-arrow" aria-hidden="true">›</span>
     </div>
   `).join('');

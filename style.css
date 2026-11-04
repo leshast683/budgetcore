@@ -2356,6 +2356,13 @@ footer {
   min-width: 0;
 }
 
+.welcome-greeting-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
 .welcome-mascot {
   height: 28px;
   width: auto;
