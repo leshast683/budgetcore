@@ -776,6 +776,11 @@ function renderDailySpendingChart() {
 
   const ctx = canvas.getContext('2d');
 
+  // Give the y-axis headroom above the highest day so the peak's callout
+  // bubble never has to overlap the top gridline/label to fit above it.
+  const maxSpend = Math.max(...spendData, 0);
+  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.25) / 100) * 100 : undefined;
+
   // Gradient fill
   const grad = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 220);
   grad.addColorStop(0,   'rgba(200,148,58,0.38)');
@@ -801,7 +806,7 @@ function renderDailySpendingChart() {
     borderWidth: 2.5,
     backgroundColor: grad,
     fill: true,
-    tension: 0.45,
+    tension: 0.75,
     pointRadius: pointRadii,
     pointHoverRadius: 7,
     pointBackgroundColor: pointBgColors,
@@ -826,6 +831,7 @@ function renderDailySpendingChart() {
   if (dailyChartInstance) {
     dailyChartInstance.data.labels = labels;
     dailyChartInstance.data.datasets = datasets;
+    dailyChartInstance.options.scales.y.suggestedMax = yAxisMax;
     dailyChartInstance.update('active');
     return;
   }
@@ -879,6 +885,11 @@ function renderDailySpendingChart() {
           grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
           border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
           beginAtZero: true,
+          suggestedMax: yAxisMax,
+          // Guarantee enough reserved width for the widest label (e.g.
+          // "$1,000") regardless of Chart.js's own auto-measurement, which
+          // can under-reserve space and clip the top tick's text.
+          afterFit: scale => { scale.width = Math.max(scale.width, 56); },
         },
       },
     },
