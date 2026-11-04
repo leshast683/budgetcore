@@ -3781,6 +3781,13 @@ input[type="date"].filter-date {
   animation: txSlideIn 0.38s var(--ease-out) both;
 }
 
+/* Lift the row above its later siblings while its own menu is open — a
+   position:relative row with z-index:auto otherwise traps its absolutely
+   positioned dropdown underneath the next row, which also has its own
+   (opaque) position:relative stacking context and comes later in paint
+   order. */
+.tx-item:has(.tx-menu.open) { z-index: 30; }
+
 .tx-item:hover {
   box-shadow: var(--shadow-xs);
   transform: translateY(-1px);
