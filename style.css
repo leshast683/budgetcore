@@ -6708,13 +6708,43 @@ input[type="date"].filter-date {
 }
 
 /* ===== AI Budget Insights ===== */
-.ai-insights-section { padding: 1.25rem 1.5rem; }
+.ai-insights-section { padding: 0; }
 
 .ai-insights-header {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1200 / 359;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: flex-end;
   gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: 24px 24px 0 0;
+  background: url('ai-insights-banner.png') center/cover no-repeat;
+}
+
+@media (max-width: 640px) {
+  .ai-insights-header { padding: 0.5rem 0.85rem; }
+  .ai-insights-header #analyze-btn {
+    padding: 0.32rem 0.7rem;
+    font-size: 0.72rem;
+    border-radius: 8px;
+  }
+}
+
+.ai-insights-body { padding: 1.25rem 1.5rem; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .ai-insights-title-wrap {
@@ -6766,9 +6796,6 @@ input[type="date"].filter-date {
   cursor: wait;
 }
 
-@media (max-width: 500px) {
-  .ai-insights-header { flex-direction: column; align-items: flex-start; }
-}
 
 /* ================================================================
    CATEGORY ICONS

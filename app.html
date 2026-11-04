@@ -484,7 +484,7 @@
     <!-- ===== 9. AI Budget Insights ===== -->
     <section class="app-card ai-insights-section" id="ai-insights-section">
       <div class="ai-insights-header">
-        <div class="ai-insights-title-wrap">
+        <div class="ai-insights-title-wrap sr-only">
           <svg class="ai-insights-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
           </svg>
@@ -492,11 +492,13 @@
         </div>
         <button type="button" class="btn btn-small" id="analyze-btn">Analyze Budget</button>
       </div>
-      <div id="ai-insights-result" class="ai-insights-result" style="display:none">
-        <p id="ai-insights-text" class="ai-insights-text"></p>
-        <span id="ai-insights-cache-label" class="ai-insights-cache-label"></span>
+      <div class="ai-insights-body">
+        <div id="ai-insights-result" class="ai-insights-result" style="display:none">
+          <p id="ai-insights-text" class="ai-insights-text"></p>
+          <span id="ai-insights-cache-label" class="ai-insights-cache-label"></span>
+        </div>
+        <p id="ai-insights-error" class="form-error" style="display:none"></p>
       </div>
-      <p id="ai-insights-error" class="form-error" style="display:none"></p>
     </section>
 
     <!-- ===== 10. Daily Spending Chart ===== -->
