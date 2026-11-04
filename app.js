@@ -1716,9 +1716,7 @@ function buildRecommendations({ expenseTip, incomeTip, balance, potentialSavings
 function renderInsightResult({ keyInsight, expenseTip, incomeTip, balance, expenses, potentialSavings, cacheLabelText }) {
   const isDeficit = balance < 0;
 
-  const [chipYear, chipMonthNum] = currentMonth.split('-');
-  document.getElementById('ai-month-chip').textContent =
-    new Date(+chipYear, +chipMonthNum - 1, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  document.getElementById('ai-month-chip').textContent = monthLabel(currentMonth);
 
   const statusBadge = document.getElementById('ai-status-badge');
   statusBadge.innerHTML = isDeficit ? '&#8595; Off Track' : '&#8593; On Track';
