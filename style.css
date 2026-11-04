@@ -2839,13 +2839,10 @@ footer {
 
 @media (max-width: 700px) {
   .targets-header {
-    flex-direction: column;
     margin: -1.4rem -1.4rem 1.25rem;
     padding: 1.4rem 1.4rem 1.7rem;
     border-radius: 14px 14px 0 0;
   }
-  .targets-header-text { max-width: 100%; }
-  .targets-header-icon { align-self: flex-end; margin-top: -1rem; }
   .goal-field { padding: 0.85rem; gap: 0.75rem; }
   .goal-icon-badge { width: 40px; height: 40px; }
   .goal-icon-badge svg { width: 17px; height: 17px; }
