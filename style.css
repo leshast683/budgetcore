@@ -7058,6 +7058,46 @@ input[type="date"].filter-date {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.chart-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.chart-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.chart-header-icon svg { width: 18px; height: 18px; }
+.chart-period-pill {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--heading);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.chart-period-pill::after {
+  content: '';
+  display: inline-block;
+  margin-left: 0.4rem;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--muted);
+  vertical-align: middle;
 }
 
 /* ================================================================

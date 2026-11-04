@@ -538,9 +538,15 @@
     <!-- ===== 10. Daily Spending Chart ===== -->
     <section class="app-card daily-chart-section" id="daily-chart-section" style="display:none">
       <div class="chart-header-row">
-        <h2 class="card-title" style="margin:0">Daily Spending</h2>
+        <div class="chart-header-title-wrap">
+          <span class="chart-header-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V11M9 16V7M14 16V4"/></svg>
+          </span>
+          <h2 class="card-title" style="margin:0">Daily Spending</h2>
+        </div>
+        <span class="chart-period-pill" id="daily-chart-period">This Month</span>
       </div>
-      <div style="position:relative;height:200px;margin-top:0.75rem">
+      <div style="position:relative;height:220px;margin-top:1rem">
         <canvas id="daily-spending-chart"></canvas>
       </div>
     </section>

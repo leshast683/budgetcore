@@ -681,6 +681,70 @@ function renderChart() {
   });
 }
 
+// Draws a rounded callout bubble with a pointer tail above a chart point
+function drawDailyChartCallout(ctx, x, y, text) {
+  ctx.save();
+  ctx.font = '700 13px Inter, sans-serif';
+  const paddingX = 11, bubbleH = 28, tailH = 6, gap = 12;
+  const textWidth = ctx.measureText(text).width;
+  const bubbleW = textWidth + paddingX * 2;
+  const bubbleBottom = y - gap;
+  const bubbleTop = bubbleBottom - bubbleH;
+  const bubbleX = x - bubbleW / 2;
+  const r = bubbleH / 2;
+
+  const bubbleGrad = ctx.createLinearGradient(bubbleX, bubbleTop, bubbleX + bubbleW, bubbleTop + bubbleH);
+  bubbleGrad.addColorStop(0, '#9a6a3a');
+  bubbleGrad.addColorStop(1, '#6e4420');
+
+  ctx.shadowColor = 'rgba(90,56,20,0.3)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 2;
+  ctx.fillStyle = bubbleGrad;
+
+  ctx.beginPath();
+  ctx.moveTo(bubbleX + r, bubbleTop);
+  ctx.arcTo(bubbleX + bubbleW, bubbleTop, bubbleX + bubbleW, bubbleTop + bubbleH, r);
+  ctx.arcTo(bubbleX + bubbleW, bubbleTop + bubbleH, bubbleX, bubbleTop + bubbleH, r);
+  ctx.arcTo(bubbleX, bubbleTop + bubbleH, bubbleX, bubbleTop, r);
+  ctx.arcTo(bubbleX, bubbleTop, bubbleX + bubbleW, bubbleTop, r);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(x - tailH, bubbleBottom - 1);
+  ctx.lineTo(x + tailH, bubbleBottom - 1);
+  ctx.lineTo(x, bubbleBottom + tailH);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, bubbleTop + bubbleH / 2);
+  ctx.restore();
+}
+
+const dailyChartCalloutPlugin = {
+  id: 'dailyChartCallouts',
+  afterDatasetsDraw(chart) {
+    const data = chart.data.datasets[0]?.data;
+    if (!data || !data.length) return;
+    const meta = chart.getDatasetMeta(0);
+    let maxIdx = 0;
+    data.forEach((v, i) => { if (v > data[maxIdx]) maxIdx = i; });
+    if (data[maxIdx] <= 0) return;
+    const lastNonZero = data.reduce((idx, v, i) => v > 0 ? i : idx, -1);
+    const idxs = new Set([maxIdx, lastNonZero].filter(i => i >= 0));
+    idxs.forEach(i => {
+      const point = meta.data[i];
+      if (!point) return;
+      drawDailyChartCallout(chart.ctx, point.x, point.y, formatCurrency(data[i]).replace(/\.00$/, ''));
+    });
+  },
+};
+
 // --- Render: Daily Spending Chart ---
 function renderDailySpendingChart() {
   const section = document.getElementById('daily-chart-section');
@@ -694,6 +758,9 @@ function renderDailySpendingChart() {
     return;
   }
   section.style.display = '';
+
+  const periodEl = document.getElementById('daily-chart-period');
+  if (periodEl) periodEl.textContent = currentMonth === todayMonth() ? 'This Month' : monthLabel(currentMonth);
 
   const [y, m] = currentMonth.split('-');
   const daysInMonth = new Date(+y, +m, 0).getDate();
@@ -715,11 +782,16 @@ function renderDailySpendingChart() {
   grad.addColorStop(0.6, 'rgba(200,148,58,0.08)');
   grad.addColorStop(1,   'rgba(200,148,58,0)');
 
-  // Highlight the last non-zero point
+  // Highlight the peak day and the most recent non-zero day
   const lastNonZero = spendData.reduce((idx, v, i) => v > 0 ? i : idx, -1);
-  const pointRadii  = spendData.map((v, i) => i === lastNonZero ? 7 : v > 0 ? 3.5 : 0);
-  const pointBgColors = spendData.map((v, i) => i === lastNonZero ? '#e07820' : '#c8943a');
-  const pointBorderWidths = spendData.map((v, i) => i === lastNonZero ? 3 : 2);
+  let maxIdx = 0;
+  spendData.forEach((v, i) => { if (v > spendData[maxIdx]) maxIdx = i; });
+  const highlightIdxs = new Set(spendData[maxIdx] > 0 ? [maxIdx, lastNonZero].filter(i => i >= 0) : []);
+
+  const pointRadii  = spendData.map((v, i) => highlightIdxs.has(i) ? 7 : v > 0 ? 3.5 : 0);
+  const pointBgColors = spendData.map((v, i) => i === maxIdx ? '#fff' : '#e07820');
+  const pointBorderColors = spendData.map((v, i) => highlightIdxs.has(i) ? '#c8943a' : '#fff');
+  const pointBorderWidths = spendData.map((v, i) => highlightIdxs.has(i) ? 3 : 2);
 
   const totalPortfolio = investments.reduce((s, inv) => s + ((inv.currentPrice || 0) * (inv.shares || 0)), 0);
   const datasets = [{
@@ -733,7 +805,7 @@ function renderDailySpendingChart() {
     pointRadius: pointRadii,
     pointHoverRadius: 7,
     pointBackgroundColor: pointBgColors,
-    pointBorderColor: '#fff',
+    pointBorderColor: pointBorderColors,
     pointBorderWidth: pointBorderWidths,
   }];
 
@@ -764,6 +836,7 @@ function renderDailySpendingChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { top: 34 } },
       interaction: { mode: 'index', intersect: false },
       animation: { duration: 600, easing: 'easeOutQuart' },
       plugins: {
@@ -800,7 +873,7 @@ function renderDailySpendingChart() {
           ticks: {
             font: { size: 10, family: 'Inter, sans-serif' },
             color: '#9a8060',
-            callback: v => v === 0 ? '' : '$' + v,
+            callback: v => '$' + v.toLocaleString('en-US'),
             maxTicksLimit: 6,
           },
           grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
@@ -809,6 +882,7 @@ function renderDailySpendingChart() {
         },
       },
     },
+    plugins: [dailyChartCalloutPlugin],
   });
 }
 
