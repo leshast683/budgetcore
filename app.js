@@ -10,6 +10,9 @@ import { initNav } from './nav.js';
 import aiRecExpenseIcon from './ai-rec-expense-icon.png';
 import aiRecIncomeIcon from './ai-rec-income-icon.png';
 import aiRecGoalIcon from './ai-rec-goal-icon.png';
+import statBalancePositiveIcon from './stat-balance-positive-icon.png';
+import statBalanceNegativeIcon from './stat-balance-negative-icon.png';
+import statBalanceZeroIcon from './stat-balance-zero-icon.png';
 
 // --- Constants ---
 const EXPENSE_CATEGORIES = [
@@ -457,6 +460,8 @@ function renderDashboard() {
   balanceVal.classList.toggle('positive', balance > 0);
   balanceVal.classList.toggle('negative', balance < 0);
 
+  document.getElementById('stat-balance-icon-img').src =
+    balance > 0 ? statBalancePositiveIcon : balance < 0 ? statBalanceNegativeIcon : statBalanceZeroIcon;
 }
 
 // --- Render: Budget Progress Card ---

@@ -2889,6 +2889,20 @@ footer {
 .stat-icon--expenses { background: #ffeaea; color: #ff3b30; }
 .stat-icon--balance  { background: #e8f0ff; color: #007aff; }
 
+/* Dashboard-only: these three use illustrated icons with their own
+   baked-in background, so drop the shared circle background just for
+   them (other pages reuse .stat-icon--income/--expenses/--balance with
+   plain stroke SVGs and must keep it). */
+#stat-income-icon, #stat-expenses-icon, #stat-balance-icon {
+  background: none;
+}
+#stat-income-icon img, #stat-expenses-icon img, #stat-balance-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .stat-card::after { display: none; }
 .stat-card::before { display: none; }
 
