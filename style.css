@@ -2356,6 +2356,13 @@ footer {
   min-width: 0;
 }
 
+.welcome-mascot {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+  display: block;
+}
+
 .welcome-greeting {
   font-size: 0.88rem;
   color: var(--muted);
