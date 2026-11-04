@@ -1817,6 +1817,7 @@ function handleEdit(id) {
   document.getElementById('tx-description').value = tx.description;
   document.getElementById('tx-amount').value       = tx.amount;
   document.getElementById('tx-date').value         = tx.date;
+  document.getElementById('tx-location').value     = '';
   selectCategory(tx.category);
 
   document.querySelector('.form-section .card-title').textContent = 'Edit Transaction';
@@ -1859,7 +1860,7 @@ function handleTypeToggle(selectedType, animate = true) {
     document.getElementById('paycheck-reminder').style.display = showReminder ? 'block' : 'none';
     if (showReminder) renderPaycheckReminder();
     const locationGroup = document.getElementById('tx-location-group');
-    if (locationGroup) locationGroup.style.display = selectedType === 'expense' ? '' : 'none';
+    if (locationGroup) locationGroup.style.display = (selectedType === 'expense' && editingId === null) ? '' : 'none';
   }
 
   if (!animate || prevType === selectedType) {
