@@ -7,6 +7,9 @@ import { supabase } from './supabase.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 import { initPageTransitions } from './transitions.js';
 import { initNav } from './nav.js';
+import aiRecExpenseIcon from './ai-rec-expense-icon.png';
+import aiRecIncomeIcon from './ai-rec-income-icon.png';
+import aiRecGoalIcon from './ai-rec-goal-icon.png';
 
 // --- Constants ---
 const EXPENSE_CATEGORIES = [
@@ -1538,9 +1541,9 @@ function buildInsightCacheKey(income, expenses, balance, incomeByCategory, expen
 }
 
 const AI_REC_ICONS = {
-  calendar: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="15" height="13" rx="1.8"/><path d="M2.5 8h15M6 2.5v3M14 2.5v3"/><path d="M7 12.5l2 2 4-4"/></svg>',
-  coins:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5" rx="6" ry="2.3"/><path d="M4 5v4c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V5"/><path d="M4 9v4c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V9"/></svg>',
-  target:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  calendar: aiRecExpenseIcon,
+  coins:    aiRecIncomeIcon,
+  target:   aiRecGoalIcon,
 };
 
 // Rough, deterministic "how much could you realistically trim" estimate —
@@ -1606,7 +1609,7 @@ function renderInsightResult({ keyInsight, expenseTip, incomeTip, balance, expen
   const recs = buildRecommendations({ expenseTip, incomeTip, balance, potentialSavings });
   document.getElementById('ai-rec-list').innerHTML = recs.map(rec => `
     <div class="ai-rec-item">
-      <span class="ai-rec-icon ${rec.iconClass}" aria-hidden="true">${rec.icon}</span>
+      <span class="ai-rec-icon ${rec.iconClass}" aria-hidden="true"><img src="${rec.icon}" alt="" /></span>
       <div class="ai-rec-body">
         <h4 class="ai-rec-title">${escapeHtml(rec.title)}</h4>
         <p class="ai-rec-desc">${escapeHtml(rec.description)}</p>

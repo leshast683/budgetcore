@@ -6915,16 +6915,12 @@ input[type="date"].filter-date {
 .ai-rec-icon {
   width: 42px;
   height: 42px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.ai-rec-icon svg { width: 19px; height: 19px; }
-.ai-rec-icon--budget { background: var(--accent-light); color: var(--accent); }
-.ai-rec-icon--income { background: #e0f5e6; color: #1db954; }
-.ai-rec-icon--goal   { background: var(--accent-light); color: var(--accent); }
+.ai-rec-icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
 .ai-rec-body { flex: 1; min-width: 0; }
 
