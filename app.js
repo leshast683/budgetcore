@@ -1988,6 +1988,7 @@ function handleEdit(id) {
   document.getElementById('tx-description').value = tx.description;
   document.getElementById('tx-amount').value       = tx.amount;
   document.getElementById('tx-date').value         = tx.date;
+  document.getElementById('tx-recurring').checked  = !!tx.isRecurring;
   selectCategory(tx.category);
 
   document.querySelector('.form-section .card-title').textContent = 'Edit Transaction';
