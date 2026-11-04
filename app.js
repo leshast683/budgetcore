@@ -959,7 +959,17 @@ function renderRecurringTimeline() {
     const badgeClass = isOverdue ? 'rec-days rec-days--overdue' : isToday ? 'rec-days rec-days--today' : 'rec-days';
     return `
       <div class="rec-card" style="--rec-bg:${bg};--rec-color:${color}">
-        <div class="rec-icon">${icon}</div>
+        <div class="rec-card-top">
+          <div class="rec-icon">${icon}</div>
+          <div class="rec-actions">
+            <button type="button" class="rec-action-btn rec-edit" data-id="${item.id}" title="Edit" aria-label="Edit transaction">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5l3 3L6 17H3v-3z"/></svg>
+            </button>
+            <button type="button" class="rec-action-btn rec-delete" data-id="${item.id}" title="Delete" aria-label="Delete transaction">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4h4v2M6 6l.7 10a1 1 0 001 .9h4.6a1 1 0 001-.9L14 6"/></svg>
+            </button>
+          </div>
+        </div>
         <div class="rec-info">
           <span class="rec-desc">${escapeHtml(item.description)}</span>
           <span class="rec-amount">${item.type === 'income' ? '+' : '−'}${formatCurrency(item.amount)}</span>
@@ -1704,7 +1714,9 @@ function buildRecommendations({ expenseTip, incomeTip, balance, potentialSavings
 function renderInsightResult({ keyInsight, expenseTip, incomeTip, balance, expenses, potentialSavings, cacheLabelText }) {
   const isDeficit = balance < 0;
 
-  document.getElementById('ai-month-chip').textContent = monthLabel(currentMonth);
+  const [chipYear, chipMonthNum] = currentMonth.split('-');
+  document.getElementById('ai-month-chip').textContent =
+    new Date(+chipYear, +chipMonthNum - 1, 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
   const statusBadge = document.getElementById('ai-status-badge');
   statusBadge.innerHTML = isDeficit ? '&#8595; Off Track' : '&#8593; On Track';
@@ -2474,6 +2486,14 @@ function init() {
     const editBtn = e.target.closest('.tx-edit');
     if (editBtn) { handleEdit(editBtn.dataset.id); return; }
     const delBtn = e.target.closest('.tx-delete');
+    if (delBtn) handleDelete(delBtn.dataset.id);
+  });
+
+  // Edit / Delete for upcoming recurring cards
+  document.getElementById('recurring-lane').addEventListener('click', e => {
+    const editBtn = e.target.closest('.rec-edit');
+    if (editBtn) { handleEdit(editBtn.dataset.id); return; }
+    const delBtn = e.target.closest('.rec-delete');
     if (delBtn) handleDelete(delBtn.dataset.id);
   });
 

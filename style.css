@@ -6832,8 +6832,9 @@ input[type="date"].filter-date {
   color: var(--heading);
   background: var(--bg);
   border: 1px solid var(--border);
-  padding: 0.3rem 0.5rem;
+  padding: 0.28rem 0.5rem;
   border-radius: 20px;
+  white-space: nowrap;
 }
 
 .ai-status-badge {
@@ -7134,7 +7135,27 @@ input[type="date"].filter-date {
   gap: 0.25rem;
   border: 1.5px solid rgba(0,0,0,0.05);
 }
+.rec-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.25rem; }
 .rec-icon { font-size: 1.05rem; line-height: 1; }
+.rec-actions { display: flex; gap: 0.15rem; flex-shrink: 0; }
+.rec-action-btn {
+  width: 19px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(0,0,0,0.07);
+  color: var(--rec-color, #5a3010);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.15s var(--ease-in-out), color 0.15s var(--ease-in-out);
+}
+.rec-action-btn svg { width: 10px; height: 10px; }
+.rec-action-btn:hover { background: rgba(0,0,0,0.16); }
+.rec-action-btn.rec-delete:hover { background: #f3c9c2; color: #b02020; }
 .rec-info { display: flex; flex-direction: column; gap: 0.1rem; }
 .rec-desc {
   font-size: 0.72rem;
