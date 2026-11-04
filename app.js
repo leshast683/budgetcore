@@ -729,7 +729,9 @@ function drawDailyChartCallout(ctx, x, y, text) {
 const dailyChartCalloutPlugin = {
   id: 'dailyChartCallouts',
   afterDatasetsDraw(chart) {
-    const data = chart.data.datasets[0]?.data;
+    // Use the real per-day amounts (not the widened display curve) to pick
+    // which day to label and what dollar value to show.
+    const data = chart.data.datasets[0]?.rawSpendData || chart.data.datasets[0]?.data;
     if (!data || !data.length) return;
     const meta = chart.getDatasetMeta(0);
     let maxIdx = 0;
@@ -744,6 +746,25 @@ const dailyChartCalloutPlugin = {
     });
   },
 };
+
+// Adds small synthetic "shoulder" values on the zero-days immediately
+// around an isolated spike, purely so the line renders as a wide, rounded
+// bump instead of a single-point spike pinned to 0 on both sides (a hard
+// limit of spline interpolation between real data points). The spike's own
+// day keeps its exact real value — only its zero neighbors are nudged up
+// for the visual curve; every label, bubble, and axis value still reflects
+// the real per-day amounts.
+function widenSpikesForDisplay(data) {
+  const display = [...data];
+  data.forEach((v, i) => {
+    if (v <= 0) return;
+    if (i > 0 && data[i - 1] === 0) display[i - 1] = Math.max(display[i - 1], v * 0.35);
+    if (i < data.length - 1 && data[i + 1] === 0) display[i + 1] = Math.max(display[i + 1], v * 0.35);
+    if (i > 1 && data[i - 2] === 0) display[i - 2] = Math.max(display[i - 2], v * 0.08);
+    if (i < data.length - 2 && data[i + 2] === 0) display[i + 2] = Math.max(display[i + 2], v * 0.08);
+  });
+  return display;
+}
 
 // --- Render: Daily Spending Chart ---
 function renderDailySpendingChart() {
@@ -801,7 +822,8 @@ function renderDailySpendingChart() {
   const totalPortfolio = investments.reduce((s, inv) => s + ((inv.currentPrice || 0) * (inv.shares || 0)), 0);
   const datasets = [{
     label: 'Daily Spending',
-    data: spendData,
+    data: widenSpikesForDisplay(spendData),
+    rawSpendData: spendData,
     borderColor: '#c8943a',
     borderWidth: 2.5,
     backgroundColor: grad,
