@@ -295,9 +295,80 @@ document.getElementById('inv-add-cta-1').addEventListener('click', scrollToInvFo
 document.getElementById('inv-add-cta-2').addEventListener('click', scrollToInvForm);
 
 // ---- "Learn to Invest" carousel ----
+// A library of real, general investing-education tips. Only 3 are shown at
+// a time (kept to a quick, skimmable card); a fresh random 3 are picked on
+// load and whenever "See all" is clicked, so repeat visits surface
+// different advice instead of the same fixed set forever.
+const INVESTING_TIPS = [
+  { title: 'Investing Basics', text: 'What actually happens when you invest $100?' },
+  { title: 'How Compounding Works', text: 'Why small, consistent contributions add up faster than you think.' },
+  { title: 'Risk & Diversification', text: 'Why spreading your money across stocks, ETFs, and cash matters.' },
+  { title: 'Start Before You Feel Ready', text: 'Time in the market usually beats waiting for the "perfect" moment to start.' },
+  { title: 'Dollar-Cost Averaging', text: 'Investing the same amount on a schedule smooths out the ups and downs of price swings.' },
+  { title: 'Emergency Fund First', text: 'Aim for 3–6 months of expenses in cash before putting money into the market.' },
+  { title: 'Know Your Time Horizon', text: "Money you'll need within 2–3 years usually doesn't belong in stocks." },
+  { title: 'Index Funds 101', text: 'A single low-cost index fund can give you exposure to hundreds of companies at once.' },
+  { title: 'Watch the Expense Ratio', text: 'A 1% annual fee can quietly cost you tens of thousands of dollars over decades.' },
+  { title: 'Avoid Timing the Market', text: 'Missing just the 10 best market days over 20 years can cut your returns dramatically.' },
+  { title: 'Rebalance Periodically', text: 'Check your portfolio once or twice a year to keep your target mix on track.' },
+  { title: 'Diversify Across Asset Classes', text: 'Stocks, bonds, and cash tend to move differently, which smooths your overall ride.' },
+  { title: 'Tax-Advantaged Accounts', text: 'A 401(k) or IRA can grow your money tax-deferred or tax-free versus a regular brokerage account.' },
+  { title: 'Employer Match Is Free Money', text: 'If your employer matches 401(k) contributions, contribute enough to get the full match.' },
+  { title: 'Risk Tolerance vs. Risk Capacity', text: 'How you feel about losses matters as much as how much you can actually afford to lose.' },
+  { title: "Don't Chase Past Performance", text: "A fund's hot streak last year tells you very little about how it'll do next year." },
+  { title: 'Pay Off High-Interest Debt First', text: "A 20% credit card rate is a guaranteed cost that's hard for any investment to beat." },
+  { title: 'Stocks vs. Bonds', text: 'Stocks are ownership with higher potential return and risk; bonds are loans with steadier, lower returns.' },
+  { title: 'The Power of Starting Early', text: 'Investing $200/month from 25 can out-earn investing $400/month starting at 35.' },
+  { title: 'Avoid Single-Stock Concentration', text: "Betting too much on one company — even your employer's — adds risk diversification could remove." },
+  { title: 'Automate Your Investing', text: 'Automatic transfers remove the temptation to time the market or skip a month.' },
+  { title: 'Understand What You Own', text: "If you can't explain an investment in one sentence, it's worth learning more before buying." },
+  { title: 'Inflation Is a Real Risk Too', text: 'Cash sitting idle loses purchasing power every year inflation outpaces its return.' },
+  { title: 'Long-Term Capital Gains', text: 'Holding an investment over a year before selling usually means a lower tax rate on the profit.' },
+  { title: 'Market Corrections Are Normal', text: "A 10%+ drop happens in stocks roughly once a year on average — it's not a crisis." },
+  { title: 'Diversify Globally', text: 'Markets outside your home country can zig when domestic markets zag.' },
+  { title: "Beware 'Guaranteed' Returns", text: "If a strategy promises high returns with no risk, it's not investing — it's a red flag." },
+  { title: 'Keep It Simple', text: 'A couple of broad, low-cost funds often outperform a complicated mix of niche picks over time.' },
+  { title: 'Reinvest Your Dividends', text: 'Reinvesting dividends automatically buys more shares and compounds your growth faster.' },
+  { title: "Review, Don't Obsess", text: 'Checking your portfolio daily rarely helps — a quarterly or annual check-in is usually enough.' },
+];
+
+const LEARN_ART_POOL = [
+  'goal-icons/learn-invest-art-1.png', 'goal-icons/learn-invest-art-2.png', 'goal-icons/learn-invest-art-3.png',
+  'goal-icons/chip-plant.png', 'goal-icons/chip-gear.png', 'goal-icons/chip-piggy.png',
+  'goal-icons/invest-growth.png', 'goal-icons/tip-art-automate.png', 'goal-icons/tip-art-invest.png',
+  'goal-icons/tip-art-save.png', 'goal-icons/tip-badge-bulb-v2.png',
+];
+
 const LEARN_SLIDE_COUNT = 3;
 let learnSlideIndex = 0;
 let learnAutoTimer = null;
+let learnActiveTips = [];
+
+// Fisher–Yates-style sample of 3 distinct tips from the full pool
+function pickRandomTips() {
+  const pool = [...INVESTING_TIPS.keys()];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, LEARN_SLIDE_COUNT).map(i => INVESTING_TIPS[i]);
+}
+
+function renderLearnSlides() {
+  learnActiveTips = pickRandomTips();
+  const track = document.getElementById('learn-carousel-track');
+  track.innerHTML = learnActiveTips.map((tip, i) => `
+    <div class="learn-slide">
+      <span class="learn-slide-num">${String(i + 1).padStart(2, '0')}</span>
+      <div class="learn-slide-body">
+        <h3 class="learn-slide-title">${escapeHtml(tip.title)}</h3>
+        <p class="learn-slide-text">${escapeHtml(tip.text)}</p>
+      </div>
+      <img src="${LEARN_ART_POOL[Math.floor(Math.random() * LEARN_ART_POOL.length)]}" alt="" class="learn-slide-art" />
+      <span class="learn-slide-arrow" aria-hidden="true">›</span>
+    </div>
+  `).join('');
+}
 
 function goToLearnSlide(i) {
   learnSlideIndex = (i + LEARN_SLIDE_COUNT) % LEARN_SLIDE_COUNT;
@@ -313,6 +384,7 @@ function startLearnAutoAdvance() {
 }
 
 function initLearnCarousel() {
+  renderLearnSlides();
   document.getElementById('learn-carousel-track').addEventListener('click', () => {
     goToLearnSlide(learnSlideIndex + 1);
     startLearnAutoAdvance();
@@ -326,6 +398,7 @@ function initLearnCarousel() {
   });
   document.getElementById('learn-see-all').addEventListener('click', e => {
     e.preventDefault();
+    renderLearnSlides();
     goToLearnSlide(0);
     startLearnAutoAdvance();
   });
