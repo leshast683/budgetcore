@@ -325,12 +325,7 @@
           <p class="profile-desc" style="margin-bottom:0">Set monthly targets to track your progress<br class="targets-desc-break"> on the dashboard.</p>
         </div>
         <span class="targets-header-icon" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="21" cy="27" r="15.5"/>
-            <circle cx="21" cy="27" r="9.5"/>
-            <circle cx="21" cy="27" r="3.2"/>
-            <path d="M31 17 L43 5 M43 5 L37 6 M43 5 L42 11" stroke-width="2.4"/>
-          </svg>
+          <img src="budget-target-icon.png" alt="" class="targets-header-icon-img" />
         </span>
       </div>
 
@@ -338,19 +333,31 @@
       <div class="profile-saved" id="profile-saved" style="display:none">
         <div class="profile-saved-row">
           <div class="profile-saved-info">
+            <span class="goal-icon-badge goal-icon-badge--budget" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4.2"/><circle cx="10" cy="10" r="1.3" fill="currentColor" stroke="none"/></svg>
+            </span>
             <span class="profile-saved-label">Budget Goal</span>
             <span class="profile-saved-value" id="profile-saved-value">—</span>
           </div>
           <div class="profile-saved-info">
+            <span class="goal-icon-badge goal-icon-badge--income" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l4.5-5 3 3L17 5"/><path d="M12.5 5H17v4.5"/></svg>
+            </span>
             <span class="profile-saved-label">Income Target</span>
             <span class="profile-saved-value" id="profile-saved-income">—</span>
           </div>
           <div class="profile-saved-info">
+            <span class="goal-icon-badge goal-icon-badge--expense" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l4.5 5 3-3L17 15"/><path d="M12.5 15H17v-4.5"/></svg>
+            </span>
             <span class="profile-saved-label">Expense Limit</span>
             <span class="profile-saved-value" id="profile-saved-expense">—</span>
           </div>
         </div>
-        <button type="button" class="btn-ghost btn-sm" id="profile-edit-btn">Edit</button>
+        <button type="button" class="btn-ghost btn-sm targets-edit-btn" id="profile-edit-btn">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3.5l3 3L6 17H3v-3z"/></svg>
+          Edit
+        </button>
       </div>
 
       <!-- Edit / set state -->
