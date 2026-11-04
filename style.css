@@ -6716,8 +6716,8 @@ input[type="date"].filter-date {
   width: 100%;
   aspect-ratio: 1200 / 359;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
+  align-items: flex-end;
+  justify-content: flex-start;
   gap: 1rem;
   padding: 1.1rem 1.5rem;
   border-radius: 24px 24px 0 0;
@@ -6725,11 +6725,10 @@ input[type="date"].filter-date {
 }
 
 @media (max-width: 640px) {
-  .ai-insights-header { padding: 0.5rem 0.85rem; }
+  .ai-insights-header { padding: 0.65rem 0.85rem; }
   .ai-insights-header #analyze-btn {
-    padding: 0.32rem 0.7rem;
-    font-size: 0.72rem;
-    border-radius: 8px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
   }
 }
 
