@@ -2364,7 +2364,7 @@ footer {
 }
 
 .welcome-mascot {
-  height: 20px;
+  height: 26px;
   width: auto;
   flex-shrink: 0;
   display: block;
@@ -6827,12 +6827,12 @@ input[type="date"].filter-date {
 }
 
 .ai-month-chip {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--heading);
   background: var(--bg);
   border: 1px solid var(--border);
-  padding: 0.35rem 0.65rem;
+  padding: 0.3rem 0.5rem;
   border-radius: 20px;
 }
 
