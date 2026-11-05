@@ -8600,7 +8600,10 @@ input[type="date"].filter-date {
   border-radius: 20px;
   padding: 1.5rem;
   margin-top: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
+.mt-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
 .mt-card-top {
   display: flex;
   align-items: flex-start;
@@ -8658,18 +8661,19 @@ input[type="date"].filter-date {
 .mt-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1rem;
-  flex-wrap: wrap;
   margin-top: 1.4rem;
   padding-top: 1.1rem;
   border-top: 1px solid var(--border);
+  position: relative;
 }
 .mt-dots { display: flex; align-items: center; gap: 0.4rem; }
 .mt-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: background 0.2s, transform 0.2s; cursor: pointer; }
 .mt-dot.active { background: var(--accent); transform: scale(1.3); }
-.mt-nav { display: flex; align-items: center; gap: 0.6rem; }
 .mt-prev-btn {
+  position: absolute;
+  left: 0;
   width: 38px; height: 38px;
   border-radius: 50%;
   border: 1px solid var(--border);
@@ -8682,20 +8686,6 @@ input[type="date"].filter-date {
 }
 .mt-prev-btn:hover { border-color: var(--accent); background: var(--accent-light); }
 .mt-prev-btn svg { width: 16px; height: 16px; }
-.mt-next-btn {
-  width: 38px; height: 38px;
-  border-radius: 50%;
-  border: none;
-  color: #fff;
-  background: linear-gradient(135deg, #b08050 0%, #8a6030 100%);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(120,80,30,0.22);
-  transition: transform 0.15s var(--ease-spring);
-  flex-shrink: 0;
-}
-.mt-next-btn:hover { transform: translateY(-1px); }
-.mt-next-btn svg { width: 16px; height: 16px; }
 
 @keyframes mtSlideIn {
   from { opacity: 0; transform: translateX(45px); }
@@ -8705,7 +8695,5 @@ input[type="date"].filter-date {
 
 @media (max-width: 560px) {
   .mt-card-art { width: 80px; height: 80px; }
-  .mt-footer { justify-content: flex-start; }
-  .mt-nav { width: 100%; justify-content: space-between; }
 }
 

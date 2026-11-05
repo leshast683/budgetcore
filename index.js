@@ -828,20 +828,23 @@ function initMoneyTips() {
   renderMoneyTip();
   restartMoneyTipsAutoplay();
 
-  document.getElementById('mt-prev').addEventListener('click', () => {
+  document.getElementById('mt-prev').addEventListener('click', e => {
+    e.stopPropagation(); // don't also trigger the card's click-to-advance below
     goToMoneyTip(currentMoneyTipIdx - 1);
-    restartMoneyTipsAutoplay();
-  });
-
-  document.getElementById('mt-next').addEventListener('click', () => {
-    advanceMoneyTip();
     restartMoneyTipsAutoplay();
   });
 
   document.getElementById('mt-dots').addEventListener('click', e => {
     const dot = e.target.closest('.mt-dot');
     if (!dot) return;
+    e.stopPropagation();
     goToMoneyTip(Number(dot.dataset.idx));
+    restartMoneyTipsAutoplay();
+  });
+
+  // Clicking anywhere else on the card skips ahead to the next tip.
+  document.getElementById('mt-card').addEventListener('click', () => {
+    advanceMoneyTip();
     restartMoneyTipsAutoplay();
   });
 }
