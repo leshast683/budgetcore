@@ -8345,6 +8345,7 @@ input[type="date"].filter-date {
 /* Home page Net Worth card — light wave background, needs dark text */
 #home-nw-hero {
   background: url('networth-home-wave.png') center/cover no-repeat;
+  animation: fadeSlideUp 0.42s var(--ease-out) both;
 }
 #home-nw-hero .nw-hero-label { color: var(--text); }
 #home-nw-hero .nw-hero-value { color: var(--heading); }
@@ -8371,8 +8372,13 @@ input[type="date"].filter-date {
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-spring);
+  animation: fadeSlideUp 0.38s var(--ease-out) both;
 }
 .home-tile:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.home-tiles > .home-tile:nth-child(1) { animation-delay: 0.13s; }
+.home-tiles > .home-tile:nth-child(2) { animation-delay: 0.16s; }
+.home-tiles > .home-tile:nth-child(3) { animation-delay: 0.19s; }
+.home-tiles > .home-tile:nth-child(4) { animation-delay: 0.22s; }
 
 .home-tile--balance,
 .home-tile--investments,
