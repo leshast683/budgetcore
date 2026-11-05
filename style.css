@@ -8393,6 +8393,18 @@ input[type="date"].filter-date {
   font-size: 1.05rem;
   flex-shrink: 0;
 }
+.home-tile-icon--img {
+  width: 40px;
+  height: 40px;
+  background: none;
+  border-radius: 0;
+}
+.home-tile-icon--img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 .home-tile-label { font-size: 0.88rem; font-weight: 700; color: var(--heading); }
 .home-tile-chevron { color: var(--muted); flex-shrink: 0; }
 .home-tile-chevron svg { width: 16px; height: 16px; }
