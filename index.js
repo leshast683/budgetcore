@@ -74,24 +74,30 @@ let homeSpendChart = null;
 async function renderAccountHome(user) {
   const uid = user.id;
 
-  const [txRes, goalsRes, invRes, nwRes] = await Promise.all([
+  const [txRes, goalsRes, invRes, nwRes, profileRes] = await Promise.all([
     supabase.from('transactions').select('*').eq('user_id', uid),
     supabase.from('goals').select('*').eq('user_id', uid),
     supabase.from('investments').select('*').eq('user_id', uid),
     supabase.from('networth').select('*').eq('user_id', uid),
+    supabase.from('profiles').select('monthly_budget, income_target, expense_limit').eq('id', uid).single(),
   ]);
 
   const transactions = txRes.data || [];
   const goals         = goalsRes.data || [];
   const investments   = invRes.data || [];
   const nwItems        = nwRes.data || [];
+  const profile        = profileRes.data || {};
 
   renderHomeNetWorth(nwItems);
   renderHomeBalance(transactions);
   renderHomeInvestments(investments);
   renderHomeGoals(goals);
   renderHomeSpendOverview(transactions);
-  renderHomeNextSteps({ hasAccounts: nwItems.length > 0, hasGoals: goals.length > 0, hasInvestments: investments.length > 0 });
+  renderHomeNextSteps({
+    hasBudgetTargets: profile.monthly_budget != null || profile.income_target != null || profile.expense_limit != null,
+    hasTransactions:  transactions.length > 0,
+    hasGoals:         goals.length > 0,
+  });
 }
 
 function renderHomeNetWorth(nwItems) {
@@ -230,11 +236,11 @@ function renderHomeSpendOverview(transactions) {
   });
 }
 
-function renderHomeNextSteps({ hasAccounts, hasGoals, hasInvestments }) {
+function renderHomeNextSteps({ hasBudgetTargets, hasTransactions, hasGoals }) {
   const steps = [
-    { done: hasAccounts,     label: 'Add Accounts',    href: 'analytics.html',          icon: '🏦' },
-    { done: hasGoals,        label: 'Set a Goal',      href: 'goals.html?mode=savings',    icon: '🎯' },
-    { done: hasInvestments,  label: 'Grow Your Wealth', href: 'goals.html?mode=investment', icon: '📈' },
+    { done: hasBudgetTargets, label: 'Set Up Budget Targets', href: 'app.html', icon: '🎯' },
+    { done: hasTransactions,  label: 'Add Your First Transaction', href: 'app.html', icon: '🧾' },
+    { done: hasGoals,         label: 'Create Your First Goal', href: 'goals.html?mode=savings', icon: '🏆' },
   ];
   const doneCount = steps.filter(s => s.done).length;
   document.getElementById('home-next-steps-count').textContent = `${doneCount} of ${steps.length} complete`;
