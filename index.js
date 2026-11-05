@@ -17,6 +17,11 @@ import stepGoalIcon from './home-step-goal-icon.png';
 import stepBudgetIconDone from './home-step-budget-icon-done.png';
 import stepTransactionIconDone from './home-step-transaction-icon-done.png';
 import stepGoalIconDone from './home-step-goal-icon-done.png';
+import mtMascot1 from './mt-mascot-1.png';
+import mtMascot2 from './mt-mascot-2.png';
+import mtMascot3 from './mt-mascot-3.png';
+import mtMascot4 from './mt-mascot-4.png';
+import mtMascot5 from './mt-mascot-5.png';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -767,6 +772,10 @@ function pickRandomMoneyTips() {
   return pool.slice(0, MONEY_TIPS_SHOWN).map(i => MONEY_TIPS[i]);
 }
 
+const MONEY_TIP_MASCOTS = [mtMascot1, mtMascot2, mtMascot3, mtMascot4, mtMascot5];
+const MONEY_TIPS_AUTOPLAY_MS = 5000;
+let moneyTipsAutoplayTimer = null;
+
 function renderMoneyTipDots() {
   document.getElementById('mt-dots').innerHTML = currentMoneyTips.map((_, i) =>
     `<span class="mt-dot${i === currentMoneyTipIdx ? ' active' : ''}" data-idx="${i}"></span>`
@@ -780,7 +789,19 @@ function renderMoneyTip() {
   document.getElementById('mt-text').textContent = tip.text;
   document.getElementById('mt-callout-text').textContent = tip.callout;
   document.getElementById('mt-counter').textContent = `Tip ${currentMoneyTipIdx + 1} of ${currentMoneyTips.length}`;
+  document.getElementById('mt-art-img').src = MONEY_TIP_MASCOTS[currentMoneyTipIdx % MONEY_TIP_MASCOTS.length];
   renderMoneyTipDots();
+}
+
+function advanceMoneyTip() {
+  if (currentMoneyTipIdx >= currentMoneyTips.length - 1) {
+    // Reached the end of this batch — shuffle in a fresh set of 5 from the pool of 30.
+    currentMoneyTips = pickRandomMoneyTips();
+    currentMoneyTipIdx = 0;
+  } else {
+    currentMoneyTipIdx += 1;
+  }
+  renderMoneyTip();
 }
 
 function goToMoneyTip(idx) {
@@ -788,27 +809,32 @@ function goToMoneyTip(idx) {
   renderMoneyTip();
 }
 
+function restartMoneyTipsAutoplay() {
+  if (moneyTipsAutoplayTimer) clearInterval(moneyTipsAutoplayTimer);
+  moneyTipsAutoplayTimer = setInterval(advanceMoneyTip, MONEY_TIPS_AUTOPLAY_MS);
+}
+
 function initMoneyTips() {
   currentMoneyTips = pickRandomMoneyTips();
   currentMoneyTipIdx = 0;
   renderMoneyTip();
+  restartMoneyTipsAutoplay();
 
-  document.getElementById('mt-prev').addEventListener('click', () => goToMoneyTip(currentMoneyTipIdx - 1));
+  document.getElementById('mt-prev').addEventListener('click', () => {
+    goToMoneyTip(currentMoneyTipIdx - 1);
+    restartMoneyTipsAutoplay();
+  });
 
   document.getElementById('mt-next').addEventListener('click', () => {
-    if (currentMoneyTipIdx >= currentMoneyTips.length - 1) {
-      // Reached the end of this batch — shuffle in a fresh set of 5 from the pool of 30.
-      currentMoneyTips = pickRandomMoneyTips();
-      currentMoneyTipIdx = 0;
-      renderMoneyTip();
-    } else {
-      goToMoneyTip(currentMoneyTipIdx + 1);
-    }
+    advanceMoneyTip();
+    restartMoneyTipsAutoplay();
   });
 
   document.getElementById('mt-dots').addEventListener('click', e => {
     const dot = e.target.closest('.mt-dot');
-    if (dot) goToMoneyTip(Number(dot.dataset.idx));
+    if (!dot) return;
+    goToMoneyTip(Number(dot.dataset.idx));
+    restartMoneyTipsAutoplay();
   });
 }
 
