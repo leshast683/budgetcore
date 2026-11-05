@@ -8303,14 +8303,23 @@ input[type="date"].filter-date {
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   transform: translateY(-2px);
 }
+.chc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.chc-header-text { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
 .chc-emoji {
   width: 56px; height: 56px;
   font-size: 1.7rem;
-  margin-bottom: 0.9rem;
   border-radius: 16px;
   background: color-mix(in srgb, var(--ch-color, #9a6e3a) 16%, white);
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
+.chc-emoji:has(img) { background: none; }
+.chc-emoji img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .chc-title { font-size: 1.15rem; font-weight: 800; color: var(--heading); margin: 0; }
 .chc-sub { font-size: 0.85rem; color: var(--muted); font-weight: 500; }
 .chc-desc { font-size: 0.9rem; color: var(--muted); margin: 0.6rem 0 1.1rem; line-height: 1.55; }

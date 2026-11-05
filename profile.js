@@ -5,6 +5,16 @@
 import { supabase } from './supabase.js';
 import { initPageTransitions } from './transitions.js';
 import { initNav } from './nav.js';
+import challengeIconDining from './challenge-icon-dining.png';
+import challengeIconCoffee from './challenge-icon-coffee.png';
+import challengeIconShopping from './challenge-icon-shopping.png';
+import challengeIconSave5 from './challenge-icon-save5.png';
+import challengeIconSubscriptions from './challenge-icon-subscriptions.png';
+import challengeIconZeroSpend from './challenge-icon-zerospend.png';
+import challengeIconFastfood from './challenge-icon-fastfood.png';
+import challengeIconRideshare from './challenge-icon-rideshare.png';
+import challengeIconWeekend from './challenge-icon-weekend.png';
+import challengeIconDelivery from './challenge-icon-delivery.png';
 
 // ── Savings Challenge definitions ───────────────────────────────────────────
 const CHALLENGE_DEFS = [
@@ -13,6 +23,7 @@ const CHALLENGE_DEFS = [
     title: 'No Dining Out',
     subtitle: '7-day challenge',
     emoji: '🥗',
+    icon: challengeIconDining,
     days: 7,
     color: '#5cba7d',
     description: 'Don\'t log any dining out or food delivery for 7 days straight. Cook at home instead.',
@@ -25,6 +36,7 @@ const CHALLENGE_DEFS = [
     title: 'Coffee-Free Week',
     subtitle: '7-day challenge',
     emoji: '☕',
+    icon: challengeIconCoffee,
     days: 7,
     color: '#9a6e3a',
     description: 'Skip the coffee shop for a week. Make it at home. Save ~$40.',
@@ -37,6 +49,7 @@ const CHALLENGE_DEFS = [
     title: 'No Online Shopping',
     subtitle: '14-day challenge',
     emoji: '📦',
+    icon: challengeIconShopping,
     days: 14,
     color: '#7b9fe0',
     description: 'Two weeks with no online purchases. If you survive 14 days, you probably didn\'t need it.',
@@ -49,6 +62,7 @@ const CHALLENGE_DEFS = [
     title: 'Save $5/Day',
     subtitle: '30-day challenge',
     emoji: '💰',
+    icon: challengeIconSave5,
     days: 30,
     color: '#2d7a3a',
     description: 'Log at least $5 in savings or income every day for 30 days. Build the habit.',
@@ -61,6 +75,7 @@ const CHALLENGE_DEFS = [
     title: 'Subscription Audit Month',
     subtitle: '30-day challenge',
     emoji: '📺',
+    icon: challengeIconSubscriptions,
     days: 30,
     color: '#9878c0',
     description: 'Cancel at least one subscription this month. Review every recurring charge you have.',
@@ -73,6 +88,7 @@ const CHALLENGE_DEFS = [
     title: '5 Zero-Spend Days',
     subtitle: 'Monthly challenge',
     emoji: '🎯',
+    icon: challengeIconZeroSpend,
     days: 30,
     color: '#e07b54',
     description: 'Have at least 5 days this month with $0 in expenses. Rest days for your wallet.',
@@ -85,6 +101,7 @@ const CHALLENGE_DEFS = [
     title: 'Skip Fast Food',
     subtitle: '7-day challenge',
     emoji: '🍔',
+    icon: challengeIconFastfood,
     days: 7,
     color: '#e0a020',
     description: 'No fast food for a full week. Cook or order healthy. Your wallet and body will thank you.',
@@ -97,6 +114,7 @@ const CHALLENGE_DEFS = [
     title: 'No Rideshare Fortnight',
     subtitle: '14-day challenge',
     emoji: '🚌',
+    icon: challengeIconRideshare,
     days: 14,
     color: '#3aa0c8',
     description: 'Ditch Uber & Lyft for 2 weeks. Walk, bike, or take public transit. Save $50+.',
@@ -109,6 +127,7 @@ const CHALLENGE_DEFS = [
     title: 'Spend-Free Weekends',
     subtitle: '2-weekend challenge',
     emoji: '🌿',
+    icon: challengeIconWeekend,
     days: 14,
     color: '#58b078',
     description: 'No spending on Saturdays or Sundays for 2 full weekends. Find free ways to enjoy your time.',
@@ -121,6 +140,7 @@ const CHALLENGE_DEFS = [
     title: 'No Food Delivery',
     subtitle: '7-day challenge',
     emoji: '🛵',
+    icon: challengeIconDelivery,
     days: 7,
     color: '#e05c5c',
     description: 'Skip DoorDash, UberEats, and Deliveroo for a week. Cook or pick it up yourself.',
@@ -676,9 +696,13 @@ function renderAvailableChallenges() {
     const isCompleted = completedDefIds.has(def.id);
     return `
       <div class="challenge-card" style="--ch-color:${def.color}">
-        <div class="chc-emoji">${def.emoji}</div>
-        <h3 class="chc-title">${def.title}</h3>
-        <span class="chc-sub">${def.subtitle}</span>
+        <div class="chc-header">
+          <div class="chc-header-text">
+            <h3 class="chc-title">${def.title}</h3>
+            <span class="chc-sub">${def.subtitle}</span>
+          </div>
+          <div class="chc-emoji">${def.icon ? `<img src="${def.icon}" alt="" />` : def.emoji}</div>
+        </div>
         <p class="chc-desc">${def.description}</p>
         <div class="chc-footer">
           ${isCompleted
