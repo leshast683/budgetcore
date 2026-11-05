@@ -15,6 +15,14 @@ import challengeIconFastfood from './challenge-icon-fastfood.png';
 import challengeIconRideshare from './challenge-icon-rideshare.png';
 import challengeIconWeekend from './challenge-icon-weekend.png';
 import challengeIconDelivery from './challenge-icon-delivery.png';
+import challengeIconAlcohol from './challenge-icon-alcohol.png';
+import challengeIconClothing from './challenge-icon-clothing.png';
+import challengeIconGaming from './challenge-icon-gaming.png';
+import challengeIconLog from './challenge-icon-log.png';
+import challengeIconUnder30 from './challenge-icon-under30.png';
+import challengeIconSave200 from './challenge-icon-save200.png';
+import challengeIconEntertainment from './challenge-icon-entertainment.png';
+import challengeIconCooling from './challenge-icon-cooling.png';
 
 // ── Savings Challenge definitions ───────────────────────────────────────────
 const CHALLENGE_DEFS = [
@@ -153,6 +161,7 @@ const CHALLENGE_DEFS = [
     title: 'Dry Month',
     subtitle: '30-day challenge',
     emoji: '🚱',
+    icon: challengeIconAlcohol,
     days: 30,
     color: '#7e57c2',
     description: 'No spending at bars or on alcohol for a full month. Your liver and budget will both recover.',
@@ -165,6 +174,7 @@ const CHALLENGE_DEFS = [
     title: 'No New Clothes',
     subtitle: '14-day challenge',
     emoji: '👕',
+    icon: challengeIconClothing,
     days: 14,
     color: '#c0766a',
     description: 'Two weeks without buying clothes, shoes, or accessories. Wear what you already own.',
@@ -177,6 +187,7 @@ const CHALLENGE_DEFS = [
     title: 'No Gaming Spend',
     subtitle: '14-day challenge',
     emoji: '🎮',
+    icon: challengeIconGaming,
     days: 14,
     color: '#5c8fe0',
     description: 'No in-game purchases, game downloads, or gaming subscriptions for 2 weeks.',
@@ -189,6 +200,7 @@ const CHALLENGE_DEFS = [
     title: 'Log Every Day',
     subtitle: '7-day habit challenge',
     emoji: '📓',
+    icon: challengeIconLog,
     days: 7,
     color: '#20a0a0',
     description: 'Add at least one transaction every day for 7 days. Build the tracking habit.',
@@ -201,6 +213,7 @@ const CHALLENGE_DEFS = [
     title: 'Under $30/Day',
     subtitle: '14-day challenge',
     emoji: '🪙',
+    icon: challengeIconUnder30,
     days: 14,
     color: '#b89a30',
     description: 'Keep your daily spending under $30 for 14 days straight. Every day counts.',
@@ -213,6 +226,7 @@ const CHALLENGE_DEFS = [
     title: 'Save $200 This Month',
     subtitle: '30-day challenge',
     emoji: '🏦',
+    icon: challengeIconSave200,
     days: 30,
     color: '#2d8a6a',
     description: 'Log at least $200 in savings or income above your expenses this month.',
@@ -225,6 +239,7 @@ const CHALLENGE_DEFS = [
     title: 'No Entertainment Spend',
     subtitle: '14-day challenge',
     emoji: '🎬',
+    icon: challengeIconEntertainment,
     days: 14,
     color: '#c060a0',
     description: 'No movies, concerts, clubs, or paid streaming add-ons for 2 weeks. Find free fun.',
@@ -237,6 +252,7 @@ const CHALLENGE_DEFS = [
     title: '3-Day Cooling Rule',
     subtitle: 'Mindfulness challenge',
     emoji: '🧘',
+    icon: challengeIconCooling,
     days: 21,
     color: '#78a060',
     description: 'For 3 weeks, log every non-essential purchase you want but wait 3 days before buying. Track the ones you skip.',
