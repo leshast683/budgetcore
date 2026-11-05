@@ -7,10 +7,9 @@ import { supabase } from './supabase.js';
 import { initPageTransitions } from './transitions.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 import { initNav } from './nav.js';
+import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from './categories.js';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
-const stayOnHome = new URLSearchParams(window.location.search).has('home');
-
 let currentUser = null;
 
 supabase.auth.onAuthStateChange((event, session) => {
@@ -28,8 +27,6 @@ supabase.auth.onAuthStateChange((event, session) => {
     const name = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
       || currentUser.email?.split('@')[0] || 'there';
     showWelcomeToast(name, currentUser, () => window.location.replace('./app.html'));
-  } else if (currentUser && !stayOnHome) {
-    window.location.replace('./app.html');
   } else if (currentUser) {
     showLoggedInState(currentUser);
   } else {
@@ -51,9 +48,11 @@ function showLoggedInState(user) {
   document.getElementById('home-nav-signin').style.display = 'none';
   const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
   document.getElementById('home-user-email').textContent = name;
-  document.getElementById('hero-dashboard-btn').style.display = '';
-  document.getElementById('hero-signin-btn').style.display    = 'none';
   loadAndApplyAvatar(user.id, 'home-avatar-ring');
+
+  document.getElementById('marketing-home').style.display = 'none';
+  document.getElementById('account-home').style.display   = '';
+  renderAccountHome(user);
 }
 
 function showSignedOutState() {
@@ -61,6 +60,195 @@ function showSignedOutState() {
   document.getElementById('home-nav-signin').style.display = '';
   document.getElementById('hero-dashboard-btn').style.display = 'none';
   document.getElementById('hero-signin-btn').style.display    = '';
+
+  document.getElementById('marketing-home').style.display = '';
+  document.getElementById('account-home').style.display   = 'none';
+}
+
+// ── Account Home (signed-in summary) ───────────────────────────────────────────
+const fmtCurrency = n => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const todayMonth = () => new Date().toISOString().slice(0, 7);
+
+let homeSpendChart = null;
+
+async function renderAccountHome(user) {
+  const uid = user.id;
+
+  const [txRes, goalsRes, invRes, nwRes] = await Promise.all([
+    supabase.from('transactions').select('*').eq('user_id', uid),
+    supabase.from('goals').select('*').eq('user_id', uid),
+    supabase.from('investments').select('*').eq('user_id', uid),
+    supabase.from('networth').select('*').eq('user_id', uid),
+  ]);
+
+  const transactions = txRes.data || [];
+  const goals         = goalsRes.data || [];
+  const investments   = invRes.data || [];
+  const nwItems        = nwRes.data || [];
+
+  renderHomeNetWorth(nwItems);
+  renderHomeBalance(transactions);
+  renderHomeInvestments(investments);
+  renderHomeGoalsAndSavings(goals);
+  renderHomeSpendOverview(transactions);
+  renderHomeNextSteps({ hasAccounts: nwItems.length > 0, hasGoals: goals.length > 0, hasInvestments: investments.length > 0 });
+}
+
+function renderHomeNetWorth(nwItems) {
+  const LIABILITY_TYPES = new Set([
+    'creditcard_debt', 'student_loan', 'car_loan', 'mortgage_debt', 'personal_loan', 'medical_debt', 'other_liability',
+  ]);
+  const totalAssets = nwItems.filter(i => !LIABILITY_TYPES.has(i.type)).reduce((s, i) => s + Number(i.value || 0), 0);
+  const totalLiab   = nwItems.filter(i =>  LIABILITY_TYPES.has(i.type)).reduce((s, i) => s + Number(i.value || 0), 0);
+  const netWorth    = totalAssets - totalLiab;
+
+  document.getElementById('home-nw-value').textContent = fmtCurrency(netWorth);
+
+  // 30-day change, reconstructed from item creation dates (same approach as analytics.html)
+  const sorted = [...nwItems].filter(i => i.created_at).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  let delta = 0, pct = 0;
+  if (sorted.length) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    let running = 0, valueAtCutoff = 0;
+    for (const i of sorted) {
+      running += LIABILITY_TYPES.has(i.type) ? -Number(i.value || 0) : Number(i.value || 0);
+      if (new Date(i.created_at) <= cutoff) valueAtCutoff = running;
+    }
+    delta = netWorth - valueAtCutoff;
+    pct = valueAtCutoff !== 0 ? (delta / Math.abs(valueAtCutoff)) * 100 : (delta !== 0 ? 100 : 0);
+  }
+  const sign = delta >= 0 ? '+' : '−';
+  document.getElementById('home-nw-change-text').textContent = `${sign} ${fmtCurrency(Math.abs(delta))} (${Math.abs(pct).toFixed(0)}%)`;
+  document.getElementById('home-nw-change').classList.toggle('is-negative', delta < 0);
+}
+
+function renderHomeBalance(transactions) {
+  const month = todayMonth();
+  const monthTx = transactions.filter(tx => (tx.date || '').slice(0, 7) === month);
+  const income   = monthTx.filter(tx => tx.type === 'income').reduce((s, tx) => s + Number(tx.amount), 0);
+  const expenses = monthTx.filter(tx => tx.type === 'expense').reduce((s, tx) => s + Number(tx.amount), 0);
+  document.getElementById('home-tile-balance-val').textContent = fmtCurrency(income - expenses);
+}
+
+function renderHomeInvestments(investments) {
+  const totalValue = investments.reduce((s, inv) => s + Number(inv.current_price) * Number(inv.shares), 0);
+  const totalCost  = investments.reduce((s, inv) => s + Number(inv.purchase_price) * Number(inv.shares), 0);
+  const gainPct    = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
+
+  document.getElementById('home-tile-invest-val').textContent = fmtCurrency(totalValue);
+  const subEl = document.getElementById('home-tile-invest-sub');
+  if (!investments.length) {
+    subEl.textContent = '';
+  } else {
+    subEl.textContent = (gainPct >= 0 ? '+' : '') + gainPct.toFixed(1) + '%';
+    subEl.className = 'home-tile-sub ' + (gainPct >= 0 ? 'positive' : 'negative');
+  }
+}
+
+function renderHomeGoalsAndSavings(goals) {
+  const active = goals.filter(g => Number(g.saved) < Number(g.target));
+  const totalSaved  = goals.reduce((s, g) => s + Number(g.saved || 0), 0);
+  const totalTarget = active.reduce((s, g) => s + Number(g.target || 0), 0);
+  const activeSaved = active.reduce((s, g) => s + Number(g.saved || 0), 0);
+  const pct = totalTarget > 0 ? Math.min(Math.round((activeSaved / totalTarget) * 100), 100) : 0;
+
+  document.getElementById('home-tile-goals-val').textContent = `${active.length} active`;
+  document.getElementById('home-tile-goals-fill').style.width = pct + '%';
+  document.getElementById('home-tile-savings-val').textContent = fmtCurrency(totalSaved);
+}
+
+function renderHomeSpendOverview(transactions) {
+  const card = document.getElementById('home-spend-card');
+  const month = todayMonth();
+  const totals = {};
+  transactions.forEach(tx => {
+    if (tx.type === 'expense' && (tx.date || '').slice(0, 7) === month) {
+      totals[tx.category] = (totals[tx.category] || 0) + Number(tx.amount);
+    }
+  });
+
+  const entries = Object.entries(totals).filter(([, v]) => v > 0).sort(([, a], [, b]) => b - a);
+  if (!entries.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  const total = entries.reduce((s, [, v]) => s + v, 0);
+  const top = entries.slice(0, 5);
+
+  const rowsEl = document.getElementById('home-spend-rows');
+  rowsEl.innerHTML = top.map(([cat, amount]) => {
+    const label = CATEGORY_LABELS[cat] || cat;
+    const icon  = CATEGORY_ICONS[cat]  || '📌';
+    const color = CATEGORY_COLORS[cat] || '#9a6e3a';
+    const pct   = Math.round((amount / total) * 100);
+    return `
+      <div class="home-spend-row">
+        <span class="home-spend-dot" style="background:${color}"></span>
+        <span class="home-spend-icon">${icon}</span>
+        <span class="home-spend-label">${label}</span>
+        <span class="home-spend-pct">${pct}%</span>
+      </div>`;
+  }).join('');
+
+  const canvas = document.getElementById('home-spend-chart');
+  const labels = top.map(([cat]) => CATEGORY_LABELS[cat] || cat);
+  const data   = top.map(([, v]) => parseFloat(v.toFixed(2)));
+  const colors = top.map(([cat]) => CATEGORY_COLORS[cat] || '#9a6e3a');
+
+  if (homeSpendChart) { homeSpendChart.destroy(); homeSpendChart = null; }
+  import('chart.js/auto').then(({ default: Chart }) => {
+    homeSpendChart = new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: '#fffdf9', borderWidth: 3, borderRadius: 6 }] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        cutout: '70%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${fmtCurrency(ctx.parsed)}` } } },
+      },
+      plugins: [{
+        id: 'homeCenterText',
+        afterDraw(chart) {
+          const { ctx } = chart;
+          const meta = chart.getDatasetMeta(0);
+          if (!meta.data.length) return;
+          const { x, y } = meta.data[0];
+          const sum = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.font = '700 15px Inter, sans-serif';
+          ctx.fillStyle = '#1a0e06';
+          ctx.fillText(fmtCurrency(sum), x, y - 8);
+          ctx.font = '500 9px Inter, sans-serif';
+          ctx.fillStyle = '#957560';
+          ctx.fillText('this month', x, y + 9);
+          ctx.restore();
+        },
+      }],
+    });
+  });
+}
+
+function renderHomeNextSteps({ hasAccounts, hasGoals, hasInvestments }) {
+  const steps = [
+    { done: hasAccounts,     label: 'Add Accounts',    href: 'analytics.html',          icon: '🏦' },
+    { done: hasGoals,        label: 'Set a Goal',      href: 'goals.html?mode=savings',    icon: '🎯' },
+    { done: hasInvestments,  label: 'Grow Your Wealth', href: 'goals.html?mode=investment', icon: '📈' },
+  ];
+  const doneCount = steps.filter(s => s.done).length;
+  document.getElementById('home-next-steps-count').textContent = `${doneCount} of ${steps.length} complete`;
+
+  document.getElementById('home-next-steps').innerHTML = steps.map((s, i) => `
+    ${i > 0 ? `<div class="home-step-connector${steps[i - 1].done ? ' is-done' : ''}"></div>` : ''}
+    <a href="${s.href}" class="home-step${s.done ? ' is-done' : ''}">
+      <span class="home-step-icon-wrap">
+        ${s.icon}
+        ${s.done ? '<span class="home-step-check">✓</span>' : ''}
+      </span>
+      <span class="home-step-label">${s.label}</span>
+    </a>
+  `).join('');
 }
 
 initNav();
@@ -315,7 +503,7 @@ async function socialAuth(provider, errorElId) {
   sessionStorage.setItem('authPending', '1');
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
-    options: { redirectTo: window.location.origin + '/index.html?home=1' },
+    options: { redirectTo: window.location.origin + '/index.html' },
   });
   if (error) {
     sessionStorage.removeItem('authPending');

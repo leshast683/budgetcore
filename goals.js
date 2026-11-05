@@ -598,3 +598,9 @@ document.querySelectorAll('.goals-mode-btn').forEach(btn => {
     }
   });
 });
+
+// Allow deep-linking straight into a mode, e.g. goals.html?mode=investment
+const requestedMode = new URLSearchParams(window.location.search).get('mode');
+if (requestedMode) {
+  document.querySelector(`.goals-mode-btn[data-mode="${requestedMode}"]`)?.click();
+}

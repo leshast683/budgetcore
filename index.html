@@ -196,7 +196,92 @@
     </nav>
   </header>
 
-  <main>
+  <!-- ===== Account Home (signed-in summary) ===== -->
+  <main id="account-home" class="app-layout" style="display:none">
+
+    <section class="nw-hero" id="home-nw-hero">
+      <div class="nw-hero-info">
+        <div class="nw-hero-label">Net Worth</div>
+        <div class="nw-hero-value" id="home-nw-value">$0.00</div>
+        <span class="nw-hero-change" id="home-nw-change">
+          <span id="home-nw-change-text">+ $0.00 (0%)</span>
+        </span>
+      </div>
+    </section>
+
+    <div class="home-tiles">
+      <a href="app.html" class="home-tile home-tile--balance">
+        <div class="home-tile-top">
+          <div class="home-tile-left">
+            <span class="home-tile-icon">👛</span>
+            <span class="home-tile-label">Balance</span>
+          </div>
+          <span class="home-tile-chevron"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l5 6-5 6"/></svg></span>
+        </div>
+        <span class="home-tile-value" id="home-tile-balance-val">$0.00</span>
+      </a>
+
+      <a href="goals.html?mode=investment" class="home-tile home-tile--investments">
+        <div class="home-tile-top">
+          <div class="home-tile-left">
+            <span class="home-tile-icon">📈</span>
+            <span class="home-tile-label">Investments</span>
+          </div>
+          <span class="home-tile-chevron"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l5 6-5 6"/></svg></span>
+        </div>
+        <span class="home-tile-value" id="home-tile-invest-val">$0.00</span>
+        <span class="home-tile-sub" id="home-tile-invest-sub"></span>
+      </a>
+
+      <a href="goals.html?mode=savings" class="home-tile home-tile--goals">
+        <div class="home-tile-top">
+          <div class="home-tile-left">
+            <span class="home-tile-icon">🎯</span>
+            <span class="home-tile-label">Goals</span>
+          </div>
+          <span class="home-tile-chevron"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l5 6-5 6"/></svg></span>
+        </div>
+        <span class="home-tile-value" id="home-tile-goals-val">0 active</span>
+        <div class="home-tile-progress-track"><div class="home-tile-progress-fill" id="home-tile-goals-fill" style="width:0%"></div></div>
+      </a>
+
+      <a href="goals.html?mode=savings" class="home-tile home-tile--savings">
+        <div class="home-tile-top">
+          <div class="home-tile-left">
+            <span class="home-tile-icon">🐷</span>
+            <span class="home-tile-label">Savings</span>
+          </div>
+          <span class="home-tile-chevron"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l5 6-5 6"/></svg></span>
+        </div>
+        <span class="home-tile-value" id="home-tile-savings-val">$0.00</span>
+      </a>
+    </div>
+
+    <section class="app-card" id="home-spend-card" style="display:none">
+      <div class="chart-header-row">
+        <div class="chart-header-title-wrap">
+          <span class="chart-header-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 5v5l3 2"/></svg></span>
+          <h2 class="card-title" style="margin:0">Spending Overview</h2>
+        </div>
+        <span class="chart-period-pill">This Month</span>
+      </div>
+      <div class="home-spend-layout">
+        <div class="home-spend-donut-wrap"><canvas id="home-spend-chart"></canvas></div>
+        <div class="home-spend-rows" id="home-spend-rows"></div>
+      </div>
+    </section>
+
+    <section class="app-card" id="home-next-steps-card">
+      <div class="chart-header-row" style="margin-bottom:0.25rem">
+        <h2 class="card-title" style="margin:0">Next Steps</h2>
+        <span class="chart-period-pill" id="home-next-steps-count">0 of 3 complete</span>
+      </div>
+      <div class="home-next-steps" id="home-next-steps"></div>
+    </section>
+
+  </main>
+
+  <main id="marketing-home">
 
     <!-- ===== Hero ===== -->
     <section id="hero" class="hero">
