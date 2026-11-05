@@ -8339,7 +8339,9 @@ input[type="date"].filter-date {
    ACCOUNT HOME — signed-in landing page summary
    ================================================================ */
 #account-home { background: var(--bg); min-height: 100vh; }
-.home-hero-text { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 0.5rem; }
+.home-hero-text { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.9rem; margin-bottom: 0.5rem; }
+.home-hero-text .hero-headline { font-size: clamp(2.9rem, 5.5vw, 4.4rem); }
+.home-hero-text .hero-subtext { font-size: 1.02rem; max-width: 420px; }
 
 .home-tiles {
   display: grid;
@@ -8364,10 +8366,10 @@ input[type="date"].filter-date {
 }
 .home-tile:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
 
-.home-tile--balance    { --home-tile-bg: #fdf0e4; }
-.home-tile--investments { --home-tile-bg: #e8f5ea; }
-.home-tile--goals      { --home-tile-bg: #fdf0e4; }
-.home-tile--expenses   { --home-tile-bg: #fdeaea; }
+.home-tile--balance,
+.home-tile--investments,
+.home-tile--goals,
+.home-tile--expenses    { --home-tile-bg: #fdf0e4; }
 
 .home-tile-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .home-tile-left { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
