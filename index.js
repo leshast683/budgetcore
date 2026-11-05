@@ -402,7 +402,7 @@ async function renderDailySpendingChart(transactions, investments) {
   const ctx = canvas.getContext('2d');
 
   const maxSpend = Math.max(...spendData, 0);
-  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.25) / 100) * 100 : undefined;
+  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.08) / 100) * 100 : undefined;
 
   const grad = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 220);
   grad.addColorStop(0,   'rgba(200,148,58,0.38)');
@@ -453,7 +453,7 @@ async function renderDailySpendingChart(transactions, investments) {
   if (dailyChartInstance) {
     dailyChartInstance.data.labels = labels;
     dailyChartInstance.data.datasets = datasets;
-    dailyChartInstance.options.scales.y.suggestedMax = yAxisMax;
+    dailyChartInstance.options.scales.y.max = yAxisMax;
     dailyChartInstance.update('active');
     return;
   }
@@ -464,7 +464,7 @@ async function renderDailySpendingChart(transactions, investments) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 34 } },
+      layout: { padding: { top: 60 } },
       interaction: { mode: 'index', intersect: false },
       animation: { duration: 600, easing: 'easeOutQuart' },
       plugins: {
@@ -497,7 +497,7 @@ async function renderDailySpendingChart(transactions, investments) {
           grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
           border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
           beginAtZero: true,
-          suggestedMax: yAxisMax,
+          max: yAxisMax,
           afterFit: scale => { scale.width = Math.max(scale.width, 56); },
         },
       },
