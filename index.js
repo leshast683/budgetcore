@@ -8,6 +8,9 @@ import { initPageTransitions } from './transitions.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 import { initNav } from './nav.js';
 import { CATEGORY_LABELS, CATEGORY_COLORS } from './categories.js';
+import aiRecExpenseIcon from './ai-rec-expense-icon.png';
+import aiRecIncomeIcon from './ai-rec-income-icon.png';
+import aiRecGoalIcon from './ai-rec-goal-icon.png';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -69,6 +72,32 @@ function showSignedOutState() {
 const fmtCurrency = n => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const todayMonth = () => new Date().toISOString().slice(0, 7);
 
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// Most-recently-fetched data, kept around so the "Analyze Budget" button
+// (clicked later, independent of the initial render) always has fresh data.
+let homeTransactions = [];
+let homeInvestments  = [];
+let dailyChartInstance = null;
+
+// Cache for AI Budget Insights — skips the API call when nothing has
+// changed since the last analysis (same approach as the Finance Hub).
+const insightCache = { key: null, data: null };
+
+// Expense categories treated as discretionary (vs. fixed costs like housing/
+// utilities) when estimating a realistic "potential savings" figure.
+const DISCRETIONARY_CATEGORIES = [
+  'dining', 'fooddelivery', 'subscriptions', 'entertainment',
+  'shopping', 'onlineshopping', 'clothing', 'personalcare',
+];
+
 let homeSpendChart = null;
 
 async function renderAccountHome(user) {
@@ -88,6 +117,9 @@ async function renderAccountHome(user) {
   const nwItems        = nwRes.data || [];
   const profile        = profileRes.data || {};
 
+  homeTransactions = transactions;
+  homeInvestments  = investments;
+
   renderHomeNetWorth(nwItems);
   renderHomeBalance(transactions);
   renderHomeInvestments(investments);
@@ -98,6 +130,7 @@ async function renderAccountHome(user) {
     hasTransactions:  transactions.length > 0,
     hasGoals:         goals.length > 0,
   });
+  renderDailySpendingChart(transactions, investments);
 }
 
 function renderHomeNetWorth(nwItems) {
@@ -256,6 +289,428 @@ function renderHomeNextSteps({ hasBudgetTargets, hasTransactions, hasGoals }) {
     </a>
   `).join('');
 }
+
+// Draws a rounded callout bubble with a pointer tail above a chart point
+function drawDailyChartCallout(ctx, x, y, text) {
+  ctx.save();
+  ctx.font = '700 13px Inter, sans-serif';
+  const paddingX = 11, bubbleH = 28, tailH = 6, gap = 12;
+  const textWidth = ctx.measureText(text).width;
+  const bubbleW = textWidth + paddingX * 2;
+  const bubbleBottom = y - gap;
+  const bubbleTop = bubbleBottom - bubbleH;
+  const bubbleX = x - bubbleW / 2;
+  const r = bubbleH / 2;
+
+  const bubbleGrad = ctx.createLinearGradient(bubbleX, bubbleTop, bubbleX + bubbleW, bubbleTop + bubbleH);
+  bubbleGrad.addColorStop(0, '#9a6a3a');
+  bubbleGrad.addColorStop(1, '#6e4420');
+
+  ctx.shadowColor = 'rgba(90,56,20,0.3)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 2;
+  ctx.fillStyle = bubbleGrad;
+
+  ctx.beginPath();
+  ctx.moveTo(bubbleX + r, bubbleTop);
+  ctx.arcTo(bubbleX + bubbleW, bubbleTop, bubbleX + bubbleW, bubbleTop + bubbleH, r);
+  ctx.arcTo(bubbleX + bubbleW, bubbleTop + bubbleH, bubbleX, bubbleTop + bubbleH, r);
+  ctx.arcTo(bubbleX, bubbleTop + bubbleH, bubbleX, bubbleTop, r);
+  ctx.arcTo(bubbleX, bubbleTop, bubbleX + bubbleW, bubbleTop, r);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(x - tailH, bubbleBottom - 1);
+  ctx.lineTo(x + tailH, bubbleBottom - 1);
+  ctx.lineTo(x, bubbleBottom + tailH);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, bubbleTop + bubbleH / 2);
+  ctx.restore();
+}
+
+const dailyChartCalloutPlugin = {
+  id: 'dailyChartCallouts',
+  afterDatasetsDraw(chart) {
+    const data = chart.data.datasets[0]?.rawSpendData || chart.data.datasets[0]?.data;
+    if (!data || !data.length) return;
+    const meta = chart.getDatasetMeta(0);
+    let maxIdx = 0;
+    data.forEach((v, i) => { if (v > data[maxIdx]) maxIdx = i; });
+    if (data[maxIdx] <= 0) return;
+    const lastNonZero = data.reduce((idx, v, i) => v > 0 ? i : idx, -1);
+    const idxs = new Set([maxIdx, lastNonZero].filter(i => i >= 0));
+    idxs.forEach(i => {
+      const point = meta.data[i];
+      if (!point) return;
+      drawDailyChartCallout(chart.ctx, point.x, point.y, fmtCurrency(data[i]).replace(/\.00$/, ''));
+    });
+  },
+};
+
+// Adds small synthetic "shoulder" values on the zero-days immediately around
+// an isolated spike, purely so the line renders as a wide, rounded bump
+// instead of a single-point spike. Only the display curve is widened — every
+// label, bubble, and axis value still reflects the real per-day amounts.
+function widenSpikesForDisplay(data) {
+  const display = [...data];
+  data.forEach((v, i) => {
+    if (v <= 0) return;
+    if (i > 0 && data[i - 1] === 0) display[i - 1] = Math.max(display[i - 1], v * 0.35);
+    if (i < data.length - 1 && data[i + 1] === 0) display[i + 1] = Math.max(display[i + 1], v * 0.35);
+    if (i > 1 && data[i - 2] === 0) display[i - 2] = Math.max(display[i - 2], v * 0.08);
+    if (i < data.length - 2 && data[i + 2] === 0) display[i + 2] = Math.max(display[i + 2], v * 0.08);
+  });
+  return display;
+}
+
+async function renderDailySpendingChart(transactions, investments) {
+  const section = document.getElementById('daily-chart-section');
+  const canvas  = document.getElementById('daily-spending-chart');
+  if (!section || !canvas) return;
+
+  const month = todayMonth();
+  const monthTx = transactions.filter(tx => tx.type === 'expense' && (tx.date || '').slice(0, 7) === month);
+  if (!monthTx.length) {
+    section.style.display = 'none';
+    if (dailyChartInstance) { dailyChartInstance.destroy(); dailyChartInstance = null; }
+    return;
+  }
+  section.style.display = '';
+
+  const [y, m] = month.split('-');
+  const daysInMonth = new Date(+y, +m, 0).getDate();
+  const byDay = {};
+  monthTx.forEach(tx => { byDay[tx.date] = (byDay[tx.date] || 0) + Number(tx.amount); });
+
+  const labels = [], spendData = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${month}-${String(d).padStart(2, '0')}`;
+    labels.push(d);
+    spendData.push(parseFloat((byDay[key] || 0).toFixed(2)));
+  }
+
+  const { default: Chart } = await import('chart.js/auto');
+  const ctx = canvas.getContext('2d');
+
+  const maxSpend = Math.max(...spendData, 0);
+  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.25) / 100) * 100 : undefined;
+
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 220);
+  grad.addColorStop(0,   'rgba(200,148,58,0.38)');
+  grad.addColorStop(0.6, 'rgba(200,148,58,0.08)');
+  grad.addColorStop(1,   'rgba(200,148,58,0)');
+
+  const lastNonZero = spendData.reduce((idx, v, i) => v > 0 ? i : idx, -1);
+  let maxIdx = 0;
+  spendData.forEach((v, i) => { if (v > spendData[maxIdx]) maxIdx = i; });
+  const highlightIdxs = new Set(spendData[maxIdx] > 0 ? [maxIdx, lastNonZero].filter(i => i >= 0) : []);
+
+  const pointRadii  = spendData.map((v, i) => highlightIdxs.has(i) ? 7 : v > 0 ? 3.5 : 0);
+  const pointBgColors = spendData.map((v, i) => i === maxIdx ? '#fff' : '#e07820');
+  const pointBorderColors = spendData.map((v, i) => highlightIdxs.has(i) ? '#c8943a' : '#fff');
+  const pointBorderWidths = spendData.map((v, i) => highlightIdxs.has(i) ? 3 : 2);
+
+  const totalPortfolio = investments.reduce((s, inv) => s + (Number(inv.current_price) || 0) * (Number(inv.shares) || 0), 0);
+  const datasets = [{
+    label: 'Daily Spending',
+    data: widenSpikesForDisplay(spendData),
+    rawSpendData: spendData,
+    borderColor: '#c8943a',
+    borderWidth: 2.5,
+    backgroundColor: grad,
+    fill: true,
+    tension: 0.75,
+    pointRadius: pointRadii,
+    pointHoverRadius: 7,
+    pointBackgroundColor: pointBgColors,
+    pointBorderColor: pointBorderColors,
+    pointBorderWidth: pointBorderWidths,
+  }];
+
+  if (totalPortfolio > 0) {
+    datasets.push({
+      label: 'Portfolio Value',
+      data: Array(daysInMonth).fill(parseFloat(totalPortfolio.toFixed(2))),
+      borderColor: 'rgba(45,122,58,0.6)',
+      backgroundColor: 'transparent',
+      borderDash: [5, 4],
+      borderWidth: 1.5,
+      fill: false,
+      tension: 0,
+      pointRadius: 0,
+    });
+  }
+
+  if (dailyChartInstance) {
+    dailyChartInstance.data.labels = labels;
+    dailyChartInstance.data.datasets = datasets;
+    dailyChartInstance.options.scales.y.suggestedMax = yAxisMax;
+    dailyChartInstance.update('active');
+    return;
+  }
+
+  dailyChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 34 } },
+      interaction: { mode: 'index', intersect: false },
+      animation: { duration: 600, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(22,12,4,0.92)',
+          titleColor: '#e0b870',
+          bodyColor: '#d4b888',
+          padding: { x: 14, y: 10 },
+          cornerRadius: 12,
+          borderColor: 'rgba(200,148,58,0.3)',
+          borderWidth: 1,
+          displayColors: true,
+          boxWidth: 8,
+          boxHeight: 8,
+          callbacks: {
+            title: ctx => `Day ${ctx[0].label}`,
+            label: ctx => `  ${ctx.dataset.label}: ${fmtCurrency(ctx.parsed.y)}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { font: { size: 10, family: 'Inter, sans-serif' }, color: '#9a8060', maxTicksLimit: 12, maxRotation: 0 },
+          grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
+          border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
+        },
+        y: {
+          ticks: { font: { size: 10, family: 'Inter, sans-serif' }, color: '#9a8060', callback: v => '$' + v.toLocaleString('en-US'), maxTicksLimit: 6 },
+          grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
+          border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
+          beginAtZero: true,
+          suggestedMax: yAxisMax,
+          afterFit: scale => { scale.width = Math.max(scale.width, 56); },
+        },
+      },
+    },
+    plugins: [dailyChartCalloutPlugin],
+  });
+}
+
+// --- AI Budget Insights ---
+
+function buildInsightCacheKey(income, expenses, balance, incomeByCategory, expensesByCategory) {
+  const sortedEntries = obj => Object.fromEntries(Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)));
+  return JSON.stringify({
+    income:   Number(income).toFixed(2),
+    expenses: Number(expenses).toFixed(2),
+    balance:  Number(balance).toFixed(2),
+    inc: sortedEntries(incomeByCategory),
+    exp: sortedEntries(expensesByCategory),
+  });
+}
+
+const AI_REC_ICONS = {
+  calendar: aiRecExpenseIcon,
+  coins:    aiRecIncomeIcon,
+  target:   aiRecGoalIcon,
+};
+
+// Rough, deterministic "how much could you realistically trim" estimate —
+// never AI-generated, so the dollar figure is always traceable to real data.
+function estimatePotentialSavings(expensesByCategoryRaw) {
+  const discretionaryLabels = new Set(DISCRETIONARY_CATEGORIES.map(c => CATEGORY_LABELS[c]).filter(Boolean));
+  const discretionarySpend = Object.entries(expensesByCategoryRaw)
+    .filter(([label]) => discretionaryLabels.has(label))
+    .reduce((s, [, amt]) => s + amt, 0);
+  if (discretionarySpend <= 0) return 0;
+  return Math.max(5, Math.round(discretionarySpend * 0.15));
+}
+
+function buildRecommendations({ expenseTip, incomeTip, balance, potentialSavings }) {
+  const isDeficit = balance < 0;
+  const gap = isDeficit ? Math.abs(balance) : 0;
+  const wholeDollars = n => `$${Math.round(n).toLocaleString('en-US')}`;
+
+  return [
+    {
+      icon: AI_REC_ICONS.calendar,
+      iconClass: 'ai-rec-icon--budget',
+      title: expenseTip.title,
+      description: expenseTip.description,
+      badge: potentialSavings > 0 ? { label: 'Save up to', value: `${wholeDollars(potentialSavings)}/mo` } : null,
+    },
+    {
+      icon: AI_REC_ICONS.coins,
+      iconClass: 'ai-rec-icon--income',
+      title: incomeTip.title,
+      description: incomeTip.description,
+      badge: gap > 0 ? { label: 'Close the gap', value: `${wholeDollars(gap)}/mo` } : null,
+    },
+    {
+      icon: AI_REC_ICONS.target,
+      iconClass: 'ai-rec-icon--goal',
+      title: 'Set a short-term goal',
+      description: isDeficit
+        ? 'Build a plan to reach a positive balance next month.'
+        : "Build a plan to put this month's surplus toward something specific.",
+      cta: { label: 'Create Goal', href: 'goals.html' },
+    },
+  ];
+}
+
+function renderInsightResult({ keyInsight, expenseTip, incomeTip, balance, expenses, potentialSavings, cacheLabelText }) {
+  const isDeficit = balance < 0;
+
+  document.getElementById('ai-month-chip').textContent = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const statusBadge = document.getElementById('ai-status-badge');
+  statusBadge.innerHTML = isDeficit ? '&#8595; Off Track' : '&#8593; On Track';
+  statusBadge.classList.toggle('ai-status-badge--off', isDeficit);
+  statusBadge.classList.toggle('ai-status-badge--on', !isDeficit);
+
+  const balanceEl = document.getElementById('ai-stat-balance');
+  balanceEl.textContent = fmtCurrency(balance);
+  balanceEl.classList.toggle('is-negative', isDeficit);
+  document.getElementById('ai-stat-expenses').textContent = fmtCurrency(expenses);
+
+  document.getElementById('ai-key-insight-text').textContent = keyInsight;
+
+  const recs = buildRecommendations({ expenseTip, incomeTip, balance, potentialSavings });
+  document.getElementById('ai-rec-list').innerHTML = recs.map(rec => `
+    <div class="ai-rec-item">
+      <span class="ai-rec-icon ${rec.iconClass}" aria-hidden="true"><img src="${rec.icon}" alt="" /></span>
+      <div class="ai-rec-body">
+        <h4 class="ai-rec-title">${escapeHtml(rec.title)}</h4>
+        <p class="ai-rec-desc">${escapeHtml(rec.description)}</p>
+      </div>
+      ${rec.badge
+        ? `<span class="ai-rec-badge"><span class="ai-rec-badge-label">${escapeHtml(rec.badge.label)}</span><span class="ai-rec-badge-value">${escapeHtml(rec.badge.value)}</span></span>`
+        : rec.cta
+          ? `<a href="${rec.cta.href}" class="ai-rec-cta">${escapeHtml(rec.cta.label)} &#8594;</a>`
+          : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('ai-insights-cache-label').textContent = cacheLabelText;
+}
+
+async function analyzeBudget() {
+  const btn      = document.getElementById('analyze-btn');
+  const resultEl = document.getElementById('ai-insights-result');
+  const errorEl  = document.getElementById('ai-insights-error');
+
+  function showError(msg) {
+    errorEl.textContent    = msg;
+    errorEl.style.display  = '';
+    resultEl.style.display = 'none';
+  }
+
+  const month = todayMonth();
+  const monthTxs = homeTransactions.filter(tx => (tx.date || '').slice(0, 7) === month);
+  if (monthTxs.length === 0) {
+    showError('No transactions found for this month. Add some income or expenses first.');
+    return;
+  }
+
+  const incomeByCategory   = {};
+  const expensesByCategory = {};
+  for (const tx of monthTxs) {
+    const label = CATEGORY_LABELS[tx.category] || (tx.category ? capitalize(tx.category) : '') || 'Other';
+    if (tx.type === 'income') {
+      incomeByCategory[label] = (incomeByCategory[label] || 0) + Number(tx.amount);
+    } else {
+      expensesByCategory[label] = (expensesByCategory[label] || 0) + Number(tx.amount);
+    }
+  }
+
+  const income   = Object.values(incomeByCategory).reduce((s, v) => s + v, 0);
+  const expenses = Object.values(expensesByCategory).reduce((s, v) => s + v, 0);
+  const balance  = income - expenses;
+
+  if (!isFinite(income) || !isFinite(expenses)) {
+    showError('Some transactions have invalid amounts. Please review your data.');
+    return;
+  }
+
+  const cacheKey = buildInsightCacheKey(income, expenses, balance, incomeByCategory, expensesByCategory);
+  const potentialSavings = estimatePotentialSavings(expensesByCategory);
+  if (insightCache.key === cacheKey) {
+    renderInsightResult({ ...insightCache.data, balance, expenses, potentialSavings, cacheLabelText: 'Loaded from cache' });
+    errorEl.style.display  = 'none';
+    resultEl.style.display = '';
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = 'Analyzing…';
+  errorEl.style.display  = 'none';
+  resultEl.style.display = 'none';
+
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    const res = await fetch('/analyze-budget', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal:  controller.signal,
+      body: JSON.stringify({
+        income, expenses, balance,
+        incomeByCategory, expensesByCategory,
+        month: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      }),
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(
+        body.error ||
+        (res.status >= 500 ? 'The server ran into an error. Please try again.'
+                           : 'The request was rejected. Please try again.')
+      );
+    }
+
+    const data = await res.json();
+
+    if (!data.keyInsight || !data.expenseTip?.title || !data.incomeTip?.title) {
+      throw new Error('The server returned an incomplete response. Please try again.');
+    }
+
+    insightCache.key  = cacheKey;
+    insightCache.data = { keyInsight: data.keyInsight, expenseTip: data.expenseTip, incomeTip: data.incomeTip };
+
+    renderInsightResult({ ...insightCache.data, balance, expenses, potentialSavings, cacheLabelText: 'Fresh analysis' });
+    resultEl.style.display = '';
+
+  } catch (err) {
+    clearTimeout(timeoutId);
+
+    if (err.name === 'AbortError') {
+      showError('The request timed out. Please try again in a moment.');
+    } else if (!navigator.onLine) {
+      showError('You appear to be offline. Check your connection and try again.');
+    } else {
+      showError(err.message || 'Something went wrong. Please try again.');
+    }
+
+    console.error('AI insight error:', err);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Analyze Budget';
+  }
+}
+
+document.getElementById('analyze-btn').addEventListener('click', analyzeBudget);
 
 initNav();
 
