@@ -720,6 +720,100 @@ async function analyzeBudget() {
 
 document.getElementById('analyze-btn').addEventListener('click', analyzeBudget);
 
+// ── Money Tips carousel (home page) ────────────────────────────────────────────
+const MONEY_TIPS = [
+  { category: 'Smart habits', title: 'Make saving automatic', text: 'Set up a recurring transfer on payday so you save before spending.', callout: 'Try starting with 5% of income' },
+  { category: 'Budgeting', title: 'Try the 50/30/20 rule', text: 'Split income into 50% needs, 30% wants, and 20% savings and debt payoff.', callout: 'A simple framework that scales with any income' },
+  { category: 'Emergency fund', title: 'Build a safety net first', text: 'Aim for 1 month of expenses saved before tackling other goals.', callout: 'Even $500 can prevent a debt spiral' },
+  { category: 'Debt', title: 'Pay the highest interest first', text: 'Tackle high-interest debt before extra savings — it\'s a guaranteed return.', callout: 'Credit cards often cost 20%+ APR' },
+  { category: 'Subscriptions', title: 'Audit recurring charges', text: 'Review every subscription monthly — cancel what you don\'t actively use.', callout: 'Average household wastes $200+/yr here' },
+  { category: 'Awareness', title: 'Track every purchase', text: 'Logging expenses, even small ones, reveals patterns you\'d otherwise miss.', callout: 'Awareness alone cuts spending ~10-15%' },
+  { category: 'Credit', title: 'Keep utilization low', text: 'Stay under 30% of your credit limit to protect your credit score.', callout: 'Under 10% is even better for your score' },
+  { category: 'Saving', title: 'Pay yourself first', text: 'Treat savings like a non-negotiable bill, not an afterthought.', callout: 'Pair it with payday for consistency' },
+  { category: 'Groceries', title: 'Plan meals before shopping', text: 'A list based on a weekly plan cuts impulse buys at the store.', callout: 'Never shop on an empty stomach' },
+  { category: 'Big purchases', title: 'Use the 24-hour rule', text: 'Wait a full day before any non-essential purchase over $50.', callout: 'Most urges fade within hours' },
+  { category: 'Income', title: 'Diversify your income', text: 'A side project or freelance work builds a buffer for lean months.', callout: 'Even $100/mo adds real resilience' },
+  { category: 'Goals', title: 'Make goals specific and dated', text: '"Save $3,000 by December" beats "save more money" every time.', callout: 'Specific goals are 2-3x more likely to be hit' },
+  { category: 'Housing', title: 'Keep housing under 30%', text: 'Rent or mortgage above this threshold squeezes every other goal.', callout: 'Include utilities in that calculation' },
+  { category: 'Investing', title: 'Start early, even small', text: 'Compounding rewards time in the market more than perfect timing.', callout: '$50/mo at 25 beats $200/mo at 40' },
+  { category: 'Taxes', title: 'Know your deductions', text: 'Common deductions and credits are often missed — a little research pays off.', callout: 'Revisit your withholding annually' },
+  { category: 'Insurance', title: 'Shop your policies yearly', text: 'Auto and home insurance rates creep up — compare quotes every renewal.', callout: 'Switching can save 10-20%' },
+  { category: 'Banking', title: 'Avoid overdraft fees', text: 'Link a savings buffer or alerts so you\'re never surprised by a fee.', callout: 'One overdraft can cost $30+' },
+  { category: 'Negotiating', title: 'Negotiate your bills', text: 'Internet, phone, and insurance providers often have retention discounts.', callout: 'A 5-minute call can save $200+/yr' },
+  { category: 'Windfalls', title: 'Give windfalls a job', text: 'Decide in advance how a bonus or refund will be split — save, debt, spend.', callout: 'Try the 50/30/20 split on windfalls too' },
+  { category: 'Lifestyle', title: 'Don\'t upgrade every raise', text: 'Bank at least half of any raise before adjusting your spending.', callout: 'This is how high earners still go broke' },
+  { category: 'Cash flow', title: 'Know your break-even number', text: 'Understand the minimum you need monthly to stay afloat.', callout: 'This number guides every big decision' },
+  { category: 'Debt', title: 'Avoid minimum-payment traps', text: 'Minimums mostly cover interest — pay more whenever you can.', callout: 'An extra $20/mo can cut years off a loan' },
+  { category: 'Shopping', title: 'Unsubscribe from sale emails', text: 'Fewer sale emails means fewer impulse temptations in your inbox.', callout: 'Out of sight really is out of mind' },
+  { category: 'Net worth', title: 'Track net worth, not just spending', text: 'Assets minus debts is the real scoreboard for financial progress.', callout: 'Check it monthly, not daily' },
+  { category: 'Retirement', title: 'Capture your employer match', text: 'An unmatched 401(k) contribution is free money left on the table.', callout: 'It\'s an instant 50-100% return' },
+  { category: 'Credit cards', title: 'Pick one card to optimize', text: 'A single rewards or cashback card is easier to manage than five.', callout: 'Simplicity beats stacking rewards' },
+  { category: 'Budget reviews', title: 'Review your budget monthly', text: 'A budget is a living plan — adjust it as life changes.', callout: '15 minutes a month keeps it honest' },
+  { category: 'Price awareness', title: 'Price-check before big buys', text: 'A quick search can reveal the same item cheaper elsewhere.', callout: 'Browser extensions can do this for you' },
+  { category: 'Family', title: 'Talk money with your household', text: 'Shared finances work best with shared visibility and goals.', callout: 'Monthly money check-ins reduce conflict' },
+  { category: 'Mindset', title: 'Progress over perfection', text: 'One off-track month doesn\'t undo months of good habits.', callout: 'Consistency beats intensity every time' },
+];
+const MONEY_TIPS_SHOWN = 5;
+
+let currentMoneyTips = [];
+let currentMoneyTipIdx = 0;
+
+function pickRandomMoneyTips() {
+  const pool = [...MONEY_TIPS.keys()];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, MONEY_TIPS_SHOWN).map(i => MONEY_TIPS[i]);
+}
+
+function renderMoneyTipDots() {
+  document.getElementById('mt-dots').innerHTML = currentMoneyTips.map((_, i) =>
+    `<span class="mt-dot${i === currentMoneyTipIdx ? ' active' : ''}" data-idx="${i}"></span>`
+  ).join('');
+}
+
+function renderMoneyTip() {
+  const tip = currentMoneyTips[currentMoneyTipIdx];
+  document.getElementById('mt-category').textContent = tip.category;
+  document.getElementById('mt-headline').textContent = tip.title;
+  document.getElementById('mt-text').textContent = tip.text;
+  document.getElementById('mt-callout-text').textContent = tip.callout;
+  document.getElementById('mt-counter').textContent = `Tip ${currentMoneyTipIdx + 1} of ${currentMoneyTips.length}`;
+  renderMoneyTipDots();
+}
+
+function goToMoneyTip(idx) {
+  currentMoneyTipIdx = (idx + currentMoneyTips.length) % currentMoneyTips.length;
+  renderMoneyTip();
+}
+
+function initMoneyTips() {
+  currentMoneyTips = pickRandomMoneyTips();
+  currentMoneyTipIdx = 0;
+  renderMoneyTip();
+
+  document.getElementById('mt-prev').addEventListener('click', () => goToMoneyTip(currentMoneyTipIdx - 1));
+
+  document.getElementById('mt-next').addEventListener('click', () => {
+    if (currentMoneyTipIdx >= currentMoneyTips.length - 1) {
+      // Reached the end of this batch — shuffle in a fresh set of 5 from the pool of 30.
+      currentMoneyTips = pickRandomMoneyTips();
+      currentMoneyTipIdx = 0;
+      renderMoneyTip();
+    } else {
+      goToMoneyTip(currentMoneyTipIdx + 1);
+    }
+  });
+
+  document.getElementById('mt-dots').addEventListener('click', e => {
+    const dot = e.target.closest('.mt-dot');
+    if (dot) goToMoneyTip(Number(dot.dataset.idx));
+  });
+}
+
+initMoneyTips();
+
 initNav();
 
 // ── Sliding panel logic ───────────────────────────────────────────────────────
