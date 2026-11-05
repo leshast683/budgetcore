@@ -372,27 +372,27 @@ function todayISO() {
 }
 
 const USER_TYPE_TIPS = {
-  spender: { icon: '🛍️', texts: [
+  spender: { texts: [
     'Try the 24-hour rule: wait a day before any non-essential purchase.',
     'Use the 50/30/20 rule: 50% needs, 30% wants, 20% savings.',
     'Track every impulse buy this month — awareness is the first step.',
   ]},
-  saver: { icon: '🐷', texts: [
+  saver: { texts: [
     'Automate your savings — treat it like a non-negotiable bill.',
     'Small wins count: every $10 saved adds up to $120 a year.',
     'Review your subscriptions monthly and cancel what you don\'t use.',
   ]},
-  learner: { icon: '📚', texts: [
+  learner: { texts: [
     'Start with an emergency fund: aim for 1 month of expenses first.',
     'The budget you actually follow is better than the perfect one.',
     'Learning to track spending is the foundation of every money goal.',
   ]},
-  investor: { icon: '📈', texts: [
+  investor: { texts: [
     'Time in the market beats timing the market — stay consistent.',
     'Track your net worth monthly, not just your spending.',
     'Reduce lifestyle inflation: every raise is a savings opportunity.',
   ]},
-  fighter: { icon: '⚔️', texts: [
+  fighter: { texts: [
     'Target the highest-interest debt first — the avalanche method saves money.',
     'Even $20 extra toward debt each month compounds into hundreds saved.',
     'Celebrate every debt payoff milestone — momentum is powerful.',
@@ -571,7 +571,6 @@ function renderTip() {
   const idx       = totalTx % tipData.texts.length;
   const text      = tipData.texts[idx];
 
-  document.getElementById('tip-icon').textContent = tipData.icon;
   document.getElementById('tip-text').textContent = text;
   tipSec.style.display = '';
 }
