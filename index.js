@@ -470,7 +470,7 @@ async function renderDailySpendingChart(transactions, investments) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 60, right: 28 } },
+      layout: { padding: { top: 60, right: 40 } },
       interaction: { mode: 'index', intersect: false },
       animation: { duration: 600, easing: 'easeOutQuart' },
       plugins: {
