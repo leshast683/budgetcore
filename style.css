@@ -8353,7 +8353,8 @@ input[type="date"].filter-date {
   transition: box-shadow 0.2s;
 }
 .cha-top { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
-.cha-emoji { font-size: 1.4rem; flex-shrink: 0; }
+.cha-emoji { font-size: 1.4rem; flex-shrink: 0; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; }
+.cha-emoji img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .cha-info { flex: 1; min-width: 0; }
 .cha-title { display: block; font-weight: 700; font-size: 0.9rem; color: var(--heading); }
 .cha-sub { font-size: 0.76rem; color: var(--muted); }

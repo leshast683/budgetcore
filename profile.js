@@ -668,7 +668,7 @@ function renderActiveChallenges() {
     return `
       <div class="challenge-active-card" style="border-left-color:${def.color}">
         <div class="cha-top">
-          <span class="cha-emoji">${def.emoji}</span>
+          <span class="cha-emoji">${def.icon ? `<img src="${def.icon}" alt="" />` : def.emoji}</span>
           <div class="cha-info">
             <span class="cha-title">${def.title}</span>
             <span class="cha-sub">${result.failed ? '❌ Failed — restart to try again' : daysLeft > 0 ? `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left` : 'Almost done!'}</span>
