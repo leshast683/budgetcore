@@ -788,9 +788,16 @@ function renderMoneyTip() {
   document.getElementById('mt-headline').textContent = tip.title;
   document.getElementById('mt-text').textContent = tip.text;
   document.getElementById('mt-callout-text').textContent = tip.callout;
-  document.getElementById('mt-counter').textContent = `Tip ${currentMoneyTipIdx + 1} of ${currentMoneyTips.length}`;
   document.getElementById('mt-art-img').src = MONEY_TIP_MASCOTS[currentMoneyTipIdx % MONEY_TIP_MASCOTS.length];
   renderMoneyTipDots();
+
+  // Re-trigger the slide-in animation on every tip change (not just once on load).
+  [document.querySelector('.mt-card-main'), document.querySelector('.mt-card-art')].forEach(el => {
+    if (!el) return;
+    el.classList.remove('mt-slide-in');
+    void el.offsetWidth; // force reflow so the animation restarts
+    el.classList.add('mt-slide-in');
+  });
 }
 
 function advanceMoneyTip() {
