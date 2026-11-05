@@ -362,10 +362,12 @@ function widenSpikesForDisplay(data) {
   const display = [...data];
   data.forEach((v, i) => {
     if (v <= 0) return;
-    if (i > 0 && data[i - 1] === 0) display[i - 1] = Math.max(display[i - 1], v * 0.7);
-    if (i < data.length - 1 && data[i + 1] === 0) display[i + 1] = Math.max(display[i + 1], v * 0.7);
-    if (i > 1 && data[i - 2] === 0) display[i - 2] = Math.max(display[i - 2], v * 0.15);
-    if (i < data.length - 2 && data[i + 2] === 0) display[i + 2] = Math.max(display[i + 2], v * 0.15);
+    if (i > 0 && data[i - 1] === 0) display[i - 1] = Math.max(display[i - 1], v * 0.85);
+    if (i < data.length - 1 && data[i + 1] === 0) display[i + 1] = Math.max(display[i + 1], v * 0.85);
+    if (i > 1 && data[i - 2] === 0) display[i - 2] = Math.max(display[i - 2], v * 0.45);
+    if (i < data.length - 2 && data[i + 2] === 0) display[i + 2] = Math.max(display[i + 2], v * 0.45);
+    if (i > 2 && data[i - 3] === 0) display[i - 3] = Math.max(display[i - 3], v * 0.12);
+    if (i < data.length - 3 && data[i + 3] === 0) display[i + 3] = Math.max(display[i + 3], v * 0.12);
   });
   return display;
 }
@@ -426,7 +428,7 @@ async function renderDailySpendingChart(transactions, investments) {
     borderWidth: 2.5,
     backgroundColor: grad,
     fill: true,
-    tension: 0.5,
+    tension: 0.35,
     pointRadius: pointRadii,
     pointHoverRadius: 7,
     pointBackgroundColor: pointBgColors,
