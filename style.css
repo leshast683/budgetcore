@@ -6379,6 +6379,7 @@ input[type="date"].filter-date {
 .account-avatar-ring:hover {
   box-shadow: 0 0 0 2.5px var(--accent), 0 4px 14px rgba(139,101,52,0.35);
 }
+#home-avatar-ring { animation: fadeSlideUp 0.38s var(--ease-out) both; }
 .account-person-icon { width: 18px; height: 18px; color: var(--accent); }
 .account-btn-name {
   font-size: 0.85rem; font-weight: 600; color: var(--heading);
