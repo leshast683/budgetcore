@@ -410,6 +410,8 @@ let transactions = [];
 let goals        = [];
 let activeChallenges    = [];
 let completedChallenges = [];
+let challengesExpanded  = false;
+const CHALLENGE_PREVIEW_COUNT = 2;
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 supabase.auth.onAuthStateChange(async (event, session) => {
@@ -597,9 +599,10 @@ async function refreshChallenges() {
 function renderChallengeStats() {
   document.getElementById('ch-active-count').textContent = activeChallenges.length;
   document.getElementById('ch-done-count').textContent   = completedChallenges.length;
-  document.getElementById('ch-streak').textContent = activeChallenges.length > 0
+  const streak = activeChallenges.length > 0
     ? Math.max(...activeChallenges.map(c => daysBetween(c.startDate, todayISO()) + 1), 0)
     : 0;
+  document.getElementById('ch-streak').textContent = `${streak} day${streak === 1 ? '' : 's'}`;
 }
 
 function renderActiveChallenges() {
@@ -662,7 +665,13 @@ function renderAvailableChallenges() {
   const activeDefIds    = new Set(activeChallenges.map(c => c.defId));
   const completedDefIds = new Set(completedChallenges.map(c => c.defId));
 
-  document.getElementById('available-challenges').innerHTML = CHALLENGE_DEFS.map(def => {
+  const seeAllLink = document.getElementById('challenges-see-all');
+  const showAll    = challengesExpanded || CHALLENGE_DEFS.length <= CHALLENGE_PREVIEW_COUNT;
+  const defsToShow = showAll ? CHALLENGE_DEFS : CHALLENGE_DEFS.slice(0, CHALLENGE_PREVIEW_COUNT);
+  seeAllLink.style.display = CHALLENGE_DEFS.length > CHALLENGE_PREVIEW_COUNT ? '' : 'none';
+  seeAllLink.textContent   = challengesExpanded ? 'Show Less ‹' : 'See All ›';
+
+  document.getElementById('available-challenges').innerHTML = defsToShow.map(def => {
     const isActive    = activeDefIds.has(def.id);
     const isCompleted = completedDefIds.has(def.id);
     return `
@@ -703,6 +712,12 @@ function renderAvailableChallenges() {
     });
   });
 }
+
+document.getElementById('challenges-see-all').addEventListener('click', e => {
+  e.preventDefault();
+  challengesExpanded = !challengesExpanded;
+  renderAvailableChallenges();
+});
 
 function renderChallengeBadges() {
   const section = document.getElementById('challenge-badges-section');
