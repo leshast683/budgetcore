@@ -8343,6 +8343,15 @@ input[type="date"].filter-date {
 .home-hero-text .hero-headline { font-size: clamp(2.9rem, 5.5vw, 4.4rem); }
 .home-hero-text .hero-subtext { font-size: 1.02rem; max-width: 420px; }
 
+/* Home page Net Worth card — light wave background, needs dark text */
+#home-nw-hero {
+  background: url('networth-home-wave.png') center/cover no-repeat;
+}
+#home-nw-hero .nw-hero-label { color: var(--text); }
+#home-nw-hero .nw-hero-value { color: var(--heading); }
+#home-nw-hero .nw-hero-change { background: rgba(26,120,42,0.12); color: #1a7a2a; }
+#home-nw-hero .nw-hero-change.is-negative { background: rgba(180,40,30,0.12); color: #b4281e; }
+
 .home-tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -8369,7 +8378,7 @@ input[type="date"].filter-date {
 .home-tile--balance,
 .home-tile--investments,
 .home-tile--goals,
-.home-tile--expenses    { --home-tile-bg: #fdf0e4; }
+.home-tile--expenses    { --home-tile-bg: rgba(253,240,228,0.55); }
 
 .home-tile-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .home-tile-left { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
