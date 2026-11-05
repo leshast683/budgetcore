@@ -362,10 +362,10 @@ function widenSpikesForDisplay(data) {
   const display = [...data];
   data.forEach((v, i) => {
     if (v <= 0) return;
-    if (i > 0 && data[i - 1] === 0) display[i - 1] = Math.max(display[i - 1], v * 0.35);
-    if (i < data.length - 1 && data[i + 1] === 0) display[i + 1] = Math.max(display[i + 1], v * 0.35);
-    if (i > 1 && data[i - 2] === 0) display[i - 2] = Math.max(display[i - 2], v * 0.08);
-    if (i < data.length - 2 && data[i + 2] === 0) display[i + 2] = Math.max(display[i + 2], v * 0.08);
+    if (i > 0 && data[i - 1] === 0) display[i - 1] = Math.max(display[i - 1], v * 0.7);
+    if (i < data.length - 1 && data[i + 1] === 0) display[i + 1] = Math.max(display[i + 1], v * 0.7);
+    if (i > 1 && data[i - 2] === 0) display[i - 2] = Math.max(display[i - 2], v * 0.15);
+    if (i < data.length - 2 && data[i + 2] === 0) display[i + 2] = Math.max(display[i + 2], v * 0.15);
   });
   return display;
 }
@@ -426,7 +426,7 @@ async function renderDailySpendingChart(transactions, investments) {
     borderWidth: 2.5,
     backgroundColor: grad,
     fill: true,
-    tension: 0.75,
+    tension: 0.5,
     pointRadius: pointRadii,
     pointHoverRadius: 7,
     pointBackgroundColor: pointBgColors,
