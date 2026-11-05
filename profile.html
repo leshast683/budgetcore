@@ -93,52 +93,57 @@
     <!-- ── Who are you? ── -->
     <section class="prof-section prof-section--type">
       <h2 class="prof-section-title">Who are you?</h2>
-      <p class="prof-section-sub">This helps us personalise your experience.</p>
+      <p class="prof-section-sub">Help us personalize your experience</p>
       <div class="prof-type-grid" id="prof-type-grid">
         <button class="type-card" data-type="spender">
-          <div class="type-icon" style="background:#fff0e0">
-            <svg viewBox="0 0 32 32" fill="none" stroke="#e07030" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="28" height="18" rx="4"/><path d="M2 13h28"/><circle cx="8" cy="20" r="2" fill="#e07030" stroke="none"/></svg>
-          </div>
-          <span class="type-label">Spender</span>
-          <span class="type-desc">I enjoy treating myself</span>
+          <span class="type-icon">👛</span>
+          <span class="type-text">
+            <span class="type-label">Spender</span>
+            <span class="type-desc">I enjoy treating myself</span>
+          </span>
+          <span class="type-radio"></span>
         </button>
         <button class="type-card" data-type="saver">
-          <div class="type-icon" style="background:#e8f5e8">
-            <svg viewBox="0 0 32 32" fill="none" stroke="#3a8a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 14c0-4.418-3.582-8-8-8a8 8 0 00-8 8c0 3 1.6 5.6 4 7.2V24h8v-2.8c2.4-1.6 4-4.2 4-7.2z"/><path d="M12 24h8M14 27h4"/></svg>
-          </div>
-          <span class="type-label">Saver</span>
-          <span class="type-desc">I'm building my future</span>
+          <span class="type-icon">🐷</span>
+          <span class="type-text">
+            <span class="type-label">Saver</span>
+            <span class="type-desc">I'm building my future</span>
+          </span>
+          <span class="type-radio"></span>
         </button>
         <button class="type-card" data-type="learner">
-          <div class="type-icon" style="background:#e8e0f4">
-            <svg viewBox="0 0 32 32" fill="none" stroke="#7040b0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l12-4 12 4v8c0 6-5.333 10-12 12C9.333 26 4 22 4 16V8z"/><path d="M16 12v8M12 16h8"/></svg>
-          </div>
-          <span class="type-label">Budget Learner</span>
-          <span class="type-desc">I want to learn money skills</span>
+          <span class="type-icon">🎓</span>
+          <span class="type-text">
+            <span class="type-label">Budget Learner</span>
+            <span class="type-desc">I want to learn money skills</span>
+          </span>
+          <span class="type-radio"></span>
         </button>
         <button class="type-card" data-type="investor">
-          <div class="type-icon" style="background:#e0eeff">
-            <svg viewBox="0 0 32 32" fill="none" stroke="#2060c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,24 12,16 18,20 28,8"/><polyline points="22,8 28,8 28,14"/></svg>
-          </div>
-          <span class="type-label">Investor</span>
-          <span class="type-desc">I'm growing my wealth</span>
+          <span class="type-icon">📈</span>
+          <span class="type-text">
+            <span class="type-label">Investor</span>
+            <span class="type-desc">I'm growing my wealth</span>
+          </span>
+          <span class="type-radio"></span>
         </button>
         <button class="type-card" data-type="fighter">
-          <div class="type-icon" style="background:#ffe0e0">
-            <svg viewBox="0 0 32 32" fill="none" stroke="#c02020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3L4 8v10c0 6.627 5.373 12 12 12s12-5.373 12-12V8L16 3z"/><path d="M16 10v6M13 13h6"/></svg>
-          </div>
-          <span class="type-label">Debt-Fighter</span>
-          <span class="type-desc">I'm crushing my debt</span>
+          <span class="type-icon">🛡️</span>
+          <span class="type-text">
+            <span class="type-label">Debt-Fighter</span>
+            <span class="type-desc">I'm crushing my debt</span>
+          </span>
+          <span class="type-radio"></span>
         </button>
       </div>
     </section>
 
     <!-- ── Personalized Tip ── -->
     <section class="prof-section" id="tip-section" style="display:none">
-      <h2 class="prof-section-title">Your Money Tip</h2>
       <div class="prof-tip-card" id="prof-tip-card">
         <div class="tip-icon" id="tip-icon">💡</div>
         <div class="tip-body">
+          <span class="prof-tip-badge">Your Money Tip</span>
           <p class="tip-text" id="tip-text"></p>
         </div>
       </div>
