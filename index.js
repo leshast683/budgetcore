@@ -792,12 +792,13 @@ function renderMoneyTip() {
   renderMoneyTipDots();
 
   // Re-trigger the slide-in animation on every tip change (not just once on load).
-  [document.querySelector('.mt-card-main'), document.querySelector('.mt-card-art')].forEach(el => {
-    if (!el) return;
-    el.classList.remove('mt-slide-in');
-    void el.offsetWidth; // force reflow so the animation restarts
-    el.classList.add('mt-slide-in');
-  });
+  // Animates .mt-card-top as a single unit so the text and art slide together.
+  const cardTop = document.querySelector('.mt-card-top');
+  if (cardTop) {
+    cardTop.classList.remove('mt-slide-in');
+    void cardTop.offsetWidth; // force reflow so the animation restarts
+    cardTop.classList.add('mt-slide-in');
+  }
 }
 
 function advanceMoneyTip() {
