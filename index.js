@@ -7,7 +7,7 @@ import { supabase } from './supabase.js';
 import { initPageTransitions } from './transitions.js';
 import { loadAndApplyAvatar } from './avatarUtils.js';
 import { initNav } from './nav.js';
-import { CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from './categories.js';
+import { CATEGORY_LABELS, CATEGORY_COLORS } from './categories.js';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -89,7 +89,7 @@ async function renderAccountHome(user) {
   renderHomeNetWorth(nwItems);
   renderHomeBalance(transactions);
   renderHomeInvestments(investments);
-  renderHomeGoalsAndSavings(goals);
+  renderHomeGoals(goals);
   renderHomeSpendOverview(transactions);
   renderHomeNextSteps({ hasAccounts: nwItems.length > 0, hasGoals: goals.length > 0, hasInvestments: investments.length > 0 });
 }
@@ -128,7 +128,8 @@ function renderHomeBalance(transactions) {
   const monthTx = transactions.filter(tx => (tx.date || '').slice(0, 7) === month);
   const income   = monthTx.filter(tx => tx.type === 'income').reduce((s, tx) => s + Number(tx.amount), 0);
   const expenses = monthTx.filter(tx => tx.type === 'expense').reduce((s, tx) => s + Number(tx.amount), 0);
-  document.getElementById('home-tile-balance-val').textContent = fmtCurrency(income - expenses);
+  document.getElementById('home-tile-balance-val').textContent  = fmtCurrency(income - expenses);
+  document.getElementById('home-tile-expenses-val').textContent = fmtCurrency(expenses);
 }
 
 function renderHomeInvestments(investments) {
@@ -146,16 +147,14 @@ function renderHomeInvestments(investments) {
   }
 }
 
-function renderHomeGoalsAndSavings(goals) {
+function renderHomeGoals(goals) {
   const active = goals.filter(g => Number(g.saved) < Number(g.target));
-  const totalSaved  = goals.reduce((s, g) => s + Number(g.saved || 0), 0);
   const totalTarget = active.reduce((s, g) => s + Number(g.target || 0), 0);
   const activeSaved = active.reduce((s, g) => s + Number(g.saved || 0), 0);
   const pct = totalTarget > 0 ? Math.min(Math.round((activeSaved / totalTarget) * 100), 100) : 0;
 
   document.getElementById('home-tile-goals-val').textContent = `${active.length} active`;
   document.getElementById('home-tile-goals-fill').style.width = pct + '%';
-  document.getElementById('home-tile-savings-val').textContent = fmtCurrency(totalSaved);
 }
 
 function renderHomeSpendOverview(transactions) {
@@ -168,43 +167,44 @@ function renderHomeSpendOverview(transactions) {
     }
   });
 
-  const entries = Object.entries(totals).filter(([, v]) => v > 0).sort(([, a], [, b]) => b - a);
-  if (!entries.length) { card.style.display = 'none'; return; }
+  const cats = Object.keys(totals).filter(c => totals[c] > 0);
+  if (!cats.length) { card.style.display = 'none'; return; }
   card.style.display = '';
 
-  const total = entries.reduce((s, [, v]) => s + v, 0);
-  const top = entries.slice(0, 5);
-
-  const rowsEl = document.getElementById('home-spend-rows');
-  rowsEl.innerHTML = top.map(([cat, amount]) => {
-    const label = CATEGORY_LABELS[cat] || cat;
-    const icon  = CATEGORY_ICONS[cat]  || '📌';
-    const color = CATEGORY_COLORS[cat] || '#9a6e3a';
-    const pct   = Math.round((amount / total) * 100);
-    return `
-      <div class="home-spend-row">
-        <span class="home-spend-dot" style="background:${color}"></span>
-        <span class="home-spend-icon">${icon}</span>
-        <span class="home-spend-label">${label}</span>
-        <span class="home-spend-pct">${pct}%</span>
-      </div>`;
-  }).join('');
-
   const canvas = document.getElementById('home-spend-chart');
-  const labels = top.map(([cat]) => CATEGORY_LABELS[cat] || cat);
-  const data   = top.map(([, v]) => parseFloat(v.toFixed(2)));
-  const colors = top.map(([cat]) => CATEGORY_COLORS[cat] || '#9a6e3a');
+  const labels = cats.map(c => CATEGORY_LABELS[c] || c);
+  const data   = cats.map(c => parseFloat(totals[c].toFixed(2)));
+  const colors = cats.map(c => CATEGORY_COLORS[c] || '#a07848');
 
   if (homeSpendChart) { homeSpendChart.destroy(); homeSpendChart = null; }
   import('chart.js/auto').then(({ default: Chart }) => {
     homeSpendChart = new Chart(canvas.getContext('2d'), {
       type: 'doughnut',
-      data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: '#fffdf9', borderWidth: 3, borderRadius: 6 }] },
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: '#fffdf9', borderWidth: 3, borderRadius: 6, hoverOffset: 10 }] },
       options: {
         responsive: true,
         maintainAspectRatio: true,
         cutout: '70%',
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${fmtCurrency(ctx.parsed)}` } } },
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              font: { family: 'Inter, -apple-system, sans-serif', size: 11, weight: '600' },
+              color: '#4a3020',
+              padding: 16,
+              usePointStyle: true,
+              pointStyle: 'rect',
+              pointStyleWidth: 10,
+              boxHeight: 10,
+            },
+          },
+          tooltip: {
+            backgroundColor: 'rgba(26,14,6,0.92)',
+            padding: 10,
+            cornerRadius: 10,
+            callbacks: { label: ctx => `  ${ctx.label}: ${fmtCurrency(ctx.parsed)}` },
+          },
+        },
       },
       plugins: [{
         id: 'homeCenterText',
@@ -217,12 +217,12 @@ function renderHomeSpendOverview(transactions) {
           ctx.save();
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.font = '700 15px Inter, sans-serif';
+          ctx.font = '700 18px Inter, -apple-system, sans-serif';
           ctx.fillStyle = '#1a0e06';
-          ctx.fillText(fmtCurrency(sum), x, y - 8);
-          ctx.font = '500 9px Inter, sans-serif';
+          ctx.fillText(fmtCurrency(sum), x, y - 9);
+          ctx.font = '500 10px Inter, -apple-system, sans-serif';
           ctx.fillStyle = '#957560';
-          ctx.fillText('this month', x, y + 9);
+          ctx.fillText('this month', x, y + 10);
           ctx.restore();
         },
       }],
