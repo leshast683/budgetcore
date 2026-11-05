@@ -8448,6 +8448,8 @@ input[type="date"].filter-date {
   transition: background 0.2s, color 0.2s;
 }
 .home-step.is-done .home-step-icon-wrap { background: var(--accent); color: #fff; }
+.home-step-icon-wrap--img { background: none; }
+.home-step-icon-wrap--img img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .home-step-check {
   position: absolute;
   bottom: -2px;
