@@ -14,6 +14,9 @@ import aiRecGoalIcon from './ai-rec-goal-icon.png';
 import stepBudgetIcon from './home-step-budget-icon.png';
 import stepTransactionIcon from './home-step-transaction-icon.png';
 import stepGoalIcon from './home-step-goal-icon.png';
+import stepBudgetIconDone from './home-step-budget-icon-done.png';
+import stepTransactionIconDone from './home-step-transaction-icon-done.png';
+import stepGoalIconDone from './home-step-goal-icon-done.png';
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -274,9 +277,9 @@ function renderHomeSpendOverview(transactions) {
 
 function renderHomeNextSteps({ hasBudgetTargets, hasTransactions, hasGoals }) {
   const steps = [
-    { done: hasBudgetTargets, label: 'Set Up Budget Targets', href: 'app.html', icon: '🎯', incompleteIcon: stepBudgetIcon },
-    { done: hasTransactions,  label: 'Add Your First Transaction', href: 'app.html', icon: '🧾', incompleteIcon: stepTransactionIcon },
-    { done: hasGoals,         label: 'Create Your First Goal', href: 'goals.html?mode=savings', icon: '🏆', incompleteIcon: stepGoalIcon },
+    { done: hasBudgetTargets, label: 'Set Up Budget Targets', href: 'app.html', incompleteIcon: stepBudgetIcon, doneIcon: stepBudgetIconDone },
+    { done: hasTransactions,  label: 'Add Your First Transaction', href: 'app.html', incompleteIcon: stepTransactionIcon, doneIcon: stepTransactionIconDone },
+    { done: hasGoals,         label: 'Create Your First Goal', href: 'goals.html?mode=savings', incompleteIcon: stepGoalIcon, doneIcon: stepGoalIconDone },
   ];
   const doneCount = steps.filter(s => s.done).length;
   document.getElementById('home-next-steps-count').textContent = `${doneCount} of ${steps.length} complete`;
@@ -284,8 +287,8 @@ function renderHomeNextSteps({ hasBudgetTargets, hasTransactions, hasGoals }) {
   document.getElementById('home-next-steps').innerHTML = steps.map((s, i) => `
     ${i > 0 ? `<div class="home-step-connector${steps[i - 1].done ? ' is-done' : ''}"></div>` : ''}
     <a href="${s.href}" class="home-step${s.done ? ' is-done' : ''}">
-      <span class="home-step-icon-wrap${s.done ? '' : ' home-step-icon-wrap--img'}">
-        ${s.done ? s.icon : `<img src="${s.incompleteIcon}" alt="" />`}
+      <span class="home-step-icon-wrap home-step-icon-wrap--img">
+        <img src="${s.done ? s.doneIcon : s.incompleteIcon}" alt="" />
         ${s.done ? '<span class="home-step-check">✓</span>' : ''}
       </span>
       <span class="home-step-label">${s.label}</span>
