@@ -2285,10 +2285,12 @@ footer {
   position: relative;
 }
 
-/* Soft blurred color blobs behind the glass cards */
+/* Soft blurred color blobs behind the glass cards — absolute (not fixed)
+   so they span the full scrollable page instead of being clipped to one
+   viewport height, which cut the lower-corner blobs off as a hard edge. */
 .app-page::before {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
