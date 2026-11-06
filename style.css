@@ -7835,6 +7835,8 @@ input[type="date"].filter-date {
 .ob-step--active { background: #9a6e3a; width: 24px; border-radius: 4px; }
 .ob-step--done { background: #c8943a; }
 .ob-icon { font-size: 2.4rem; text-align: center; margin-bottom: 0.75rem; }
+.ob-icon--img { display: flex; justify-content: center; }
+.ob-icon--img img { width: 88px; height: 88px; object-fit: contain; }
 .ob-title { font-size: 1.25rem; font-weight: 700; color: var(--heading); text-align: center; margin: 0 0 0.5rem; }
 .ob-body { font-size: 0.9rem; color: var(--muted); text-align: center; margin: 0 0 1.5rem; line-height: 1.6; }
 .ob-goals-grid {
