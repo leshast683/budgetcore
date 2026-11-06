@@ -2607,7 +2607,10 @@ footer {
 .targets-edit-btn svg { width: 15px; height: 15px; }
 
 @media (max-width: 560px) {
-  .profile-saved-row { grid-template-columns: 1fr; }
+  .profile-saved-row { gap: 0.4rem; }
+  .profile-saved-info { padding: 0.4rem 0.4rem; }
+  .profile-saved-label { font-size: 0.52rem; }
+  .profile-saved-value { font-size: 0.8rem; }
 }
 
 .profile-desc {
@@ -6580,6 +6583,24 @@ input[type="date"].filter-date {
 }
 .type-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .type-card.active { border-color: var(--accent); background: var(--accent-light); }
+@keyframes profIconPop {
+  from { opacity: 0; transform: scale(0.75); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.profile-page .type-icon,
+.profile-page .tip-icon,
+.profile-page .prof-section-icon,
+.profile-page .challenge-stat-icon,
+.profile-page .chc-emoji,
+.profile-page .cha-emoji {
+  animation: profIconPop 0.45s var(--ease-out) both;
+}
+.prof-type-grid .type-card:nth-child(1) .type-icon { animation-delay: 0.02s; }
+.prof-type-grid .type-card:nth-child(2) .type-icon { animation-delay: 0.08s; }
+.prof-type-grid .type-card:nth-child(3) .type-icon { animation-delay: 0.14s; }
+.prof-type-grid .type-card:nth-child(4) .type-icon { animation-delay: 0.20s; }
+.prof-type-grid .type-card:nth-child(5) .type-icon { animation-delay: 0.26s; }
+
 .type-icon {
   width: 44px;
   height: 44px;
@@ -7143,7 +7164,25 @@ input[type="date"].filter-date {
 /* ================================================================
    DAILY SPENDING CHART
    ================================================================ */
-.daily-chart-section { }
+.daily-chart-section {
+  background: linear-gradient(160deg, #fdf3e8 0%, #f9e4cd 55%, #f5d9ba 100%);
+  border: 1px solid rgba(154,106,58,0.16);
+}
+.dsc-month-wrap { position: relative; display: inline-flex; align-items: center; }
+.dsc-month-select {
+  appearance: none; -webkit-appearance: none;
+  font-family: inherit; font-size: 0.82rem; font-weight: 600;
+  color: var(--heading);
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 0.4rem 2rem 0.4rem 0.9rem;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.dsc-month-chevron {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; color: var(--muted); pointer-events: none;
+}
 .chart-header-row {
   display: flex;
   align-items: center;

@@ -348,11 +348,14 @@
           <span class="chart-header-icon chart-header-icon--img" aria-hidden="true">
             <img src="daily-spending-header-icon.png" alt="" />
           </span>
-          <h2 class="card-title" style="margin:0">Daily Spending</h2>
+          <h2 class="card-title" style="margin:0">Spending This Month</h2>
         </div>
-        <span class="chart-period-pill" id="daily-chart-period">This Month</span>
+        <div class="dsc-month-wrap">
+          <select class="dsc-month-select" id="dsc-month-select"></select>
+          <svg class="dsc-month-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7l5 5 5-5"/></svg>
+        </div>
       </div>
-      <div style="position:relative;height:220px;margin-top:1rem">
+      <div style="position:relative;height:240px;margin-top:1.25rem">
         <canvas id="daily-spending-chart"></canvas>
       </div>
     </section>

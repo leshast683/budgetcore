@@ -99,6 +99,7 @@ function showSignedOutState() {
 
 // ── Account Home (signed-in summary) ───────────────────────────────────────────
 const fmtCurrency = n => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtWholeCurrency = n => (n < 0 ? '-$' : '$') + Math.round(Math.abs(n)).toLocaleString('en-US');
 const todayMonth = () => new Date().toISOString().slice(0, 7);
 
 function animateCountUp(el, target, formatFn, duration = 700) {
@@ -129,6 +130,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 let homeTransactions = [];
 let homeInvestments  = [];
 let dailyChartInstance = null;
+let selectedSpendingMonth = null;
 
 // Cache for AI Budget Insights — skips the API call when nothing has
 // changed since the last analysis (same approach as the Finance Hub).
@@ -173,7 +175,7 @@ async function renderAccountHome(user) {
     hasTransactions:  transactions.length > 0,
     hasGoals:         goals.length > 0,
   });
-  renderDailySpendingChart(transactions, investments);
+  renderDailySpendingChart(transactions);
 }
 
 function renderHomeNetWorth(nwItems) {
@@ -388,49 +390,88 @@ function drawDailyChartCallout(ctx, x, y, text) {
   ctx.restore();
 }
 
-const dailyChartCalloutPlugin = {
-  id: 'dailyChartCallouts',
+function lerpColor(hexA, hexB, t) {
+  const a = parseInt(hexA.slice(1), 16), b = parseInt(hexB.slice(1), 16);
+  const ar = (a >> 16) & 255, ag = (a >> 8) & 255, ab = a & 255;
+  const br = (b >> 16) & 255, bg = (b >> 8) & 255, bb = b & 255;
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `rgb(${r},${g},${bl})`;
+}
+
+const weeklyBarLabelsPlugin = {
+  id: 'weeklyBarLabels',
   afterDatasetsDraw(chart) {
-    const data = chart.data.datasets[0]?.rawSpendData || chart.data.datasets[0]?.data;
+    const data = chart.data.datasets[0]?.data;
     if (!data || !data.length) return;
     const meta = chart.getDatasetMeta(0);
     let maxIdx = 0;
     data.forEach((v, i) => { if (v > data[maxIdx]) maxIdx = i; });
-    if (data[maxIdx] <= 0) return;
-    const lastNonZero = data.reduce((idx, v, i) => v > 0 ? i : idx, -1);
-    const idxs = new Set([maxIdx, lastNonZero].filter(i => i >= 0));
-    idxs.forEach(i => {
-      const point = meta.data[i];
-      if (!point) return;
-      drawDailyChartCallout(chart.ctx, point.x, point.y, fmtCurrency(data[i]).replace(/\.00$/, ''));
+    data.forEach((v, i) => {
+      const bar = meta.data[i];
+      if (!bar) return;
+      const label = fmtWholeCurrency(v);
+      if (i === maxIdx && v > 0) {
+        drawDailyChartCallout(chart.ctx, bar.x, bar.y, label);
+      } else {
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = '700 13px Inter, sans-serif';
+        ctx.fillStyle = '#6e4420';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(label, bar.x, bar.y - 10);
+        ctx.restore();
+      }
     });
   },
 };
 
-// Adds small synthetic "shoulder" values on the zero-days immediately around
-// an isolated spike, purely so the line renders as a wide, rounded bump
-// instead of a single-point spike. Only the display curve is widened — every
-// label, bubble, and axis value still reflects the real per-day amounts.
-function widenSpikesForDisplay(data) {
-  const display = [...data];
-  data.forEach((v, i) => {
-    if (v <= 0) return;
-    if (i > 0 && data[i - 1] === 0) display[i - 1] = Math.max(display[i - 1], v * 0.85);
-    if (i < data.length - 1 && data[i + 1] === 0) display[i + 1] = Math.max(display[i + 1], v * 0.85);
-    if (i > 1 && data[i - 2] === 0) display[i - 2] = Math.max(display[i - 2], v * 0.45);
-    if (i < data.length - 2 && data[i + 2] === 0) display[i + 2] = Math.max(display[i + 2], v * 0.45);
-    if (i > 2 && data[i - 3] === 0) display[i - 3] = Math.max(display[i - 3], v * 0.12);
-    if (i < data.length - 3 && data[i + 3] === 0) display[i + 3] = Math.max(display[i + 3], v * 0.12);
-  });
-  return display;
+function getAvailableSpendingMonths(transactions) {
+  const set = new Set(transactions.filter(tx => tx.type === 'expense').map(tx => (tx.date || '').slice(0, 7)));
+  set.add(todayMonth());
+  return [...set].sort().reverse();
 }
 
-async function renderDailySpendingChart(transactions, investments) {
+function formatSpendingMonthLabel(monthStr) {
+  const [y, m] = monthStr.split('-').map(Number);
+  const name = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'long' });
+  return y === new Date().getFullYear() ? name : `${name} ${y}`;
+}
+
+function getWeekBuckets(year, monthIndex0) {
+  const daysInMonth = new Date(year, monthIndex0 + 1, 0).getDate();
+  const buckets = [];
+  for (let start = 1; start <= daysInMonth; start += 7) {
+    buckets.push({ start, end: Math.min(start + 6, daysInMonth) });
+  }
+  return buckets;
+}
+
+async function renderDailySpendingChart(transactions) {
   const section = document.getElementById('daily-chart-section');
   const canvas  = document.getElementById('daily-spending-chart');
-  if (!section || !canvas) return;
+  const select  = document.getElementById('dsc-month-select');
+  if (!section || !canvas || !select) return;
 
-  const month = todayMonth();
+  const availableMonths = getAvailableSpendingMonths(transactions);
+  if (!selectedSpendingMonth || !availableMonths.includes(selectedSpendingMonth)) {
+    selectedSpendingMonth = todayMonth();
+  }
+  select.innerHTML = availableMonths.map(m =>
+    `<option value="${m}" ${m === selectedSpendingMonth ? 'selected' : ''}>${formatSpendingMonthLabel(m)}</option>`
+  ).join('');
+
+  if (!select.dataset.wired) {
+    select.dataset.wired = '1';
+    select.addEventListener('change', () => {
+      selectedSpendingMonth = select.value;
+      renderDailySpendingChart(homeTransactions);
+    });
+  }
+
+  const month = selectedSpendingMonth;
   const monthTx = transactions.filter(tx => tx.type === 'expense' && (tx.date || '').slice(0, 7) === month);
   if (!monthTx.length) {
     section.style.display = 'none';
@@ -439,69 +480,48 @@ async function renderDailySpendingChart(transactions, investments) {
   }
   section.style.display = '';
 
-  const [y, m] = month.split('-');
-  const daysInMonth = new Date(+y, +m, 0).getDate();
+  const [y, m] = month.split('-').map(Number);
+  const buckets = getWeekBuckets(y, m - 1);
   const byDay = {};
   monthTx.forEach(tx => { byDay[tx.date] = (byDay[tx.date] || 0) + Number(tx.amount); });
 
+  const monthAbbr = new Date(y, m - 1, 1).toLocaleString('en-US', { month: 'short' });
   const labels = [], spendData = [];
-  for (let d = 1; d <= daysInMonth; d++) {
-    const key = `${month}-${String(d).padStart(2, '0')}`;
-    labels.push(d);
-    spendData.push(parseFloat((byDay[key] || 0).toFixed(2)));
-  }
+  buckets.forEach(b => {
+    let sum = 0;
+    for (let d = b.start; d <= b.end; d++) {
+      sum += byDay[`${month}-${String(d).padStart(2, '0')}`] || 0;
+    }
+    spendData.push(parseFloat(sum.toFixed(2)));
+    labels.push(b.start === b.end ? `${monthAbbr} ${b.start}` : `${monthAbbr} ${b.start} – ${b.end}`);
+  });
 
   const { default: Chart } = await import('chart.js/auto');
   const ctx = canvas.getContext('2d');
 
   const maxSpend = Math.max(...spendData, 0);
-  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.08) / 100) * 100 : undefined;
+  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.12) / 500) * 500 : 500;
 
-  const grad = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 220);
-  grad.addColorStop(0,   'rgba(200,148,58,0.38)');
-  grad.addColorStop(0.6, 'rgba(200,148,58,0.08)');
-  grad.addColorStop(1,   'rgba(200,148,58,0)');
-
-  const lastNonZero = spendData.reduce((idx, v, i) => v > 0 ? i : idx, -1);
-  let maxIdx = 0;
-  spendData.forEach((v, i) => { if (v > spendData[maxIdx]) maxIdx = i; });
-  const highlightIdxs = new Set(spendData[maxIdx] > 0 ? [maxIdx, lastNonZero].filter(i => i >= 0) : []);
-
-  const pointRadii  = spendData.map((v, i) => highlightIdxs.has(i) ? 7 : v > 0 ? 3.5 : 0);
-  const pointBgColors = spendData.map((v, i) => i === maxIdx ? '#fff' : '#e07820');
-  const pointBorderColors = spendData.map((v, i) => highlightIdxs.has(i) ? '#c8943a' : '#fff');
-  const pointBorderWidths = spendData.map((v, i) => highlightIdxs.has(i) ? 3 : 2);
-
-  const totalPortfolio = investments.reduce((s, inv) => s + (Number(inv.current_price) || 0) * (Number(inv.shares) || 0), 0);
   const datasets = [{
-    label: 'Daily Spending',
-    data: widenSpikesForDisplay(spendData),
-    rawSpendData: spendData,
-    borderColor: '#c8943a',
-    borderWidth: 2.5,
-    backgroundColor: grad,
-    fill: true,
-    tension: 0.35,
-    pointRadius: pointRadii,
-    pointHoverRadius: 7,
-    pointBackgroundColor: pointBgColors,
-    pointBorderColor: pointBorderColors,
-    pointBorderWidth: pointBorderWidths,
+    label: 'Weekly Spending',
+    data: spendData,
+    borderRadius: 16,
+    borderSkipped: false,
+    barPercentage: 0.62,
+    categoryPercentage: 0.85,
+    backgroundColor(ctx) {
+      const chart = ctx.chart;
+      const bar = chart.getDatasetMeta(0).data[ctx.dataIndex];
+      if (!bar || !chart.chartArea) return '#e8c896';
+      const t = maxSpend > 0 ? spendData[ctx.dataIndex] / maxSpend : 0;
+      const top = lerpColor('#faecd8', '#9c6f62', t);
+      const bottom = lerpColor('#f2d8ab', '#6e4a40', t);
+      const grad = chart.ctx.createLinearGradient(0, bar.y, 0, bar.base);
+      grad.addColorStop(0, top);
+      grad.addColorStop(1, bottom);
+      return grad;
+    },
   }];
-
-  if (totalPortfolio > 0) {
-    datasets.push({
-      label: 'Portfolio Value',
-      data: Array(daysInMonth).fill(parseFloat(totalPortfolio.toFixed(2))),
-      borderColor: 'rgba(45,122,58,0.6)',
-      backgroundColor: 'transparent',
-      borderDash: [5, 4],
-      borderWidth: 1.5,
-      fill: false,
-      tension: 0,
-      pointRadius: 0,
-    });
-  }
 
   if (dailyChartInstance) {
     dailyChartInstance.data.labels = labels;
@@ -512,50 +532,34 @@ async function renderDailySpendingChart(transactions, investments) {
   }
 
   dailyChartInstance = new Chart(ctx, {
-    type: 'line',
+    type: 'bar',
     data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 60, right: 52 } },
-      interaction: { mode: 'index', intersect: false },
-      animation: { duration: 600, easing: 'easeOutQuart' },
+      layout: { padding: { top: 60, right: 10 } },
+      animation: { duration: 650, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(22,12,4,0.92)',
-          titleColor: '#e0b870',
-          bodyColor: '#d4b888',
-          padding: { x: 14, y: 10 },
-          cornerRadius: 12,
-          borderColor: 'rgba(200,148,58,0.3)',
-          borderWidth: 1,
-          displayColors: true,
-          boxWidth: 8,
-          boxHeight: 8,
-          callbacks: {
-            title: ctx => `Day ${ctx[0].label}`,
-            label: ctx => `  ${ctx.dataset.label}: ${fmtCurrency(ctx.parsed.y)}`,
-          },
-        },
+        tooltip: { enabled: false },
       },
       scales: {
         x: {
-          ticks: { font: { size: 10, family: 'Inter, sans-serif' }, color: '#9a8060', maxTicksLimit: 12, maxRotation: 0 },
-          grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
-          border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
+          ticks: { font: { size: 11, weight: '600', family: 'Inter, sans-serif' }, color: '#6e4420' },
+          grid: { display: false },
+          border: { display: false },
         },
         y: {
-          ticks: { font: { size: 10, family: 'Inter, sans-serif' }, color: '#9a8060', callback: v => '$' + v.toLocaleString('en-US'), maxTicksLimit: 6 },
-          grid: { color: 'rgba(200,148,58,0.06)', drawTicks: false },
-          border: { dash: [4, 4], color: 'rgba(200,148,58,0.15)' },
+          ticks: { font: { size: 11, family: 'Inter, sans-serif' }, color: '#9a7a5a', callback: v => '$' + v.toLocaleString('en-US'), stepSize: yAxisMax / 5 },
+          grid: { color: 'rgba(110,68,32,0.12)', drawTicks: false },
+          border: { display: false },
           beginAtZero: true,
           max: yAxisMax,
           afterFit: scale => { scale.width = Math.max(scale.width, 56); },
         },
       },
     },
-    plugins: [dailyChartCalloutPlugin],
+    plugins: [weeklyBarLabelsPlugin],
   });
 }
 
