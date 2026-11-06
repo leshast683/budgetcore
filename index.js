@@ -511,12 +511,15 @@ async function renderDailySpendingChart(transactions) {
     categoryPercentage: 0.85,
     backgroundColor(ctx) {
       const chart = ctx.chart;
-      const bar = chart.getDatasetMeta(0).data[ctx.dataIndex];
-      if (!bar || !chart.chartArea) return '#e8c896';
-      const t = maxSpend > 0 ? spendData[ctx.dataIndex] / maxSpend : 0;
+      const yScale = chart.scales && chart.scales.y;
+      if (!yScale) return '#e8c896';
+      const value = spendData[ctx.dataIndex];
+      const t = maxSpend > 0 ? value / maxSpend : 0;
       const top = lerpColor('#faecd8', '#9c6f62', t);
       const bottom = lerpColor('#f2d8ab', '#6e4a40', t);
-      const grad = chart.ctx.createLinearGradient(0, bar.y, 0, bar.base);
+      const topPx = yScale.getPixelForValue(value);
+      const basePx = yScale.getPixelForValue(0);
+      const grad = chart.ctx.createLinearGradient(0, topPx, 0, basePx);
       grad.addColorStop(0, top);
       grad.addColorStop(1, bottom);
       return grad;

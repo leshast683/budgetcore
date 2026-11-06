@@ -453,8 +453,9 @@
         <div class="health-breakdown">
           <div class="health-breakdown-header">
             <h2 class="card-title" style="margin-bottom:0">Financial Health Score</h2>
-            <span class="health-info-icon" tabindex="0" title="Combines savings rate, budget adherence, tracking history, balanced tracking, and credit card usage.">
+            <span class="health-info-icon" id="health-info-icon" tabindex="0" role="button" aria-expanded="false" aria-label="What is the Financial Health Score?">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="8.3"/><path d="M10 9v5" stroke-linecap="round"/><circle cx="10" cy="6.3" r="0.9" fill="currentColor" stroke="none"/></svg>
+              <span class="health-info-popover" role="tooltip">Your Financial Health Score combines five factors: savings rate, budget adherence, tracking history, balanced tracking (income vs. expenses logged), and credit card usage. A higher score means healthier overall money habits.</span>
             </span>
           </div>
           <div class="health-factors" id="health-factors"></div>

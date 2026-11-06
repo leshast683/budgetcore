@@ -2023,6 +2023,29 @@ function init() {
   document.getElementById('export-csv-btn').addEventListener('click', exportCSV);
   document.getElementById('export-pdf-btn').addEventListener('click', exportPDF);
 
+  // Financial Health Score info popover (tap-to-open, since hover tooltips
+  // don't work on touch devices)
+  const healthInfoBtn = document.getElementById('health-info-icon');
+  if (healthInfoBtn) {
+    const setOpen = open => {
+      healthInfoBtn.classList.toggle('is-open', open);
+      healthInfoBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    healthInfoBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      setOpen(!healthInfoBtn.classList.contains('is-open'));
+    });
+    healthInfoBtn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setOpen(!healthInfoBtn.classList.contains('is-open'));
+      } else if (e.key === 'Escape') {
+        setOpen(false);
+      }
+    });
+    document.addEventListener('click', () => setOpen(false));
+  }
+
   // Auth tabs
   document.getElementById('auth-tabs').addEventListener('click', e => {
     const tab = e.target.closest('.auth-tab');
