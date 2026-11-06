@@ -527,6 +527,10 @@ async function renderDailySpendingChart(transactions) {
   const barColors = spendData.map((v, i) =>
     (i === maxIdx && v > 0) ? 'rgba(122,79,62,0.78)' : BEIGE_GLASS_PALETTE[i % BEIGE_GLASS_PALETTE.length]
   );
+  // The 3rd bucket (days 15-21) is always this fixed 7-day span regardless
+  // of month length — call it out in pastel taupe beige specifically.
+  const PASTEL_TAUPE_BEIGE = 'rgba(205,191,174,0.8)';
+  if (barColors.length > 2) barColors[2] = PASTEL_TAUPE_BEIGE;
 
   const datasets = [{
     label: 'Weekly Spending',
