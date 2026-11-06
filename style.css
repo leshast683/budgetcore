@@ -6207,6 +6207,7 @@ input[type="date"].filter-date {
 }
 .social-btn:hover { background: #f8f4f0; border-color: #c8b89a; }
 .social-btn--full { width: 100%; gap: 0.6rem; font-size: 0.88rem; font-weight: 500; color: #3c3c3c; }
+.apple-logo-icon { transform: translateY(2px); }
 
 .auth-or {
   display: flex; align-items: center; gap: 0.5rem;
