@@ -101,6 +101,20 @@ function showSignedOutState() {
 const fmtCurrency = n => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const todayMonth = () => new Date().toISOString().slice(0, 7);
 
+function animateCountUp(el, target, formatFn, duration = 700) {
+  const start = performance.now();
+  const from = 0;
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const value = from + (target - from) * eased;
+    el.textContent = formatFn(value);
+    if (t < 1) requestAnimationFrame(tick);
+    else el.textContent = formatFn(target);
+  }
+  requestAnimationFrame(tick);
+}
+
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -199,11 +213,11 @@ function renderHomeBalance(transactions) {
   const balance  = income - expenses;
 
   const balanceEl = document.getElementById('home-tile-balance-val');
-  balanceEl.textContent = fmtCurrency(balance);
   balanceEl.classList.toggle('positive', balance > 0);
   balanceEl.classList.toggle('negative', balance < 0);
+  animateCountUp(balanceEl, balance, fmtCurrency);
 
-  document.getElementById('home-tile-expenses-val').textContent = fmtCurrency(expenses);
+  animateCountUp(document.getElementById('home-tile-expenses-val'), expenses, fmtCurrency);
 }
 
 function renderHomeInvestments(investments) {
@@ -211,7 +225,7 @@ function renderHomeInvestments(investments) {
   const totalCost  = investments.reduce((s, inv) => s + Number(inv.purchase_price) * Number(inv.shares), 0);
   const gainPct    = totalCost > 0 ? ((totalValue - totalCost) / totalCost) * 100 : 0;
 
-  document.getElementById('home-tile-invest-val').textContent = fmtCurrency(totalValue);
+  animateCountUp(document.getElementById('home-tile-invest-val'), totalValue, fmtCurrency);
   const subEl = document.getElementById('home-tile-invest-sub');
   if (!investments.length) {
     subEl.textContent = '';
@@ -227,8 +241,12 @@ function renderHomeGoals(goals) {
   const activeSaved = active.reduce((s, g) => s + Number(g.saved || 0), 0);
   const pct = totalTarget > 0 ? Math.min(Math.round((activeSaved / totalTarget) * 100), 100) : 0;
 
-  document.getElementById('home-tile-goals-val').textContent = `${active.length} active`;
-  document.getElementById('home-tile-goals-fill').style.width = pct + '%';
+  const goalsValEl = document.getElementById('home-tile-goals-val');
+  animateCountUp(goalsValEl, active.length, v => `${Math.round(v)} active`);
+
+  const fillEl = document.getElementById('home-tile-goals-fill');
+  fillEl.style.width = '0%';
+  requestAnimationFrame(() => requestAnimationFrame(() => { fillEl.style.width = pct + '%'; }));
 }
 
 function renderHomeSpendOverview(transactions) {
