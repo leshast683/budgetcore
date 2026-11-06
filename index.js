@@ -510,7 +510,7 @@ async function renderDailySpendingChart(transactions) {
   const ctx = canvas.getContext('2d');
 
   const maxSpend = Math.max(...spendData, 0);
-  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.12) / 500) * 500 : 500;
+  const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.3) / 500) * 500 : 500;
 
   // Static arrays (not scriptable functions) so Chart.js can never resolve
   // these against bar/scale geometry before it's ready — see commit
@@ -560,7 +560,7 @@ async function renderDailySpendingChart(transactions) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 60, right: 2, left: 6 } },
+      layout: { padding: { top: 26, right: 2, left: 6 } },
       animation: { duration: 650, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
