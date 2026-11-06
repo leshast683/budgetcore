@@ -447,6 +447,15 @@ function getWeekBuckets(year, monthIndex0) {
   for (let start = 1; start <= daysInMonth; start += 7) {
     buckets.push({ start, end: Math.min(start + 6, daysInMonth) });
   }
+  // Fold a short trailing remainder (e.g. "29-30") into the previous full
+  // week instead of giving it its own cramped bar.
+  if (buckets.length > 1) {
+    const last = buckets[buckets.length - 1];
+    if (last.end - last.start < 6) {
+      buckets.pop();
+      buckets[buckets.length - 1].end = last.end;
+    }
+  }
   return buckets;
 }
 
@@ -499,31 +508,31 @@ async function renderDailySpendingChart(transactions) {
 
   const { default: Chart } = await import('chart.js/auto');
   const ctx = canvas.getContext('2d');
-  const canvasHeightPx = canvas.offsetHeight || 240;
 
   const maxSpend = Math.max(...spendData, 0);
   const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.12) / 500) * 500 : 500;
 
+  // Static arrays (not scriptable functions) so Chart.js can never resolve
+  // these against bar/scale geometry before it's ready — see commit
+  // 42628a4 for why that crashed.
+  const BEIGE_GLASS_PALETTE = [
+    'rgba(245,230,204,0.62)',
+    'rgba(237,219,182,0.62)',
+    'rgba(228,206,156,0.62)',
+    'rgba(220,195,138,0.62)',
+    'rgba(212,183,120,0.62)',
+  ];
+  const barColors  = spendData.map((_, i) => BEIGE_GLASS_PALETTE[i % BEIGE_GLASS_PALETTE.length]);
+
   const datasets = [{
     label: 'Weekly Spending',
     data: spendData,
-    borderRadius: 34,
-    borderSkipped: false,
-    barPercentage: 0.82,
+    borderRadius: 0,
+    barPercentage: 0.7,
     categoryPercentage: 0.92,
-    backgroundColor(barCtx) {
-      const value = spendData[barCtx.dataIndex] || 0;
-      const t = maxSpend > 0 ? value / maxSpend : 0;
-      const base = lerpColor('#f0cf9c', '#7a4f3e', t);
-      const light = lerpColor('#fff8ee', base, 0.55);
-      // Fixed canvas-relative gradient (not derived from bar/scale geometry,
-      // which Chart.js can resolve this scriptable fn against before it's
-      // ready — see commit 42628a4) so this can never throw on first paint.
-      const grad = barCtx.chart.ctx.createLinearGradient(0, 0, 0, canvasHeightPx);
-      grad.addColorStop(0, light);
-      grad.addColorStop(1, base);
-      return grad;
-    },
+    backgroundColor: barColors,
+    borderColor: 'rgba(255,255,255,0.65)',
+    borderWidth: 1.5,
   }];
 
   if (dailyChartInstance) {
@@ -540,7 +549,7 @@ async function renderDailySpendingChart(transactions) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 60, right: 10 } },
+      layout: { padding: { top: 60, right: 2 } },
       animation: { duration: 650, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
@@ -548,7 +557,7 @@ async function renderDailySpendingChart(transactions) {
       },
       scales: {
         x: {
-          ticks: { font: { size: 11, weight: '600', family: 'Inter, sans-serif' }, color: '#6e4420' },
+          ticks: { font: { size: 11, weight: '600', family: 'Inter, sans-serif' }, color: '#6e4420', maxRotation: 0, minRotation: 0, autoSkip: false },
           grid: { display: false },
           border: { display: false },
         },
@@ -558,7 +567,7 @@ async function renderDailySpendingChart(transactions) {
           border: { display: false },
           beginAtZero: true,
           max: yAxisMax,
-          afterFit: scale => { scale.width = Math.max(scale.width, 56); },
+          afterFit: scale => { scale.width = Math.min(scale.width, 44); },
         },
       },
     },
