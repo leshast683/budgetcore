@@ -178,7 +178,13 @@ function renderHomeBalance(transactions) {
   const monthTx = transactions.filter(tx => (tx.date || '').slice(0, 7) === month);
   const income   = monthTx.filter(tx => tx.type === 'income').reduce((s, tx) => s + Number(tx.amount), 0);
   const expenses = monthTx.filter(tx => tx.type === 'expense').reduce((s, tx) => s + Number(tx.amount), 0);
-  document.getElementById('home-tile-balance-val').textContent  = fmtCurrency(income - expenses);
+  const balance  = income - expenses;
+
+  const balanceEl = document.getElementById('home-tile-balance-val');
+  balanceEl.textContent = fmtCurrency(balance);
+  balanceEl.classList.toggle('positive', balance > 0);
+  balanceEl.classList.toggle('negative', balance < 0);
+
   document.getElementById('home-tile-expenses-val').textContent = fmtCurrency(expenses);
 }
 
@@ -475,7 +481,7 @@ async function renderDailySpendingChart(transactions, investments) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 60, right: 40 } },
+      layout: { padding: { top: 60, right: 52 } },
       interaction: { mode: 'index', intersect: false },
       animation: { duration: 600, easing: 'easeOutQuart' },
       plugins: {
@@ -773,14 +779,8 @@ function pickRandomMoneyTips() {
 }
 
 const MONEY_TIP_MASCOTS = [mtMascot1, mtMascot2, mtMascot3, mtMascot4, mtMascot5];
-const MONEY_TIPS_AUTOPLAY_MS = 5000;
+const MONEY_TIPS_AUTOPLAY_MS = 12000;
 let moneyTipsAutoplayTimer = null;
-
-function renderMoneyTipDots() {
-  document.getElementById('mt-dots').innerHTML = currentMoneyTips.map((_, i) =>
-    `<span class="mt-dot${i === currentMoneyTipIdx ? ' active' : ''}" data-idx="${i}"></span>`
-  ).join('');
-}
 
 function renderMoneyTip() {
   const tip = currentMoneyTips[currentMoneyTipIdx];
@@ -789,7 +789,6 @@ function renderMoneyTip() {
   document.getElementById('mt-text').textContent = tip.text;
   document.getElementById('mt-callout-text').textContent = tip.callout;
   document.getElementById('mt-art-img').src = MONEY_TIP_MASCOTS[currentMoneyTipIdx % MONEY_TIP_MASCOTS.length];
-  renderMoneyTipDots();
 
   // Re-trigger the slide-in animation on every tip change (not just once on load).
   // Animates .mt-card-top as a single unit so the text and art slide together.
@@ -812,11 +811,6 @@ function advanceMoneyTip() {
   renderMoneyTip();
 }
 
-function goToMoneyTip(idx) {
-  currentMoneyTipIdx = (idx + currentMoneyTips.length) % currentMoneyTips.length;
-  renderMoneyTip();
-}
-
 function restartMoneyTipsAutoplay() {
   if (moneyTipsAutoplayTimer) clearInterval(moneyTipsAutoplayTimer);
   moneyTipsAutoplayTimer = setInterval(advanceMoneyTip, MONEY_TIPS_AUTOPLAY_MS);
@@ -828,21 +822,7 @@ function initMoneyTips() {
   renderMoneyTip();
   restartMoneyTipsAutoplay();
 
-  document.getElementById('mt-prev').addEventListener('click', e => {
-    e.stopPropagation(); // don't also trigger the card's click-to-advance below
-    goToMoneyTip(currentMoneyTipIdx - 1);
-    restartMoneyTipsAutoplay();
-  });
-
-  document.getElementById('mt-dots').addEventListener('click', e => {
-    const dot = e.target.closest('.mt-dot');
-    if (!dot) return;
-    e.stopPropagation();
-    goToMoneyTip(Number(dot.dataset.idx));
-    restartMoneyTipsAutoplay();
-  });
-
-  // Clicking anywhere else on the card skips ahead to the next tip.
+  // Clicking the card skips ahead to the next tip.
   document.getElementById('mt-card').addEventListener('click', () => {
     advanceMoneyTip();
     restartMoneyTipsAutoplay();
