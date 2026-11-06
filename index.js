@@ -45,7 +45,11 @@ supabase.auth.onAuthStateChange((event, session) => {
       showSigninToast(name);
     });
   } else if (currentUser) {
-    showLoggedInState(currentUser);
+    // TEMP: showing the onboarding wizard on every reload for now so it can be
+    // reviewed without re-registering. Revert to showLoggedInState(currentUser)
+    // directly once confirmed.
+    hideAuth();
+    showOnboarding(currentUser, () => showLoggedInState(currentUser));
   } else {
     showSignedOutState();
   }
