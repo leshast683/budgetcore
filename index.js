@@ -450,6 +450,22 @@ function getWeekBuckets(year, monthIndex0) {
 }
 
 async function renderDailySpendingChart(transactions) {
+  try {
+    await renderDailySpendingChartInner(transactions);
+  } catch (err) {
+    const section = document.getElementById('daily-chart-section');
+    if (section) {
+      section.style.display = '';
+      const debugEl = document.createElement('p');
+      debugEl.style.cssText = 'color:#b00020;font-size:12px;font-weight:700;white-space:pre-wrap;margin-top:0.75rem;';
+      debugEl.textContent = 'TEMP DEBUG — chart error: ' + (err && err.stack || err);
+      section.appendChild(debugEl);
+    }
+    console.error('renderDailySpendingChart failed', err);
+  }
+}
+
+async function renderDailySpendingChartInner(transactions) {
   const section = document.getElementById('daily-chart-section');
   const canvas  = document.getElementById('daily-spending-chart');
   const select  = document.getElementById('dsc-month-select');
