@@ -985,20 +985,35 @@ function showWelcomeToast(name, user, then) {
 }
 
 // ── Onboarding Wizard ─────────────────────────────────────────────────────────
+const OB_GOAL_LABELS = {
+  save: '💰 Save more',
+  debt: '💳 Pay off debt',
+  invest: '📈 Start investing',
+  track: '📊 Track spending',
+  emergency: '🏦 Emergency fund',
+  retire: '🏖️ Plan retirement',
+};
+
 let _onboardingCallback = null;
 let _onboardingUser = null;
 let _obStep = 1;
+let _obBudget = null;
+let _obGoal = '';
 
 function showOnboarding(user, callback) {
   _onboardingCallback = callback;
   _onboardingUser = user;
   _obStep = 1;
+  _obBudget = null;
+  _obGoal = '';
+  document.getElementById('ob-budget').value = '';
+  document.querySelectorAll('.ob-goal-btn').forEach(b => b.classList.remove('ob-goal-btn--selected'));
   showObPane(1);
   document.getElementById('onboarding-overlay').style.display = 'flex';
 }
 
 function showObPane(n) {
-  [1, 2, 3].forEach(i => {
+  [1, 2, 3, 4].forEach(i => {
     document.getElementById(`ob-pane-${i}`).style.display = i === n ? '' : 'none';
     document.getElementById(`ob-dot-${i}`).classList.toggle('ob-step--active', i === n);
     document.getElementById(`ob-dot-${i}`).classList.toggle('ob-step--done', i < n);
@@ -1006,11 +1021,22 @@ function showObPane(n) {
   _obStep = n;
 }
 
+function renderObRecap() {
+  const budgetRow = _obBudget
+    ? `<div class="ob-recap-row"><span class="ob-recap-label">Monthly budget</span><span class="ob-recap-value">$${_obBudget.toLocaleString()}</span></div>`
+    : `<div class="ob-recap-row"><span class="ob-recap-label">Monthly budget</span><span class="ob-recap-value">Not set yet</span></div>`;
+  const goalRow = _obGoal
+    ? `<div class="ob-recap-row"><span class="ob-recap-label">#1 goal</span><span class="ob-recap-value">${OB_GOAL_LABELS[_obGoal] || _obGoal}</span></div>`
+    : `<div class="ob-recap-row"><span class="ob-recap-label">#1 goal</span><span class="ob-recap-value">Not set yet</span></div>`;
+  document.getElementById('ob-recap').innerHTML = budgetRow + goalRow;
+}
+
 document.getElementById('ob-next-1').addEventListener('click', () => showObPane(2));
 
 document.getElementById('ob-next-2').addEventListener('click', async () => {
   const budget = parseFloat(document.getElementById('ob-budget').value);
   if (!isNaN(budget) && budget > 0 && _onboardingUser) {
+    _obBudget = budget;
     try {
       await supabase.from('profiles').update({ monthly_budget: budget }).eq('id', _onboardingUser.id);
     } catch { /* non-fatal */ }
@@ -1026,8 +1052,9 @@ document.getElementById('ob-goals-grid').addEventListener('click', e => {
   document.querySelectorAll('.ob-goal-btn').forEach(b => b.classList.toggle('ob-goal-btn--selected', b === btn));
 });
 
-document.getElementById('ob-finish').addEventListener('click', async () => {
+document.getElementById('ob-next-3').addEventListener('click', async () => {
   const goal = document.querySelector('.ob-goal-btn--selected')?.dataset.goal || '';
+  _obGoal = goal;
   if (_onboardingUser) {
     try {
       await supabase.from('profiles')
@@ -1036,6 +1063,11 @@ document.getElementById('ob-finish').addEventListener('click', async () => {
     } catch { /* non-fatal */ }
     localStorage.setItem('budgetly_onboarded_' + _onboardingUser.id, '1');
   }
+  renderObRecap();
+  showObPane(4);
+});
+
+document.getElementById('ob-finish').addEventListener('click', () => {
   document.getElementById('onboarding-overlay').style.display = 'none';
   if (_onboardingCallback) _onboardingCallback();
 });

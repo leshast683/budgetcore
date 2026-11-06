@@ -7850,6 +7850,14 @@ input[type="date"].filter-date {
 }
 .ob-goal-btn:hover { border-color: #9a6e3a; background: #fff8f0; }
 .ob-goal-btn--selected { border-color: #9a6e3a; background: #fff3e0; color: #6c3d10; font-weight: 600; }
+.ob-recap {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  background: #fff8f0; border: 1.5px solid #f0ddbf; border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+.ob-recap-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.ob-recap-label { font-size: 0.8rem; color: var(--muted); }
+.ob-recap-value { font-size: 0.9rem; font-weight: 700; color: #6c3d10; text-align: right; }
 
 /* --- 3D Continuous Animation: feature cards --- */
 @keyframes fc-float-a {
