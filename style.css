@@ -6537,6 +6537,8 @@ input[type="date"].filter-date {
   justify-content: center;
   flex-shrink: 0;
 }
+.prof-section-icon--img { background: none; }
+.prof-section-icon--img img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
 /* Challenge stats bar */
 .challenge-stats-bar {
@@ -7162,6 +7164,8 @@ input[type="date"].filter-date {
   justify-content: center;
   flex-shrink: 0;
 }
+.chart-header-icon--img { background: none; }
+.chart-header-icon--img img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .chart-header-icon svg { width: 18px; height: 18px; }
 .chart-period-pill {
   font-size: 0.82rem;
