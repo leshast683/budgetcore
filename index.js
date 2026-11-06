@@ -40,7 +40,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     sessionStorage.removeItem('authPending');
     const name = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name
       || currentUser.email?.split('@')[0] || 'there';
-    showWelcomeToast(name, currentUser, () => window.location.replace('./app.html'));
+    showWelcomeToast(name, currentUser, () => showLoggedInState(currentUser));
   } else if (currentUser) {
     showLoggedInState(currentUser);
   } else {
@@ -67,27 +67,6 @@ function showLoggedInState(user) {
   document.getElementById('marketing-home').style.display = 'none';
   document.getElementById('account-home').style.display   = '';
   renderAccountHome(user);
-
-  // TEMP: showing this welcome message on every reload for now so it can be
-  // reviewed without re-registering. Should be gated to first-time sign-in only
-  // (e.g. via the budgetly_onboarded_<uid> localStorage flag) once confirmed.
-  showSigninToast(name);
-}
-
-// ── Welcome toast ─────────────────────────────────────────────────────────────
-function showSigninToast(name) {
-  const toast = document.getElementById('signin-toast');
-  const msgEl = document.getElementById('signin-toast-msg');
-  if (!toast) return;
-  msgEl.textContent = `Welcome, ${name}! Great to have you here.`;
-  toast.style.display = 'flex';
-  const close = document.getElementById('signin-toast-close');
-  const dismiss = () => {
-    toast.classList.add('signin-toast--out');
-    setTimeout(() => { toast.style.display = 'none'; toast.classList.remove('signin-toast--out'); }, 400);
-  };
-  close.addEventListener('click', dismiss, { once: true });
-  setTimeout(dismiss, 3000);
 }
 
 function showSignedOutState() {
