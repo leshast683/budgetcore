@@ -560,7 +560,7 @@ async function renderDailySpendingChart(transactions) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 60, right: 2, left: 0 } },
+      layout: { padding: { top: 60, right: 2, left: 6 } },
       animation: { duration: 650, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
@@ -578,7 +578,7 @@ async function renderDailySpendingChart(transactions) {
           border: { display: false },
           beginAtZero: true,
           max: yAxisMax,
-          afterFit: scale => { scale.width = Math.min(scale.width, 36); },
+          afterFit: scale => { scale.width = Math.min(scale.width, 42); },
         },
       },
     },
