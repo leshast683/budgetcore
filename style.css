@@ -7841,15 +7841,25 @@ input[type="date"].filter-date {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;
 }
 .ob-goal-btn {
+  display: flex; align-items: center; gap: 0.5rem;
   border: 1.5px solid var(--border); background: var(--surface);
-  border-radius: 10px; padding: 0.65rem 0.75rem;
+  border-radius: 10px; padding: 0.5rem 0.75rem;
   font-family: inherit; font-size: 0.85rem; font-weight: 500;
   color: var(--heading); cursor: pointer;
-  transition: border-color 0.18s, background 0.18s;
+  transition: border-color 0.18s, background 0.18s, color 0.18s;
   text-align: left;
 }
-.ob-goal-btn:hover { border-color: #9a6e3a; background: #fff8f0; }
-.ob-goal-btn--selected { border-color: #9a6e3a; background: #fff3e0; color: #6c3d10; font-weight: 600; }
+.ob-goal-icon { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
+.ob-goal-btn:hover {
+  border-color: var(--goal-color, #9a6e3a);
+  background: color-mix(in srgb, var(--goal-color, #9a6e3a) 10%, white);
+}
+.ob-goal-btn--selected {
+  border-color: var(--goal-color, #9a6e3a);
+  background: color-mix(in srgb, var(--goal-color, #9a6e3a) 18%, white);
+  color: color-mix(in srgb, var(--goal-color, #9a6e3a) 70%, #2a1a0a);
+  font-weight: 600;
+}
 .ob-recap {
   display: flex; flex-direction: column; gap: 0.5rem;
   background: #fff8f0; border: 1.5px solid #f0ddbf; border-radius: 12px;
