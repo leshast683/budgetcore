@@ -450,22 +450,6 @@ function getWeekBuckets(year, monthIndex0) {
 }
 
 async function renderDailySpendingChart(transactions) {
-  try {
-    await renderDailySpendingChartInner(transactions);
-  } catch (err) {
-    const section = document.getElementById('daily-chart-section');
-    if (section) {
-      section.style.display = '';
-      const debugEl = document.createElement('p');
-      debugEl.style.cssText = 'color:#b00020;font-size:12px;font-weight:700;white-space:pre-wrap;margin-top:0.75rem;';
-      debugEl.textContent = 'TEMP DEBUG — chart error: ' + (err && err.stack || err);
-      section.appendChild(debugEl);
-    }
-    console.error('renderDailySpendingChart failed', err);
-  }
-}
-
-async function renderDailySpendingChartInner(transactions) {
   const section = document.getElementById('daily-chart-section');
   const canvas  = document.getElementById('daily-spending-chart');
   const select  = document.getElementById('dsc-month-select');
@@ -526,19 +510,9 @@ async function renderDailySpendingChartInner(transactions) {
     barPercentage: 0.62,
     categoryPercentage: 0.85,
     backgroundColor(ctx) {
-      const chart = ctx.chart;
-      const yScale = chart.scales && chart.scales.y;
-      if (!yScale) return '#e8c896';
-      const value = spendData[ctx.dataIndex];
+      const value = spendData[ctx.dataIndex] || 0;
       const t = maxSpend > 0 ? value / maxSpend : 0;
-      const top = lerpColor('#faecd8', '#9c6f62', t);
-      const bottom = lerpColor('#f2d8ab', '#6e4a40', t);
-      const topPx = yScale.getPixelForValue(value);
-      const basePx = yScale.getPixelForValue(0);
-      const grad = chart.ctx.createLinearGradient(0, topPx, 0, basePx);
-      grad.addColorStop(0, top);
-      grad.addColorStop(1, bottom);
-      return grad;
+      return lerpColor('#f2d8ab', '#6e4a40', t);
     },
   }];
 
