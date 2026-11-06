@@ -529,8 +529,11 @@ async function renderDailySpendingChart(transactions) {
   );
   // The 3rd bucket (days 15-21) is always this fixed 7-day span regardless
   // of month length — call it out in pastel taupe beige specifically.
-  const PASTEL_TAUPE_BEIGE = 'rgba(205,191,174,0.8)';
+  const PASTEL_TAUPE_BEIGE   = 'rgba(205,191,174,0.8)';
+  const PASTEL_CARAMEL_BEIGE = 'rgba(224,184,136,0.8)';
   if (barColors.length > 2) barColors[2] = PASTEL_TAUPE_BEIGE;
+  // The 4th bucket (days 22 through month-end, e.g. "22-30") — same idea.
+  if (barColors.length > 3) barColors[3] = PASTEL_CARAMEL_BEIGE;
 
   const datasets = [{
     label: 'Weekly Spending',
