@@ -6350,7 +6350,8 @@ input[type="date"].filter-date {
   .auth-slider.right-panel-active .sign-up-container { display: flex; }
   .auth-form { max-width: 100%; padding: 2rem 1.25rem 4rem; width: 100%; overflow-x: hidden; }
   .auth-input, .social-btn, .auth-social-row { max-width: 100%; }
-  .auth-social-row { flex-wrap: wrap; justify-content: center; }
+  .auth-social-row { flex-direction: column; flex-wrap: nowrap; }
+  .social-btn--full { width: 100%; }
   .welcome-toast { border-radius: 0; }
 }
 
