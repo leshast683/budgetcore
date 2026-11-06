@@ -397,7 +397,8 @@ function lerpColor(hexA, hexB, t) {
   const r = Math.round(ar + (br - ar) * t);
   const g = Math.round(ag + (bg - ag) * t);
   const bl = Math.round(ab + (bb - ab) * t);
-  return `rgb(${r},${g},${bl})`;
+  const toHex = n => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(bl)}`;
 }
 
 const weeklyBarLabelsPlugin = {
@@ -498,6 +499,7 @@ async function renderDailySpendingChart(transactions) {
 
   const { default: Chart } = await import('chart.js/auto');
   const ctx = canvas.getContext('2d');
+  const canvasHeightPx = canvas.offsetHeight || 240;
 
   const maxSpend = Math.max(...spendData, 0);
   const yAxisMax = maxSpend > 0 ? Math.ceil((maxSpend * 1.12) / 500) * 500 : 500;
@@ -505,14 +507,22 @@ async function renderDailySpendingChart(transactions) {
   const datasets = [{
     label: 'Weekly Spending',
     data: spendData,
-    borderRadius: 16,
+    borderRadius: 34,
     borderSkipped: false,
-    barPercentage: 0.62,
-    categoryPercentage: 0.85,
-    backgroundColor(ctx) {
-      const value = spendData[ctx.dataIndex] || 0;
+    barPercentage: 0.82,
+    categoryPercentage: 0.92,
+    backgroundColor(barCtx) {
+      const value = spendData[barCtx.dataIndex] || 0;
       const t = maxSpend > 0 ? value / maxSpend : 0;
-      return lerpColor('#f2d8ab', '#6e4a40', t);
+      const base = lerpColor('#f0cf9c', '#7a4f3e', t);
+      const light = lerpColor('#fff8ee', base, 0.55);
+      // Fixed canvas-relative gradient (not derived from bar/scale geometry,
+      // which Chart.js can resolve this scriptable fn against before it's
+      // ready — see commit 42628a4) so this can never throw on first paint.
+      const grad = barCtx.chart.ctx.createLinearGradient(0, 0, 0, canvasHeightPx);
+      grad.addColorStop(0, light);
+      grad.addColorStop(1, base);
+      return grad;
     },
   }];
 
