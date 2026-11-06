@@ -7177,10 +7177,11 @@ input[type="date"].filter-date {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 @media (max-width: 560px) {
-  .daily-chart-section .chart-header-title-wrap .card-title { font-size: 0.98rem; }
-  .daily-chart-section .chart-header-icon { width: 30px; height: 30px; }
-  .daily-chart-section .dsc-month-select { font-size: 0.76rem; padding: 0.35rem 1.5rem 0.35rem 0.65rem; }
-  .daily-chart-section .dsc-month-chevron { right: 8px; width: 12px; height: 12px; }
+  .daily-chart-section .chart-header-icon { width: 26px; height: 26px; }
+  .daily-chart-section .chart-header-title-wrap { gap: 0.45rem; }
+  .daily-chart-section .chart-header-row { gap: 0.4rem; }
+  .daily-chart-section .dsc-month-select { font-size: 0.7rem; padding: 0.3rem 1.3rem 0.3rem 0.55rem; }
+  .daily-chart-section .dsc-month-chevron { right: 7px; width: 11px; height: 11px; }
 }
 .dsc-month-wrap { position: relative; display: inline-flex; align-items: center; flex-shrink: 0; }
 .dsc-month-select {
