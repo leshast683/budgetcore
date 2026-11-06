@@ -7168,10 +7168,21 @@ input[type="date"].filter-date {
    DAILY SPENDING CHART
    ================================================================ */
 .daily-chart-section {
-  background: linear-gradient(160deg, #fdf3e8 0%, #f9e4cd 55%, #f5d9ba 100%);
-  border: 1px solid rgba(154,106,58,0.16);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
-.dsc-month-wrap { position: relative; display: inline-flex; align-items: center; }
+.daily-chart-section .chart-header-row { flex-wrap: nowrap; }
+.daily-chart-section .chart-header-title-wrap { min-width: 0; }
+.daily-chart-section .chart-header-title-wrap .card-title {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+@media (max-width: 560px) {
+  .daily-chart-section .chart-header-title-wrap .card-title { font-size: 0.98rem; }
+  .daily-chart-section .chart-header-icon { width: 30px; height: 30px; }
+  .daily-chart-section .dsc-month-select { font-size: 0.76rem; padding: 0.35rem 1.5rem 0.35rem 0.65rem; }
+  .daily-chart-section .dsc-month-chevron { right: 8px; width: 12px; height: 12px; }
+}
+.dsc-month-wrap { position: relative; display: inline-flex; align-items: center; flex-shrink: 0; }
 .dsc-month-select {
   appearance: none; -webkit-appearance: none;
   font-family: inherit; font-size: 0.82rem; font-weight: 600;

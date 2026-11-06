@@ -522,7 +522,11 @@ async function renderDailySpendingChart(transactions) {
     'rgba(220,195,138,0.62)',
     'rgba(212,183,120,0.62)',
   ];
-  const barColors  = spendData.map((_, i) => BEIGE_GLASS_PALETTE[i % BEIGE_GLASS_PALETTE.length]);
+  let maxIdx = 0;
+  spendData.forEach((v, i) => { if (v > spendData[maxIdx]) maxIdx = i; });
+  const barColors = spendData.map((v, i) =>
+    (i === maxIdx && v > 0) ? 'rgba(122,79,62,0.78)' : BEIGE_GLASS_PALETTE[i % BEIGE_GLASS_PALETTE.length]
+  );
 
   const datasets = [{
     label: 'Weekly Spending',
@@ -549,7 +553,7 @@ async function renderDailySpendingChart(transactions) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 60, right: 2 } },
+      layout: { padding: { top: 60, right: 2, left: 0 } },
       animation: { duration: 650, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
@@ -567,7 +571,7 @@ async function renderDailySpendingChart(transactions) {
           border: { display: false },
           beginAtZero: true,
           max: yAxisMax,
-          afterFit: scale => { scale.width = Math.min(scale.width, 44); },
+          afterFit: scale => { scale.width = Math.min(scale.width, 36); },
         },
       },
     },
