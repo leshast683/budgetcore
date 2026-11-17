@@ -1,18 +1,22 @@
 // Shared avatar utilities
 import { supabase } from './supabase.js';
+import avatarCat from './avatar-cat.jpg';
 import avatarBear from './avatar-bear.jpg';
 import avatarFox from './avatar-fox.jpg';
 import avatarRaccoon from './avatar-raccoon.jpg';
 import avatarOwl from './avatar-owl.jpg';
 import avatarSloth from './avatar-sloth.jpg';
+import avatarDonkey from './avatar-donkey.jpg';
 
-// The 5 default avatar images (matching profile.html)
+// The default avatar images (matching profile.html)
 export const AVATAR_IMAGES = {
+  'cat': avatarCat,
   '1': avatarBear,
   '2': avatarFox,
   '3': avatarRaccoon,
   '4': avatarOwl,
   '5': avatarSloth,
+  'donkey': avatarDonkey,
 };
 
 // Apply avatar to a ring element
